@@ -1,0 +1,347 @@
+
+GYMENT
+Simple Gym Management Software  |  Manage Your Gym. Simply.
+“The goal is simple: Less manual work. Better organization. More control.”
+— GYMENT Philosophy
+1. What is GYMENT?
+GYMENT is a modern, intuitive gym management software designed 
+specifically to help gym owners streamline and automate their daily fitness center operations from a single dashboard.
+Instead of juggling member details, fee payments, daily attendance records, membership expiry dates, and financial statements across phys
+ical notebooks or scattered spreadsheets, GYMENT consolidates everything into one organized, dependable digital system.
+Core Capabilities at a Glance:
+Member Management: 
+Maintain complete, searchable member directories with contact and medical profiles.
+Fl
+exible Memberships: 
+Configure custom plans, durations, fees, and auto-track expirations.
+Attendance Tracking: 
+Streamlined daily check-ins with fast search and comprehensive logging.
+Payment Records: 
+Log payments across Cash, UPI, Card, or Bank Transfers wi
+th immediate receipt records.
+Expiry Alerts: 
+Automated proactive reminders for upcoming and overdue renewals.
+Trainer &amp; Staff Management: 
+Assign members to trainers, define employee roles, and enforce secure permissions.
+Reports &amp; Analytics: 
+Monitor growth
+ metrics, attendance patterns, and monthly revenue performance.
+2. Why GYMENT?
+As gym enrollments grow, manual administration quickly becomes cumbersome, error-prone, and overwhelming. Managing expired passes, uncollected dues, and personal training schedu
+les manually costs owners hours of productive time every week.
+Manual / Spreadsheet Tracking
+GYMENT Digital Platform
+•  Paper notebooks &amp; fragmented Excel sheets
+?
+  Unified centralized cloud-ready records
+•  Frequent missed renewals and revenue leakages
+?
+  Automated 7-day, 3-day, and 1-day expiry alerts
+•  Slow manual attendance recording at the front desk
+?
+  Instant 1-click member search &amp; check-in
+•  Difficulty tracking cash vs UPI collections
+?
+  Transparent logs with payment method filters
+•  Zero 
+instant visibility into gym growth or profit
+?
+  Real-time dashboard metrics and exportable reports
+3. GYMENT Dashboard
+The GYMENT Dashboard serves as your mission control, providing a clean visual snapshot of your gym's pulse the second you log in. 
+Owners no longer need to cross-reference multiple sheets or ledgers.
+Total &amp; Active Members
+Instant counts of enrolled vs currently paid-up members.
+Expiring Memberships
+Direct counts of plans nearing expiration within 7 days.
+Today's Attendance
+Live head
+count of gym members checked in today.
+Today's Payments
+Total financial collections logged across all methods today.
+Monthly Revenue
+Cumulative revenue earned in the active billing month.
+Recent Transactions
+A feed of the latest payments processed by 
+front-desk staff.
+Urgent Renewal Alerts
+Color-coded notifications highlighting overdue subscriptions.
+Quick Actions
+Instant one-click shortcuts to check in, add members, or renew.
+4. Member Management
+Organize your entire customer database with high 
+fidelity. Every profile maintains comprehensive biographical, fitness, and historical billing information.
+Comprehensive Profile Data: 
+Full Name, Phone Number, Email, Date of Birth, Gender, Residential Address, and Profile Photo.
+Gym Records: 
+Joining Date,
+ Active Membership Plan, Expiry Date, Assigned Trainer, and Custom Notes/Medical history.
+Complete History: 
+Access past attendance logs and lifetime payment history with a single click.
+Rapid Search &amp; Smart Filters: 
+Locate any member in milliseconds by Nam
+e or Phone. Filter profiles by Active, Expired, Expiring Soon, or Inactive status.
+5. Membership Management
+Tailor membership packages exactly to your facility's business model. GYMENT supports custom pricing, custom durations, and flexible renewal cycles.
+Membership Tier
+Standard Duration
+Indicative Pricing
+Monthly Pass
+30 Days
+?
+1,000
+Quarterly Plan
+90 Days
+?
+2,700
+Half-Yearly Plan
+180 Days
+?
+5,000
+Annual Premium Plan
+365 Days
+?
+9,000
+Note: These packages are completely customizable. Gym owners have full
+ autonomy to create, modify, or retire plans and set custom prices as desired.
+6. Attendance Management
+Fast, reliable attendance recording eliminates lobby friction during peak morning and evening workout hours.
+Streamlined 3-Step Check-In: Search Member 
+ ?  Click Check-In  ?  Attendance Recorded instantly.
+Average check-in time: under 3 seconds per member.
+Real-Time Tracking: 
+View active gym capacity and today's total headcounts at any moment.
+Individual Attendance History: 
+Review personal workout 
+consistency and attendance logs for any member.
+Monthly Analytics: 
+Spot seasonal dips, peak traffic hours, and infrequent visitors to curb member drop-offs.
+7. Payment Management
+Maintain clean, auditable payment records without the friction of complex acc
+ounting tools. Track every rupee that enters your gym.
+Payment Records Captured: 
+Member Name, Selected Plan, Paid Amount, Payment Date, Payment Method, and Custom Notes/Bill Reference.
+Supported Payment Modes: 
+Cash, UPI (PhonePe, Google Pay, Paytm), Debit/
+Credit Card, and Direct Bank Transfer.
+Operational Focus: 
+GYMENT focuses on reliable manual recording and financial bookkeeping. No expensive third-party payment gateway integration is forced on standard operations.
+8. Membership Expiry Alerts
+Protect your
+ recurring gym cash flow with structured, automated expiration warnings. Staff can reach out proactively before a membership lapses.
+Alert Category
+Time Window
+Recommended Action
+Advance Notice
+Expiring in 7 Days
+Gentle reminder during regular check-in or
+ via chat.
+Priority Notice
+Expiring in 3 Days
+Inform member of renewal offers or packages.
+Urgent Notice
+Expiring Tomorrow
+Confirm renewal intentions before access lapse.
+Lapsed Member
+Already Expired
+Follow up for re-enrollment and feedback collection.
+9. Trainer &amp; Staff Management
+Empower your team while maintaining tight administrative control over sensitive customer information and financial data.
+Trainer Management &amp; Member Assignment
+Trainer Profiles: 
+Record Trainer Name, Contact Details, 
+Specializations (e.g. Weight Training, Yoga, CrossFit), and Joining Date.
+Member Assignment: 
+Allocate specific members to dedicated trainers for customized workout plans and targeted progress tracking.
+Role-Based Staff Access
+Owner / Administrator: 
+Full un
+restricted access: gym settings, financial records, pricing, revenue metrics, and user management.
+Front Desk / Staff: 
+Operational access: daily check-ins, new member registration, payment recording, and expiry monitoring.
+Trainer Account: 
+Restricted acces
+s: view assigned member list and fitness details; confidential revenue and owner settings remain hidden.
+11. Reports &amp; Analytics
+Make confident, data-driven decisions regarding equipment investment, trainer compensation, and promotional campaigns.
+Operatio
+nal Reports: 
+Member enrollment lists, daily attendance sheets, payment transaction history, and active plan breakdowns.
+Executive Analytics: 
+Monthly revenue growth curves, peak check-in time heatmaps, churn/renewal ratios, and member retention curves.
+Data Exportability: 
+Export all tables into clean CSV or structured Excel (.xlsx) workbooks for accounting and audit reconciliation.
+12. GYMENT Subscription Plans
+Select an affordable plan tailored to your gym's current size and operational scale. Upgrade s
+eamlessly as your member base expands.
+Feature / Capability
+Starter
+Growth
+Pro
+Monthly Price
+?
+499
+?
+999
+?
+1,999
+Yearly Price (Save 17%)
+?
+4,999
+?
+9,999
+?
+19,999
+Gym Branches Allowed
+1 Branch
+1 Branch
+Multiple Branches
+Member Capacity
+Up to 100
+Up to 500
+Unlimited
+Owner Accounts
+1
+1
+1
+Staff Accounts
+1 Account
+Up to 5 Accounts
+Unlimited
+Member Directory &amp; Profiles
+?
+ Included
+?
+ Included
+?
+ Included
+Custom Membership Plans
+?
+ Included
+?
+ Included
+?
+ Included
+Attendance Tracking
+Standard
+Multiple Methods
+Multiple Methods
+Payment Records &amp; History
+?
+ Included
+?
+ Included
+?
+ Included
+Dashboard &amp; Expiry Alerts
+Basic
+Advanced
+Advanced Pro
+Reports &amp; Analytics
+Basic Reports
+Advanced Analytics
+Consolidated Analytics
+Trainer Management &amp; Assign
+—
+?
+ Included
+?
+ 
+Included
+Multi-Branch Consolidated Reports
+—
+—
+?
+ Included
+Custom Gym Branding
+—
+—
+?
+ Included
+Automated WhatsApp / SMS
+—
+—
+?
+ Included
+Export Options
+CSV Only
+CSV + Excel
+ 
+(
+.
+x
+l
+s
+x
+)
+Advanced Data Export
+Support Level
+Standard Support
+Priority Support
+Dedicated VIP Support
+13. Which Plan Fits Your Facility?
+Starter Plan — ?499/month (or ?4,999/year)
+Best suited for new boutique gyms, personal studios, or neighborhood fitness centers managing up to 100 active members. Delivers essential daily member 
+tracking, fee collection records, and expiry alerts without excess complexity.
+Growth Plan — ?999/month (or ?9,999/year)
+Best suited for expanding gyms with up to 500 members. Unlocks multi-staff logins, trainer-to-member allocation, revenue and attendance
+ analytics, and direct Excel export for your accountant.
+Pro Plan — ?1,999/month (or ?19,999/year)
+Built for established gym brands, multi-floor centers, or multi-branch fitness chains. Supports unlimited members, unlimited staff accounts, automated WhatsA
+pp/SMS notifications, and custom gym branding across multi-branch reports.
+14. Business Value: How GYMENT Empowers You
+Save Time
+Automate manual logs and paperwork so you can focus on member satisfaction.
+Eliminate Leakage
+Strict expiry tracking and 
+payment history ensure no dues slip away.
+Organized Records
+Replace loose ledgers with secure, searchable digital profiles.
+Know Your Numbers
+Clear real-time revenue and attendance graphs highlight your growth.
+Role Protection
+Grant staff and trainers acc
+ess to what they need while safeguarding financials.
+Seamless Scalability
+Start small and seamlessly upgrade your software as your membership doubles.
+15. Recommended Daily Front-Desk Workflow
+Time of Day
+Focus Activity
+GYMENT Steps
+Morning Opening
+Status Review &amp; Expiries
+Open Dashboard ? Check today's scheduled renewals &amp; alert list.
+Throughout the Day
+Member Check-Ins
+Quick Search ? 1-Click Check-In at the reception desk.
+New Walk-In
+Registration &amp; Enrollment
+Add Member Details ? Choose Plan ? 
+Record Initial Payment.
+Renewals
+Plan Extension
+Find Member Profile ? Update Plan &amp; Record Payment Receipt.
+Evening Closing
+Day Reconciliation
+Review Daily Attendance ? Tally Cash &amp; UPI Payments ? Lock Day.
+16. Built Specially for Gym Owners
+Most 
+enterprise gym software is overly complex, bloated with redundant modules, and confusing for front-desk staff. GYMENT cuts through the clutter by focusing exclusively on what drives your fitness club:
+The Core 7: 
+Members  •  Memberships  •  Attendance  •  
+Payments  •  Trainers  •  Reports  •  Renewals
+17. Contact &amp; Get Started With GYMENT
+Transform your gym administration today. Schedule a live demonstration or get onboarded within minutes.
+GYMENT — Manage Your Gym. Simply.
+• Representative
+: 
+Vijay 
+Sudhakar
+ S
+• Phone Number: 
+8667096760
+• Official Email: 
+vijaysudhakar434@gmail.com
+• Website: 
+Coming Soon
+

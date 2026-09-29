@@ -13,13 +13,30 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*", "./*"],
+      "@adminDB/index": ["./generate/admin/index"],
+      "@tenantDB/index": ["./generate/tenant/index"],
+      "@adminDB/*": ["./generate/admin/*"],
+      "@tenantDB/*": ["./generate/tenant/*"],
+      "@backend/*": ["./src/backend/*"],
+      "@services/*": ["./src/backend/services/*"],
+      "@controller/*": ["./src/backend/controller/*"],
+      "@helpers/*": ["./src/backend/helpers/*"],
+      "@config/*": ["./src/backend/config/*"],
+      "@loaders/*": ["./src/backend/loaders/*"],
+      "@middlewares/*": ["./src/backend/middlewares/*"],
+      "@interface/*": ["./src/backend/interface/*"],
+      "@api/*": ["./src/backend/api/*"],
+      "@errors/*": ["./src/backend/api/errors/*"],
+      "@responseMessages/*": ["./src/backend/responseMessages/*"]
     }
   },
   "include": [

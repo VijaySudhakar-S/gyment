@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../../generate/admin"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GymRole {
+  GYM_ADMIN
+  RECEPTIONIST
+  TRAINER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum GymStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  TRIAL
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum GymSubscriptionStatus {
+  ACTIVE
+  TRIAL
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+enum ActivityType {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  STATUS
+  SUBSCRIPTION
+  SETTINGS
+}
+
+model SuperAdmin {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  mobile       String    @unique
+  passwordHash String
+  lastLogin    DateTime?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  auditLogs      AuditLog[]                     @relation("AdminAuditActor")
+  resetTokens    SuperAdminPasswordResetToken[]
+  subscriptions  GymSubscription[]              @relation("SubscriptionCreatedBy")
+  featureUpdates GymFeature[]                   @relation("FeatureUpdatedBy")
+}
+
+model SuperAdminPasswordResetToken {
+  id           String     @id @default(uuid())
+  tokenHash    String     @unique
+  superAdminId String
+  used         Boolean    @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime   @default(now())
+
+  superAdmin   SuperAdmin @relation(fields: [superAdminId], references: [id], onDelete: Cascade)
+
+  @@index([superAdminId, used, expiresAt])
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  phone        String?    @unique
+  passwordHash String
+  status       UserStatus @default(ACTIVE)
+  lastLogin    DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  gymMemberships GymUser[]
+  resetTokens    UserPasswordResetToken[]
+}
+
+model GymUser {
+  id          String     @id @default(uuid())
+  gymId       String
+  userId      String
+  role        GymRole
+  status      UserStatus @default(ACTIVE)
+  designation String?
+  permissions Json?      @default("{}")
+  isPrimary   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  gym         Gym        @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([gymId, userId])
+  @@index([userId])
+  @@index([gymId, role, status])
+}
+
+model UserPasswordResetToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, used, expiresAt])
+}
+
+model GlobalMember {
+  id             String    @id @default(uuid())
+  firstName      String
+  lastName       String
+  email          String?   @unique
+  phone          String    @unique
+  gender         String?   @default("MALE")
+  dob            DateTime?
+  bloodGroup     String?
+  emergencyPhone String?
+  emergencyName  String?
+  address        String?
+  avatar         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Plan {
+  id           String            @id @default(uuid())
+  name         String            @unique
+  description  String?
+  monthlyPrice Decimal           @db.Decimal(10, 2)
+  yearlyPrice  Decimal           @db.Decimal(10, 2)
+  features     Json?             @default("[]")
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  subscriptions GymSubscription[]
+}
+
+model Gym {
+  id           String     @id @default(uuid())
+  code         String     @unique
+  schemaName   String     @unique
+  name         String
+  location     String
+  address      String?
+  city         String?
+  state        String?
+  country      String?    @default("India")
+  pincode      String?
+  contactEmail String?
+  contactPhone String?
+  ownerName    String?
+  ownerPhone   String?
+  status       GymStatus  @default(ACTIVE)
+  meta         Json?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  users         GymUser[]
+  subscriptions GymSubscription[]
+  featureFlags  GymFeature[]
+  auditLogs     AuditLog[]
+
+  @@index([status])
+}
+
+model GymSubscription {
+  id           String                @id @default(uuid())
+  gymId        String
+  planId       String
+  billingCycle BillingCycle          @default(MONTHLY)
+  status       GymSubscriptionStatus @default(ACTIVE)
+  startDate    DateTime              @default(now())
+  renewalDate  DateTime
+  price        Decimal               @db.Decimal(10, 2)
+  notes        String?
+  createdById  String?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  gym          Gym                   @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  plan         Plan                  @relation(fields: [planId], references: [id])
+  createdBy    SuperAdmin?           @relation("SubscriptionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([gymId, status])
+  @@index([renewalDate])
+}
+
+model GymFeature {
+  gymId            String
+  featureKey       String
+  enabled          Boolean     @default(false)
+  updatedByAdminId String?
+  updatedAt        DateTime    @updatedAt
+
+  gym              Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  updatedByAdmin   SuperAdmin? @relation("FeatureUpdatedBy", fields: [updatedByAdminId], references: [id], onDelete: SetNull)
+
+  @@id([gymId, featureKey])
+}
+
+model PlatformConfig {
+  key                String   @id @default("platform")
+  platformName       String   @default("Gyment")
+  currency           String   @default("INR")
+  defaultTimezone    String   @default("Asia/Kolkata")
+  supportEmail       String   @default("support@gyment.app")
+  supportPhone       String   @default("+91-98765-43210")
+  maintenanceMode    Boolean  @default(false)
+  maintenanceMessage String?  @db.Text
+  updatedAt          DateTime @updatedAt
+}
+
+model AuditLog {
+  id           String       @id @default(uuid())
+  type         ActivityType
+  action       String
+  details      String?      @db.Text
+  metadata     Json?
+  entityType   String?
+  entityId     String?
+  gymId        String?
+  actorAdminId String?
+  createdAt    DateTime     @default(now())
+
+  gym          Gym?         @relation(fields: [gymId], references: [id], onDelete: SetNull)
+  actorAdmin   SuperAdmin?  @relation("AdminAuditActor", fields: [actorAdminId], references: [id], onDelete: SetNull)
+
+  @@index([gymId, createdAt])
+  @@index([actorAdminId])
+}

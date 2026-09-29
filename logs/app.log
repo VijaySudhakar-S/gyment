@@ -1,0 +1,239 @@
+{"level":"info","message":"Dependency injected into container","timestamp":"2026-09-28 00:38:14"}
+{"level":"info","message":"Express loader configured successfully.","timestamp":"2026-09-28 00:38:14"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/login - {\n  body: undefined,\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 00:38:14"}
+{"level":"error","message":"Login controller error: 'this.logger.info is not a function'","timestamp":"2026-09-28 00:38:14"}
+{"level":"error","message":"Response [500] POST /api/v1/superadmin/auth/login - { duration: '270ms', action_method: '', status: 500 }","timestamp":"2026-09-28 00:38:14"}
+{"level":"info","message":"Dependency injected into container","timestamp":"2026-09-28 00:39:10"}
+{"level":"info","message":"Dependency injected into container","timestamp":"2026-09-28 00:41:00"}
+{"level":"info","message":"Express loader configured successfully.","timestamp":"2026-09-28 00:41:00"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/login - {\n  body: { email: 'vijaysudhakar434@gmail.com', password: 'admin@123!@#' },\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 00:41:00"}
+{"level":"error","message":"Login controller error: 'Container is not defined'","timestamp":"2026-09-28 00:41:00"}
+{"level":"error","message":"Response [500] POST /api/v1/superadmin/auth/login - { duration: '14ms', action_method: '', status: 500 }","timestamp":"2026-09-28 00:41:00"}
+{"level":"info","message":"Dependency injected into container","timestamp":"2026-09-28 00:41:36"}
+{"level":"info","message":"Express loader configured successfully.","timestamp":"2026-09-28 00:41:36"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/login - {\n  body: { email: 'vijaysudhakar434@gmail.com', password: 'admin@123!@#' },\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 00:41:36"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 00:41:36"}
+{"level":"info","message":"Response [200] POST /login - {\n  duration: '560ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 200\n}","timestamp":"2026-09-28 00:41:37"}
+{"level":"info","message":"Request GET /api/v1/superadmin/auth/user-details - {\n  body: undefined,\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'GET'\n}","timestamp":"2026-09-28 00:41:37"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 00:41:37"}
+{"level":"info","message":"Response [200] GET /user-details - {\n  duration: '8ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 200\n}","timestamp":"2026-09-28 00:41:37"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/login - {\n  body: { email: 'vijaysudhakar434@gmail.com', password: 'wrongpassword' },\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 00:41:37"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 00:41:37"}
+{"level":"error","message":"Login controller error: 'Invalid email or password.'","timestamp":"2026-09-28 00:41:37"}
+{"level":"warn","message":"Response [400] POST /api/v1/superadmin/auth/login - { duration: '295ms', action_method: '', status: 400 }","timestamp":"2026-09-28 00:41:37"}
+{"level":"info","message":"Dependency injected into container","timestamp":"2026-09-28 00:51:51"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 00:51:51"}
+{"level":"info","message":"Dependency injected into container","timestamp":"2026-09-28 00:55:00"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 00:55:00"}
+{"level":"info","message":"Dependency injected into container","timestamp":"2026-09-28 01:07:39"}
+{"level":"info","message":"Express loader configured successfully.","timestamp":"2026-09-28 01:07:39"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/login - {\n  body: { email: 'not-an-email', password: 'somepassword' },\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 01:07:39"}
+{"level":"info","message":"SuperAdmin login attempt: not-an-email","timestamp":"2026-09-28 01:07:39"}
+{"level":"error","message":"Login controller error: 'Invalid email or password.'","timestamp":"2026-09-28 01:07:39"}
+{"level":"warn","message":"Response [400] POST /api/v1/superadmin/auth/login - { duration: '237ms', action_method: '', status: 400 }","timestamp":"2026-09-28 01:07:39"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/login - {\n  body: { email: 'vijaysudhakar434@gmail.com' },\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 01:07:39"}
+{"level":"warn","message":"Response [400] POST /api/v1/superadmin/auth/login - { duration: '3ms', action_method: '', status: 400 }","timestamp":"2026-09-28 01:07:39"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/login - {\n  body: {\n    email: 'vijaysudhakar434@gmail.com',\n    password: 'wrong_password_123'\n  },\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 01:07:39"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:07:39"}
+{"level":"error","message":"Login controller error: 'Invalid email or password.'","timestamp":"2026-09-28 01:07:40"}
+{"level":"warn","message":"Response [400] POST /api/v1/superadmin/auth/login - { duration: '413ms', action_method: '', status: 400 }","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/login - {\n  body: { email: 'vijaysudhakar434@gmail.com', password: 'admin@123!@#' },\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Response [200] POST /login - {\n  duration: '472ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 200\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Request GET /api/v1/superadmin/auth/user-details - {\n  body: undefined,\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'GET'\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Response [200] GET /user-details - {\n  duration: '10ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 200\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Request GET /api/v1/superadmin/auth/user-details - {\n  body: undefined,\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'GET'\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"warn","message":"Response [401] GET /user-details - {\n  duration: '1ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 401\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Request GET /api/v1/superadmin/auth/user-details - {\n  body: undefined,\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'GET'\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"warn","message":"Response [401] GET /user-details - {\n  duration: '3ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 401\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Request POST /api/v1/superadmin/auth/refreshtoken - {\n  body: {\n    refreshToken: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIzYjc5MjZkLWVjYTgtNDI1Yi1iODk1LWI1MTc4ZjM3NTE4NiIsImVtYWlsIjoidmlqYXlzdWRoYWthcjQzNEBnbWFpbC5jb20iLCJuYW1lIjoiVmlqYXkiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3OTA1Mzc4NjAsImV4cCI6MTc5MDc5NzA2MH0.PAs9Tnxby-IiDpe2xgA5gaWlvekUVTERZOolZOSEMYxP1R6UdsRfYz0UAFpF_Z91nZJ3KNaf6qYoad935NXGG5WERd0HCQzu9FcYGvqP49w1CUeLgYyRf7PI6Mo78xxw4hJlcPkFnRegQGzUCeFLykwSAfr6NgaCfEWkDu1K02CF-ug3tL9OAUovsnZ34vCOGLxxbZUYot_5cM7-8K3HLBDoHDNHAo3lFX4bAjfhLaZAvO2f_zxT0R99XEQfp9FHpDFxmu_ZxUEzqbu4_3rRUoawXc3MOraSW2z2-CgfZ4e6ciYhqI3sqSsqq9ar_KLQoVcVLLyUlCpr2EUOrBpFIQ'\n  },\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'POST'\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Response [200] POST /refreshtoken - {\n  duration: '12ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 200\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Request GET /api/v1/superadmin/auth/pk - {\n  body: undefined,\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'GET'\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Response [200] GET /pk - {\n  duration: '1ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 200\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Request GET /api/v1/superadmin/auth/user-details - {\n  body: undefined,\n  query: [Object: null prototype] {},\n  params: {},\n  origin: 'localhost',\n  http_method: 'GET'\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Response [200] GET /user-details - {\n  duration: '6ms',\n  action_method: '/api/v1/superadmin/auth',\n  status: 200\n}","timestamp":"2026-09-28 01:07:40"}
+{"level":"info","message":"Dependency injected into container","timestamp":"2026-09-28 01:09:58"}
+{"level":"info","message":"Express loader configured successfully.","timestamp":"2026-09-28 01:09:58"}
+{"level":"info","message":"Gyment Backend Server listening on localhost:8000","timestamp":"2026-09-28 01:09:58"}
+{"level":"error","message":"SuperAdmin login error: 'Bad escaped character in JSON at position 9 (line 1 column 10)'","timestamp":"2026-09-28 01:20:46"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:21:16"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:21:26"}
+{"level":"error","message":"SuperAdmin login error: 'Invalid email or password.'","timestamp":"2026-09-28 01:21:27"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:21:40"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:21:42"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:28:03"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:28:04"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:29:35"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:29:52"}
+{"level":"error","message":"SuperAdmin login error: 'Invalid email or password.'","timestamp":"2026-09-28 01:29:53"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:29:57"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:33:14"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:37:50"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:38:03"}
+{"level":"error","message":"SuperAdmin readUser error: 'Invalid token'","timestamp":"2026-09-28 01:38:23"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:40:11"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:13"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:13"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:32"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:32"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:36"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:36"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:38"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:38"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:40"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:40:40"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:41:10"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:41:11"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:41:11"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:41:41"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:41:42"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:41:42"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:04"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:04"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:06"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:06"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:07"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:07"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:28"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:28"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:29"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:42:29"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:00"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:00"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:03"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:03"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:09"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:09"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:12"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:12"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:13"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:13"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:14"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:15"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:17"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:17"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:19"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:19"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:37"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:37"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:39"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:39"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:41"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:41"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:44"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:44"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:45"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:45"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:47"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:47"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:59"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:43:59"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:01"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:01"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:03"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:03"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:05"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:05"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:13"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:13"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:15"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:15"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:17"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:17"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:24"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:24"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:26"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:26"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:27"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:27"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:29"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:29"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:30"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:30"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.comw","timestamp":"2026-09-28 01:44:51"}
+{"level":"error","message":"SuperAdmin login error: 'Invalid email or password.'","timestamp":"2026-09-28 01:44:52"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 01:44:53"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:55"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 01:44:55"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 21:10:26"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:10:28"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:10:28"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:15:07"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 21:15:22"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-09-28 21:15:24"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-09-28 21:15:37"}
+{"level":"error","message":"SuperAdmin refreshToken error: 'jwt malformed'","timestamp":"2026-09-28 21:15:38"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:18:59"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:18:59"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:24:49"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:24:49"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:28:02"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:28:02"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:29:20"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:29:20"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:41:30"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:41:30"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:41:40"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:41:40"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:44:08"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:44:08"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:47:08"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:47:08"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:48:03"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:48:03"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:48:06"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 21:48:06"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 22:15:09"}
+{"level":"error","message":"SuperAdmin readUser error: 'User not found.'","timestamp":"2026-09-28 22:15:10"}
+{"level":"info","message":"Fetching SuperAdmin profile: b3b7926d-eca8-425b-b895-b5178f375186","timestamp":"2026-09-28 22:15:10"}
+{"level":"error","message":"SuperAdmin readUser error: 'User not found.'","timestamp":"2026-09-28 22:15:10"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 22:15:44"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:15:46"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:15:46"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:17:32"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:17:33"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:17:45"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:17:45"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:18:32"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:18:33"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:18:36"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:18:36"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:18:39"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:18:39"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:24:17"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:24:17"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:28:21"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 22:28:21"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 23:24:03"}
+{"level":"error","message":"SuperAdmin readUser error: 'User not found.'","timestamp":"2026-09-28 23:24:03"}
+{"level":"info","message":"Fetching SuperAdmin profile: 516540e6-7648-4c2f-ba8b-e3b85a257f6e","timestamp":"2026-09-28 23:24:03"}
+{"level":"error","message":"SuperAdmin readUser error: 'User not found.'","timestamp":"2026-09-28 23:24:03"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-28 23:24:08"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-28 23:24:08"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-28 23:24:08"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-28 23:43:14"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-28 23:43:14"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-28 23:56:22"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-28 23:56:23"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-28 23:59:39"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-28 23:59:39"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:00:14"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:00:14"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:01:02"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:01:02"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:01:41"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:01:42"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:02:25"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:02:25"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:03:57"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:03:57"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:04:39"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 00:04:39"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-09-29 21:46:38"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 21:46:41"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 21:46:41"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 21:47:26"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-09-29 21:47:27"}
