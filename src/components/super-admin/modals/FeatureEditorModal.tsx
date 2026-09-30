@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, message } from 'antd';
+import { Modal, App } from 'antd';
 import { FEATURES_CONFIG } from '@/data/plans';
 import { FeatureLimits } from '@/types/plan';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
@@ -19,6 +19,7 @@ const LIMIT_KEYS = [
 import { FeatureEditorModalProps } from '@/types/modals';
 
 export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, onClose, editingPlanKey, onSuccess }) => {
+  const { message } = App.useApp();
 
   const [activePlan, setActivePlan] = useState<PlanData | null>(null);
   const [currentFeatures, setCurrentFeatures] = useState<Record<string, boolean>>({});

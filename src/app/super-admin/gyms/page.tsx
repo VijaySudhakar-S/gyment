@@ -137,16 +137,27 @@ export default function GymsPage() {
 
   const handleDeleteGym = (gym: GymData) => {
     modal.confirm({
-      title: 'Delete Gym',
-      content: `Are you sure you want to permanently delete ${gym.name}? This action cannot be undone.`,
-      okText: 'Delete',
+      title: 'Permanently Delete Gym?',
+      content: (
+        <div className="space-y-2 text-sm">
+          <p>You are about to permanently delete <b className="text-red-600">{gym.name}</b>.</p>
+          <p className="text-gyment-muted">This will:</p>
+          <ul className="list-disc list-inside text-gyment-muted space-y-1">
+            <li>Delete the gym record and all subscription history</li>
+            <li>Drop the tenant's entire database schema</li>
+            <li>Remove all associated users from this gym</li>
+          </ul>
+          <p className="font-semibold text-red-600 mt-2">This action cannot be undone.</p>
+        </div>
+      ),
+      okText: `Delete ${gym.name}`,
       okType: 'danger',
-      centered : true,
+      centered: true,
       onOk: async () => {
         try {
           const res = await gymsApi.delete(gym.id);
           if (res.status) {
-            message.success('Gym deleted successfully');
+            message.success('Gym and its database schema deleted successfully');
             await loadGyms();
           }
         } catch (error: any) {

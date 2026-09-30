@@ -21,6 +21,7 @@ export interface StatCardProps {
   value: string | number;
   delta?: string;
   deltaType?: 'up' | 'down' | 'neu';
+  badge?: { text: string; color: 'red' | 'amber' | 'green' | 'blue' } | null | false;
   className?: string;
   onClick?: () => void;
 }

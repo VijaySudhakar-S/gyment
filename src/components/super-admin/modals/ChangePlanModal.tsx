@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, message, Select, Button, Input } from 'antd';
+import { Modal, App, Select, Button, Input } from 'antd';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 import { subscriptionsApi, PlanChangePreviewData } from '@/lib/api/superadmin/subscriptions.api';
@@ -10,6 +10,7 @@ import { Calendar, CreditCard, Sparkles, CheckCircle2 } from 'lucide-react';
 import { ChangePlanModalProps } from '@/types/modals';
 
 export const ChangePlanModal: React.FC<ChangePlanModalProps> = ({ open, onClose, gymId, onSuccess }) => {
+  const { message } = App.useApp();
   const [gym, setGym] = useState<GymData | null>(null);
   const [plans, setPlans] = useState<PlanData[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');

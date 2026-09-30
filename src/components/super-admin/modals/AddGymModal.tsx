@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Modal, message, Input, Select, Button } from 'antd';
+import { Modal, App, Input, Select, Button } from 'antd';
 import { gymsApi } from '@/lib/api/superadmin/gyms.api';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 
 import { AddGymModalProps } from '@/types/modals';
 
 export const AddGymModal: React.FC<AddGymModalProps> = ({ open, onClose, onSuccess }) => {
+  const { message } = App.useApp();
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [adminName, setAdminName] = useState('');
@@ -47,6 +48,20 @@ export const AddGymModal: React.FC<AddGymModalProps> = ({ open, onClose, onSucce
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !adminName.trim() || !adminEmail.trim() || !adminPhone.trim() || !selectedPlanId) {
+      message.error('Please fill in all required fields');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+
+    if (!emailRegex.test(adminEmail.trim())) {
+      message.error('Please enter a valid email address');
+      return;
+    }
+
+    if (!phoneRegex.test(adminPhone.trim())) {
+      message.error('Please enter a valid phone number (min 10 digits)');
       return;
     }
 
@@ -239,7 +254,7 @@ export const AddGymModal: React.FC<AddGymModalProps> = ({ open, onClose, onSucce
             htmlType="submit"
             loading={isSubmitting}
           >
-            Create Gym & Provision Schema
+            {isSubmitting ? 'Provisioning Tenant Database...' : 'Create Gym & Provision Schema'}
           </Button>
         </div>
       </form>

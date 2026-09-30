@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Drawer, message } from 'antd';
+import { Drawer, App } from 'antd';
 import { LogIn, Users } from 'lucide-react';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
 import { StatusBadge } from '../../shared/StatusBadge';
 import { initials } from '@/lib/formatters';
 import { UserItem, usersApi } from '@/lib/api/superadmin/users.api';
@@ -13,6 +12,7 @@ import { UserDrawerSkeleton } from '@/components/shared/skeletons';
 import { UserDetailDrawerProps } from '@/types/modals';
 
 export const UserDetailDrawer: React.FC<UserDetailDrawerProps> = ({ open, onClose, userId }) => {
+  const { message } = App.useApp();
   const router = useRouter();
 
   const [user, setUser] = useState<UserItem | null>(null);

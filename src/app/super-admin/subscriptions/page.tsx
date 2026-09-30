@@ -275,6 +275,11 @@ export default function SubscriptionsPage() {
       title: 'BILLING CYCLE',
       dataIndex: 'billingCycle',
       key: 'billingCycle',
+      render: (val: string) => (
+        <span className="text-[12px] font-medium text-gyment-muted capitalize">
+          {val === 'MONTHLY' ? 'Monthly' : 'Yearly'}
+        </span>
+      ),
     },
     {
       title: 'AMOUNT',
@@ -292,7 +297,34 @@ export default function SubscriptionsPage() {
       title: 'RENEWAL DATE',
       dataIndex: 'renewalDate',
       key: 'renewalDate',
-      render: (val) => new Date(val).toLocaleDateString(),
+      render: (val: string, sub: SubscriptionItem) => {
+        const renewalDate = new Date(val);
+        const now = new Date();
+        const daysLeft = Math.ceil((renewalDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        const isExpired = daysLeft < 0;
+        const isUrgent = daysLeft >= 0 && daysLeft <= 7;
+        const isWarning = daysLeft > 7 && daysLeft <= 30;
+        const isActive = sub.status === 'ACTIVE' || sub.status === 'TRIAL';
+
+        return (
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[12.5px] text-gyment-text">{renewalDate.toLocaleDateString()}</span>
+            {isActive && (
+              <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full w-fit ${
+                isExpired
+                  ? 'bg-red-100 text-red-700'
+                  : isUrgent
+                    ? 'bg-red-50 text-red-600'
+                    : isWarning
+                      ? 'bg-amber-50 text-amber-700'
+                      : 'bg-green-50 text-green-700'
+              }`}>
+                {isExpired ? 'Overdue' : `${daysLeft}d left`}
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: 'STATUS',

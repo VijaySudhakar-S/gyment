@@ -171,7 +171,21 @@ export default function GymDetailPage({
             <MotionItem><StatCard label="Location" value={gym.location || '-'} /></MotionItem>
             <MotionItem><StatCard label="Current Plan" value={activeSub?.planName || 'None'} /></MotionItem>
             <MotionItem><StatCard label="Billing Cycle" value={activeSub?.billingCycle || '-'} /></MotionItem>
-            <MotionItem><StatCard label="Renewal Date" value={activeSub ? new Date(activeSub.renewalDate).toLocaleDateString() : '-'} /></MotionItem>
+            <MotionItem>
+              <StatCard
+                label="Renewal Date"
+                value={activeSub ? new Date(activeSub.renewalDate).toLocaleDateString() : '-'}
+                badge={
+                  activeSub && (() => {
+                    const daysLeft = Math.ceil((new Date(activeSub.renewalDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                    if (daysLeft < 0) return { text: 'Overdue', color: 'red' as const };
+                    if (daysLeft <= 7) return { text: `${daysLeft}d left`, color: 'red' as const };
+                    if (daysLeft <= 30) return { text: `${daysLeft}d left`, color: 'amber' as const };
+                    return { text: `${daysLeft}d left`, color: 'green' as const };
+                  })()
+                }
+              />
+            </MotionItem>
           </MotionStagger>
         </MotionFadeIn>
 
