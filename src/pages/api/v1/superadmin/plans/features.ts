@@ -4,9 +4,10 @@ import LoggerInstance from '@loaders/logger';
 import { adminDB } from '@loaders/prisma';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const planService = new PlanService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') {
     return res.status(405).json({ status: false, message: 'Method Not Allowed' });
   }
@@ -38,3 +39,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

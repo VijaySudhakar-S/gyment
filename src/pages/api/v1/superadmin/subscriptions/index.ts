@@ -5,9 +5,10 @@ import { adminDB } from '@loaders/prisma';
 import { SUBSCRIPTION } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const subscriptionService = new SubscriptionService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
       return handleGetAll(req, res);
@@ -82,3 +83,6 @@ async function handleAssignPlan(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

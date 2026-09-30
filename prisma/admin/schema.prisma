@@ -150,8 +150,9 @@ model Plan {
   description  String?
   monthlyPrice Decimal           @db.Decimal(10, 2)
   yearlyPrice  Decimal           @db.Decimal(10, 2)
-  features     Json?             @default("[]")
+  features     Json?             @default("{}")
   isActive     Boolean           @default(true)
+  sortOrder    Int               @default(0)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 

@@ -29,11 +29,13 @@ export type AggregatePlan = {
 export type PlanAvgAggregateOutputType = {
   monthlyPrice: runtime.Decimal | null
   yearlyPrice: runtime.Decimal | null
+  sortOrder: number | null
 }
 
 export type PlanSumAggregateOutputType = {
   monthlyPrice: runtime.Decimal | null
   yearlyPrice: runtime.Decimal | null
+  sortOrder: number | null
 }
 
 export type PlanMinAggregateOutputType = {
@@ -43,6 +45,7 @@ export type PlanMinAggregateOutputType = {
   monthlyPrice: runtime.Decimal | null
   yearlyPrice: runtime.Decimal | null
   isActive: boolean | null
+  sortOrder: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +57,7 @@ export type PlanMaxAggregateOutputType = {
   monthlyPrice: runtime.Decimal | null
   yearlyPrice: runtime.Decimal | null
   isActive: boolean | null
+  sortOrder: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +70,7 @@ export type PlanCountAggregateOutputType = {
   yearlyPrice: number
   features: number
   isActive: number
+  sortOrder: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -75,11 +80,13 @@ export type PlanCountAggregateOutputType = {
 export type PlanAvgAggregateInputType = {
   monthlyPrice?: true
   yearlyPrice?: true
+  sortOrder?: true
 }
 
 export type PlanSumAggregateInputType = {
   monthlyPrice?: true
   yearlyPrice?: true
+  sortOrder?: true
 }
 
 export type PlanMinAggregateInputType = {
@@ -89,6 +96,7 @@ export type PlanMinAggregateInputType = {
   monthlyPrice?: true
   yearlyPrice?: true
   isActive?: true
+  sortOrder?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +108,7 @@ export type PlanMaxAggregateInputType = {
   monthlyPrice?: true
   yearlyPrice?: true
   isActive?: true
+  sortOrder?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +121,7 @@ export type PlanCountAggregateInputType = {
   yearlyPrice?: true
   features?: true
   isActive?: true
+  sortOrder?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -211,6 +221,7 @@ export type PlanGroupByOutputType = {
   yearlyPrice: runtime.Decimal
   features: runtime.JsonValue | null
   isActive: boolean
+  sortOrder: number
   createdAt: Date
   updatedAt: Date
   _count: PlanCountAggregateOutputType | null
@@ -246,6 +257,7 @@ export type PlanWhereInput = {
   yearlyPrice?: Prisma.DecimalFilter<"Plan"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.JsonNullableFilter<"Plan">
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
+  sortOrder?: Prisma.IntFilter<"Plan"> | number
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   subscriptions?: Prisma.GymSubscriptionListRelationFilter
@@ -259,6 +271,7 @@ export type PlanOrderByWithRelationInput = {
   yearlyPrice?: Prisma.SortOrder
   features?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   subscriptions?: Prisma.GymSubscriptionOrderByRelationAggregateInput
@@ -275,6 +288,7 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   yearlyPrice?: Prisma.DecimalFilter<"Plan"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.JsonNullableFilter<"Plan">
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
+  sortOrder?: Prisma.IntFilter<"Plan"> | number
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   subscriptions?: Prisma.GymSubscriptionListRelationFilter
@@ -288,6 +302,7 @@ export type PlanOrderByWithAggregationInput = {
   yearlyPrice?: Prisma.SortOrder
   features?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PlanCountOrderByAggregateInput
@@ -308,6 +323,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   yearlyPrice?: Prisma.DecimalWithAggregatesFilter<"Plan"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.JsonNullableWithAggregatesFilter<"Plan">
   isActive?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
+  sortOrder?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
 }
@@ -320,6 +336,7 @@ export type PlanCreateInput = {
   yearlyPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   subscriptions?: Prisma.GymSubscriptionCreateNestedManyWithoutPlanInput
@@ -333,6 +350,7 @@ export type PlanUncheckedCreateInput = {
   yearlyPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   subscriptions?: Prisma.GymSubscriptionUncheckedCreateNestedManyWithoutPlanInput
@@ -346,6 +364,7 @@ export type PlanUpdateInput = {
   yearlyPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscriptions?: Prisma.GymSubscriptionUpdateManyWithoutPlanNestedInput
@@ -359,6 +378,7 @@ export type PlanUncheckedUpdateInput = {
   yearlyPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscriptions?: Prisma.GymSubscriptionUncheckedUpdateManyWithoutPlanNestedInput
@@ -372,6 +392,7 @@ export type PlanCreateManyInput = {
   yearlyPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -384,6 +405,7 @@ export type PlanUpdateManyMutationInput = {
   yearlyPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -396,6 +418,7 @@ export type PlanUncheckedUpdateManyInput = {
   yearlyPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -408,6 +431,7 @@ export type PlanCountOrderByAggregateInput = {
   yearlyPrice?: Prisma.SortOrder
   features?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -415,6 +439,7 @@ export type PlanCountOrderByAggregateInput = {
 export type PlanAvgOrderByAggregateInput = {
   monthlyPrice?: Prisma.SortOrder
   yearlyPrice?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
 }
 
 export type PlanMaxOrderByAggregateInput = {
@@ -424,6 +449,7 @@ export type PlanMaxOrderByAggregateInput = {
   monthlyPrice?: Prisma.SortOrder
   yearlyPrice?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -435,6 +461,7 @@ export type PlanMinOrderByAggregateInput = {
   monthlyPrice?: Prisma.SortOrder
   yearlyPrice?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -442,6 +469,7 @@ export type PlanMinOrderByAggregateInput = {
 export type PlanSumOrderByAggregateInput = {
   monthlyPrice?: Prisma.SortOrder
   yearlyPrice?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
 }
 
 export type PlanScalarRelationFilter = {
@@ -455,6 +483,14 @@ export type DecimalFieldUpdateOperationsInput = {
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type PlanCreateNestedOneWithoutSubscriptionsInput = {
@@ -479,6 +515,7 @@ export type PlanCreateWithoutSubscriptionsInput = {
   yearlyPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -491,6 +528,7 @@ export type PlanUncheckedCreateWithoutSubscriptionsInput = {
   yearlyPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -519,6 +557,7 @@ export type PlanUpdateWithoutSubscriptionsInput = {
   yearlyPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -531,6 +570,7 @@ export type PlanUncheckedUpdateWithoutSubscriptionsInput = {
   yearlyPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -574,6 +614,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   yearlyPrice?: boolean
   features?: boolean
   isActive?: boolean
+  sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
@@ -588,6 +629,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   yearlyPrice?: boolean
   features?: boolean
   isActive?: boolean
+  sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -600,6 +642,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   yearlyPrice?: boolean
   features?: boolean
   isActive?: boolean
+  sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -612,11 +655,12 @@ export type PlanSelectScalar = {
   yearlyPrice?: boolean
   features?: boolean
   isActive?: boolean
+  sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "monthlyPrice" | "yearlyPrice" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "monthlyPrice" | "yearlyPrice" | "features" | "isActive" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 export type PlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
   _count?: boolean | Prisma.PlanCountOutputTypeDefaultArgs<ExtArgs>
@@ -637,6 +681,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     yearlyPrice: runtime.Decimal
     features: runtime.JsonValue | null
     isActive: boolean
+    sortOrder: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["plan"]>
@@ -1070,6 +1115,7 @@ export interface PlanFieldRefs {
   readonly yearlyPrice: Prisma.FieldRef<"Plan", 'Decimal'>
   readonly features: Prisma.FieldRef<"Plan", 'Json'>
   readonly isActive: Prisma.FieldRef<"Plan", 'Boolean'>
+  readonly sortOrder: Prisma.FieldRef<"Plan", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Plan", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Plan", 'DateTime'>
 }

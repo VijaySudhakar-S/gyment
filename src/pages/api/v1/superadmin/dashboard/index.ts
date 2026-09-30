@@ -5,9 +5,10 @@ import { adminDB } from '@loaders/prisma';
 import { DASHBOARD } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const dashboardService = new DashboardService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
     return res.status(405).json({
@@ -33,3 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

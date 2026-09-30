@@ -5,9 +5,10 @@ import { adminDB } from '@loaders/prisma';
 import { GYM_TENANT } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const gymService = new GymService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
@@ -125,3 +126,6 @@ async function handleDelete(id: string, res: NextApiResponse) {
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

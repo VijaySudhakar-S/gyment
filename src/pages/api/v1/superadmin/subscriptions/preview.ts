@@ -6,9 +6,10 @@ import { SUBSCRIPTION } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 import { BillingCycle } from '@adminDB/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const subscriptionService = new SubscriptionService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
     return res.status(405).json({
@@ -53,3 +54,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

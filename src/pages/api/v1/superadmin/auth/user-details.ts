@@ -6,9 +6,10 @@ import { LOGIN } from '@responseMessages/superadmin';
 import { decodeJWT } from '@helpers/index';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const authService = new AuthService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ status: false, message: 'Method Not Allowed' });
   }
@@ -37,3 +38,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

@@ -5,9 +5,10 @@ import { adminDB } from '@loaders/prisma';
 import { GYM_TENANT } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const gymService = new GymService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
       return handleGetAll(req, res);
@@ -92,3 +93,6 @@ async function handleCreate(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

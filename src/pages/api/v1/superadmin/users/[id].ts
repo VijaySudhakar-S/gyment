@@ -5,9 +5,10 @@ import { adminDB } from '@loaders/prisma';
 import { USER_MANAGEMENT } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const userService = new UserService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
@@ -130,3 +131,6 @@ async function handleDelete(id: string, req: NextApiRequest, res: NextApiRespons
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

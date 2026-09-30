@@ -29,7 +29,8 @@ export interface PlanResponseDTO {
   yearlyPrice: number;
   features: PlanFeaturesPayload;
   isActive: boolean;
-  activeGymsCount?: number;
-  createdAt: Date;
-  updatedAt: Date;
+  sortOrder: number;
+  activeGymsCount: number;
+  createdAt: string;
+  updatedAt: string;
 }

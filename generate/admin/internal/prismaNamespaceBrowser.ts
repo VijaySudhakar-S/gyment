@@ -180,6 +180,7 @@ export const PlanScalarFieldEnum = {
   yearlyPrice: 'yearlyPrice',
   features: 'features',
   isActive: 'isActive',
+  sortOrder: 'sortOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

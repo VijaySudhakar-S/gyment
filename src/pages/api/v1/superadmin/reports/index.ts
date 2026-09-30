@@ -6,9 +6,10 @@ import { REPORTS } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 import { ExportType } from '@interface/report';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const reportService = new ReportService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
       return handleGetMetrics(req, res);
@@ -69,3 +70,6 @@ async function handleExport(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

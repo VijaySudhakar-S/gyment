@@ -60,9 +60,10 @@ export default class PlanService {
       yearlyPrice: Number(plan.yearlyPrice),
       features: parsedFeatures,
       isActive: Boolean(plan.isActive),
-      activeGymsCount: plan._count?.subscriptions ?? undefined,
-      createdAt: plan.createdAt,
-      updatedAt: plan.updatedAt,
+      sortOrder: plan.sortOrder ?? 0,
+      activeGymsCount: plan._count?.subscriptions ?? 0,
+      createdAt: new Date(plan.createdAt).toISOString(),
+      updatedAt: new Date(plan.updatedAt).toISOString(),
     };
   }
 
@@ -83,9 +84,10 @@ export default class PlanService {
             },
           },
         },
-        orderBy: {
-          monthlyPrice: 'asc',
-        },
+        orderBy: [
+          { sortOrder: 'asc' },
+          { monthlyPrice: 'asc' }
+        ],
       });
 
       return plans.map((p) => this.formatPlan(p));
@@ -173,6 +175,16 @@ export default class PlanService {
         },
       });
 
+      await this.db.auditLog.create({
+        data: {
+          type: 'CREATE',
+          action: `Plan created: ${created.name}`,
+          entityType: 'Plan',
+          entityId: created.id,
+          metadata: { monthlyPrice: Number(created.monthlyPrice), yearlyPrice: Number(created.yearlyPrice) }
+        }
+      });
+
       return this.formatPlan(created);
     } catch (error: any) {
       this.logger.error('Error creating plan: %o', error.message || error);
@@ -239,6 +251,20 @@ export default class PlanService {
         },
       });
 
+      await this.db.auditLog.create({
+        data: {
+          type: 'UPDATE',
+          action: `Plan updated: ${updated.name}`,
+          entityType: 'Plan',
+          entityId: updated.id,
+          metadata: { 
+            monthlyPrice: Number(updated.monthlyPrice), 
+            yearlyPrice: Number(updated.yearlyPrice),
+            isActive: updated.isActive
+          }
+        }
+      });
+
       return this.formatPlan(updated);
     } catch (error: any) {
       this.logger.error('Error updating plan: %o', error.message || error);
@@ -256,7 +282,13 @@ export default class PlanService {
         include: {
           _count: {
             select: {
-              subscriptions: true,
+              subscriptions: {
+                where: {
+                  status: {
+                    in: ['ACTIVE', 'TRIAL', 'PAST_DUE']
+                  }
+                }
+              },
             },
           },
         },
@@ -274,6 +306,16 @@ export default class PlanService {
         where: { id },
       });
 
+      await this.db.auditLog.create({
+        data: {
+          type: 'DELETE',
+          action: `Plan deleted: ${plan.name}`,
+          entityType: 'Plan',
+          entityId: plan.id,
+          metadata: { name: plan.name }
+        }
+      });
+
       return { id };
     } catch (error: any) {
       this.logger.error('Error deleting plan: %o', error.message || error);
@@ -284,7 +326,7 @@ export default class PlanService {
   /**
    * Toggle Plan active status
    */
-  public async togglePlanStatus(id: string): Promise<PlanResponseDTO> {
+  public async togglePlanStatus(id: string, explicitIsActive?: boolean): Promise<PlanResponseDTO> {
     try {
       const plan = await this.db.plan.findUnique({
         where: { id },
@@ -294,10 +336,12 @@ export default class PlanService {
         throw new NotFoundError(PLAN.ERROR.NOT_FOUND);
       }
 
+      const newIsActive = explicitIsActive !== undefined ? explicitIsActive : !plan.isActive;
+
       const updated = await this.db.plan.update({
         where: { id },
         data: {
-          isActive: !plan.isActive,
+          isActive: newIsActive,
         },
         include: {
           _count: {
@@ -310,6 +354,16 @@ export default class PlanService {
             },
           },
         },
+      });
+
+      await this.db.auditLog.create({
+        data: {
+          type: 'STATUS',
+          action: `Plan status toggled: ${updated.name} (Active: ${updated.isActive})`,
+          entityType: 'Plan',
+          entityId: updated.id,
+          metadata: { isActive: updated.isActive }
+        }
       });
 
       return this.formatPlan(updated);
@@ -328,13 +382,8 @@ export default class PlanService {
     limits: Record<string, string>
   ): Promise<PlanResponseDTO> {
     try {
-      const plan = await this.db.plan.findFirst({
-        where: {
-          OR: [
-            { id: planKeyOrId },
-            { name: { equals: planKeyOrId, mode: 'insensitive' } },
-          ],
-        },
+      const plan = await this.db.plan.findUnique({
+        where: { id: planKeyOrId },
       });
 
       if (!plan) {

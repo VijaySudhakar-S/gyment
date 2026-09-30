@@ -124,7 +124,7 @@ export default function PlansPage() {
 
   const doToggle = async (plan: PlanData, action: string) => {
     try {
-      const res = await plansApi.toggleStatus(plan.id);
+      const res = await plansApi.toggleStatus(plan.id, !plan.isActive);
       if (res.status) {
         message.success(`Plan ${action}d successfully`);
         await loadPlans();

@@ -5,9 +5,10 @@ import { adminDB } from '@loaders/prisma';
 import { NOTIFICATIONS } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const notificationService = new NotificationService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
       return handleGetAll(req, res);
@@ -75,3 +76,6 @@ async function handleMarkRead(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

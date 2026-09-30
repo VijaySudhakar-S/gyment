@@ -5,9 +5,10 @@ import { adminDB } from '@loaders/prisma';
 import { PLAN } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
 
+import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
 const planService = new PlanService(LoggerInstance, adminDB);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
@@ -115,7 +116,8 @@ async function handleUpdate(id: string, req: NextApiRequest, res: NextApiRespons
 
 async function handleToggleStatus(id: string, req: NextApiRequest, res: NextApiResponse) {
   try {
-    const data = await planService.togglePlanStatus(id);
+    const { isActive } = req.body || {};
+    const data = await planService.togglePlanStatus(id, isActive !== undefined ? Boolean(isActive) : undefined);
     return res.status(200).json({
       status: true,
       message: PLAN.SUCCESS.STATUS_TOGGLED,
@@ -150,3 +152,6 @@ async function handleDelete(id: string, res: NextApiResponse) {
     });
   }
 }
+
+
+export default withSuperAdminAuth(handler);

@@ -33,8 +33,8 @@ export const plansApi = {
     return response.data;
   },
 
-  toggleStatus: async (id: string) => {
-    const response = await apiClient.patch<ApiResponse<PlanData>>(`/api/v1/superadmin/plans/${id}`);
+  toggleStatus: async (id: string, isActive: boolean) => {
+    const response = await apiClient.patch<ApiResponse<PlanData>>(`/api/v1/superadmin/plans/${id}`, { isActive });
     return response.data;
   },
 
