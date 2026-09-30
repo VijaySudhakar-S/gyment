@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, User } from 'lucide-react';
+import { Menu, Bell, User, Moon, Sun } from 'lucide-react';
 import { useSuperAdmin } from '@/context/SuperAdminContext';
+import { useTheme } from '@/context/ThemeContext';
 import { NotificationPanel } from './NotificationPanel';
 import { ProfileMenu } from './ProfileMenu';
 import { tokenStorage } from '@/lib/auth/tokenStorage';
@@ -17,6 +18,8 @@ export const Topbar: React.FC<TopbarProps> = ({
   const {
     setMobileSidebarOpen,
   } = useSuperAdmin();
+
+  const { theme, isDark, toggleTheme } = useTheme();
 
   // Temporary local state until notifications are migrated to their own context/api
   const unreadNotifCount = 0;
@@ -70,6 +73,21 @@ export const Topbar: React.FC<TopbarProps> = ({
           {actions}
         </div>
       )}
+
+      {/* Theme Toggle Moon / Sun Button */}
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="w-9 h-9 rounded-lg border border-gyment-border bg-white hover:bg-gyment-bg flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+        aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+      >
+        {isDark ? (
+          <Sun className="w-4 h-4 text-amber-400 stroke-2 transition-transform duration-200 hover:rotate-45" />
+        ) : (
+          <Moon className="w-4 h-4 text-gyment-text stroke-2 transition-transform duration-200 hover:-rotate-12" />
+        )}
+      </button>
 
       {/* Notification Bell Icon */}
       <div ref={notifRef} className="relative">

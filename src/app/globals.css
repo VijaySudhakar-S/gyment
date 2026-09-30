@@ -1,33 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #2FAE68;
-  --color-primary-dark: #1f8954;
-  --color-primary-light: #E7F6ED;
-  --color-gyment-dark: #16211B;
-  --color-gyment-text: #16211B;
-  --color-gyment-muted: #4A5550;
-  --color-gyment-bg: #F6F9F7;
-  --color-gyment-border: #CED5D1;
-  --color-danger: #C5432E;
-  --color-danger-light: #FBEAE6;
-  --color-warning: #B8791C;
-  --color-warning-light: #FBF1DE;
-  --color-info: #3B6FB0;
-  --color-info-light: #EAF1FA;
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-gyment-dark: var(--gyment-dark);
+  --color-gyment-text: var(--text);
+  --color-gyment-muted: var(--muted);
+  --color-gyment-bg: var(--bg);
+  --color-gyment-border: var(--border);
+  --color-danger: var(--danger);
+  --color-danger-light: var(--danger-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-info: var(--info);
+  --color-info-light: var(--info-light);
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 :root {
+  color-scheme: light;
   --primary: #2FAE68;
   --primary-dark: #1f8954;
   --primary-light: #E7F6ED;
-  --dark: #16211B;
+  --gyment-dark: #16211B;
   --text: #16211B;
   --muted: #4A5550;
+  --placeholder: #5A6660;
   --bg: #F6F9F7;
+  --card-bg: #FFFFFF;
+  --table-header-bg: #FFFFFF;
+  --table-hover-bg: #F6F9F7;
   --white: #FFFFFF;
   --border: #CED5D1;
+  --border-subtle: #E3E8E5;
   --danger: #C5432E;
   --danger-light: #FBEAE6;
   --warning: #B8791C;
@@ -37,10 +43,35 @@
   --info-light: #EAF1FA;
 }
 
+html.dark, [data-theme="dark"] {
+  color-scheme: dark;
+  --primary: #2FAE68;
+  --primary-dark: #35C777;
+  --primary-light: #162B1F;
+  --gyment-dark: #16211B; /* Kept exactly the same as light theme */
+  --text: #F0F0F0;
+  --muted: #8E8E8E;
+  --placeholder: #666666;
+  --bg: #0A0A0A; /* Pure black main background */
+  --card-bg: #141414; /* Pure neutral black/charcoal card surface */
+  --table-header-bg: #171717; /* Neutral black table header */
+  --table-hover-bg: #1E1E1E; /* Neutral dark hover */
+  --white: #141414; /* White cards become neutral black */
+  --border: #262626; /* Neutral dark border */
+  --border-subtle: #1C1C1C;
+  --danger: #F26C58;
+  --danger-light: #2A1412;
+  --warning: #E5A13B;
+  --warning-light: #2A1D0D;
+  --ok-light: #162B1F;
+  --info: #5290DF;
+  --info-light: #121E2C;
+}
+
 html, body {
   min-height: 100%;
-  background-color: #F6F9F7;
-  color: #16211B;
+  background-color: var(--bg);
+  color: var(--text);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -66,62 +97,117 @@ a {
   background: #AAB9AF;
 }
 
-/* Ant design overrides for high-contrast visibility across inputs, search & filters */
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2A2A2A;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3A3A3A;
+}
+
+/* Dark mode utility class overrides */
+html.dark .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+html.dark .hover\:bg-gyment-bg:hover {
+  background-color: var(--table-hover-bg) !important;
+}
+
+html.dark .bg-gyment-bg {
+  background-color: var(--bg) !important;
+}
+
+html.dark .border-gyment-border {
+  border-color: var(--border) !important;
+}
+
+html.dark .divide-gyment-border > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--border) !important;
+}
+
+html.dark .text-gyment-text {
+  color: var(--text) !important;
+}
+
+html.dark .text-gyment-muted {
+  color: var(--muted) !important;
+}
+
+html.dark .text-\[\#232D27\] {
+  color: var(--text) !important;
+}
+
+html.dark .text-\[\#16211B\] {
+  color: var(--text) !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  color: var(--text);
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--placeholder);
+}
+
+/* Ant design overrides for theme responsiveness and high contrast */
 .ant-input,
 .ant-input-affix-wrapper input {
-  color: #16211B !important;
+  color: var(--text) !important;
   font-weight: 500 !important;
 }
 
 .ant-input::placeholder,
 .ant-input-affix-wrapper input::placeholder {
-  color: #5A6660 !important;
+  color: var(--placeholder) !important;
   font-weight: 500 !important;
 }
 
 .ant-select-selection-item {
-  color: #16211B !important;
+  color: var(--text) !important;
   font-weight: 600 !important;
 }
 
 .ant-select-selection-placeholder {
-  color: #5A6660 !important;
+  color: var(--placeholder) !important;
   font-weight: 500 !important;
 }
 
 .ant-picker-input > input {
-  color: #16211B !important;
+  color: var(--text) !important;
   font-weight: 500 !important;
 }
 
 .ant-picker-input > input::placeholder {
-  color: #5A6660 !important;
+  color: var(--placeholder) !important;
   font-weight: 500 !important;
 }
 
 .ant-table-wrapper .ant-table {
-  background: #FFFFFF !important;
-  color: #16211B !important;
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
   font-size: 13px !important;
   font-family: inherit !important;
 }
 
 .ant-table-wrapper .ant-table-thead > tr > th {
-  background: #FFFFFF !important;
-  color: #4A5550 !important;
+  background: var(--table-header-bg) !important;
+  color: var(--muted) !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.4px !important;
-  border-bottom: 1px solid #CED5D1 !important;
+  border-bottom: 1px solid var(--border) !important;
   padding: 10px 12px !important;
   white-space: nowrap !important;
 }
 
 .ant-table-wrapper .ant-table-tbody > tr > td {
-  border-bottom: 1px solid #E3E8E5 !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
   padding: 11px 12px !important;
-  color: #16211B !important;
+  color: var(--text) !important;
   vertical-align: middle !important;
 }
 
@@ -130,30 +216,70 @@ a {
 }
 
 .ant-table-wrapper .ant-table-tbody > tr:hover > td {
-  background: #F6F9F7 !important;
+  background: var(--table-hover-bg) !important;
 }
 
 .ant-modal .ant-modal-content {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 14px !important;
   padding: 20px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
   font-family: inherit !important;
 }
 
 .ant-modal .ant-modal-header {
-  border-bottom: 1px solid #CED5D1 !important;
+  background: var(--card-bg) !important;
+  border-bottom: 1px solid var(--border) !important;
   padding-bottom: 14px !important;
   margin-bottom: 0 !important;
 }
 
+.ant-modal .ant-modal-title {
+  color: var(--text) !important;
+}
+
 .ant-drawer .ant-drawer-content {
-  background: #FFFFFF !important;
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
   font-family: inherit !important;
 }
 
 .ant-select-dropdown {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 10px !important;
   padding: 4px !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
   font-family: inherit !important;
+}
+
+.ant-select-dropdown .ant-select-item {
+  color: var(--text) !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background: var(--table-hover-bg) !important;
+  color: var(--primary) !important;
+  font-weight: 600 !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-selected) {
+  background: var(--table-hover-bg) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  padding: 4px !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item {
+  color: var(--text) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item:hover {
+  background: var(--table-hover-bg) !important;
 }

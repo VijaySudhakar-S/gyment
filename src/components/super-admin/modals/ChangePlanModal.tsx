@@ -5,6 +5,7 @@ import { Modal, message, Select, Button } from 'antd';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 import { subscriptionsApi } from '@/lib/api/superadmin/subscriptions.api';
+import { FormSkeleton } from '@/components/shared/skeletons';
 
 import { ChangePlanModalProps } from '@/types/modals';
 
@@ -13,11 +14,13 @@ export const ChangePlanModal: React.FC<ChangePlanModalProps> = ({ open, onClose,
   const [plans, setPlans] = useState<PlanData[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
   const [billingCycle, setBillingCycle] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const loadData = useCallback(async () => {
     if (!gymId) return;
     try {
+      setIsLoading(true);
       const [gymRes, plansRes] = await Promise.all([
         gymsApi.getById(String(gymId)),
         plansApi.getAll(),
@@ -40,6 +43,8 @@ export const ChangePlanModal: React.FC<ChangePlanModalProps> = ({ open, onClose,
       }
     } catch (error) {
       console.error('Failed to load plan change data:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, [gymId]);
 
@@ -89,7 +94,12 @@ export const ChangePlanModal: React.FC<ChangePlanModalProps> = ({ open, onClose,
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="pt-4 space-y-4">
+      {isLoading ? (
+        <div className="py-4">
+          <FormSkeleton fields={2} columns={1} />
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="pt-4 space-y-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold text-gyment-text">Select Plan *</label>
           <Select
@@ -131,6 +141,7 @@ export const ChangePlanModal: React.FC<ChangePlanModalProps> = ({ open, onClose,
           </Button>
         </div>
       </form>
+      )}
     </Modal>
   );
 };

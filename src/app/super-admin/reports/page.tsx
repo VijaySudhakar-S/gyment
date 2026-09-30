@@ -7,6 +7,13 @@ import { Topbar } from '@/components/super-admin/header/Topbar';
 import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/MotionContainer';
 import { reportsApi, ReportMetricsData } from '@/lib/api/superadmin/reports.api';
 import { fmtRs } from '@/lib/formatters';
+import { ReportsCardsSkeleton, ChartCardSkeleton } from '@/components/shared/skeletons';
+import {
+  GymsReportChart,
+  SubscriptionReportChart,
+  UserDemographicsChart,
+  RevenueVelocityChart,
+} from '@/components/charts/ReportCharts';
 
 export default function ReportsPage() {
   const { message } = App.useApp();
@@ -61,122 +68,184 @@ export default function ReportsPage() {
         subtitle="Platform-level performance and audit reports."
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-6">
-        {/* Reports 4-Card Grid */}
-        <MotionStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {/* Gym Reports */}
-          <MotionItem className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
-            <h3 className="text-[13px] font-bold text-gyment-text m-0 mb-2.5">
-              Gym Reports
-            </h3>
-            <div className="space-y-1 text-[13px]">
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Total gyms</span>
-                <span className="font-semibold text-gyment-text">{gymData?.totalGyms ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">New this month</span>
-                <span className="font-semibold text-gyment-text">{gymData?.newThisMonth ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Active</span>
-                <span className="font-semibold text-gyment-text">{gymData?.activeGyms ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Suspended</span>
-                <span className="font-semibold text-gyment-text">{gymData?.suspendedGyms ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5">
-                <span className="text-gyment-muted">Inactive / Cancelled</span>
-                <span className="font-semibold text-gyment-text">{gymData?.cancelledGyms ?? 0}</span>
-              </div>
+        {/* Reports 4-Card Grid & Visual Analytics */}
+        {isLoading && !metrics ? (
+          <>
+            <ReportsCardsSkeleton count={4} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mt-6">
+              <ChartCardSkeleton type="bar" height={210} />
+              <ChartCardSkeleton type="donut" height={210} />
+              <ChartCardSkeleton type="bar" height={210} />
+              <ChartCardSkeleton type="bar" height={210} />
             </div>
-          </MotionItem>
+          </>
+        ) : (
+          <>
+            <MotionStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              {/* Gym Reports */}
+              <MotionItem className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+                <h3 className="text-[13px] font-bold text-gyment-text m-0 mb-2.5">
+                  Gym Reports
+                </h3>
+                <div className="space-y-1 text-[13px]">
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Total gyms</span>
+                    <span className="font-semibold text-gyment-text">{gymData?.totalGyms ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">New this month</span>
+                    <span className="font-semibold text-gyment-text">{gymData?.newThisMonth ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Active</span>
+                    <span className="font-semibold text-gyment-text">{gymData?.activeGyms ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Suspended</span>
+                    <span className="font-semibold text-gyment-text">{gymData?.suspendedGyms ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-gyment-muted">Inactive / Cancelled</span>
+                    <span className="font-semibold text-gyment-text">{gymData?.cancelledGyms ?? 0}</span>
+                  </div>
+                </div>
+              </MotionItem>
 
-          {/* Subscription Reports */}
-          <MotionItem className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
-            <h3 className="text-[13px] font-bold text-gyment-text m-0 mb-2.5">
-              Subscription Reports
-            </h3>
-            <div className="space-y-1 text-[13px]">
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Total Subscriptions</span>
-                <span className="font-semibold text-gyment-text">{subData?.totalSubscriptions ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Active Subscriptions</span>
-                <span className="font-semibold text-gyment-text">{subData?.activeSubscriptions ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Trial Subscriptions</span>
-                <span className="font-semibold text-gyment-text">{subData?.trialSubscriptions ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Past Due / Overdue</span>
-                <span className="font-semibold text-gyment-text">{subData?.pastDueSubscriptions ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5">
-                <span className="text-gyment-muted">Annual Run Rate</span>
-                <span className="font-semibold text-gyment-text">{fmtRs(subData?.arr ?? 0)}</span>
-              </div>
-            </div>
-          </MotionItem>
+              {/* Subscription Reports */}
+              <MotionItem className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+                <h3 className="text-[13px] font-bold text-gyment-text m-0 mb-2.5">
+                  Subscription Reports
+                </h3>
+                <div className="space-y-1 text-[13px]">
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Total Subscriptions</span>
+                    <span className="font-semibold text-gyment-text">{subData?.totalSubscriptions ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Active Subscriptions</span>
+                    <span className="font-semibold text-gyment-text">{subData?.activeSubscriptions ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Trial Subscriptions</span>
+                    <span className="font-semibold text-gyment-text">{subData?.trialSubscriptions ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Past Due / Overdue</span>
+                    <span className="font-semibold text-gyment-text">{subData?.pastDueSubscriptions ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-gyment-muted">Annual Run Rate</span>
+                    <span className="font-semibold text-gyment-text">{fmtRs(subData?.arr ?? 0)}</span>
+                  </div>
+                </div>
+              </MotionItem>
 
-          {/* Revenue Reports */}
-          <MotionItem className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
-            <h3 className="text-[13px] font-bold text-gyment-text m-0 mb-2.5">
-              Revenue Reports
-            </h3>
-            <div className="space-y-1 text-[13px]">
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Monthly Recurring</span>
-                <span className="font-semibold text-gyment-text">{fmtRs(subData?.mrr ?? 0)}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Annual Recurring</span>
-                <span className="font-semibold text-gyment-text">{fmtRs(subData?.arr ?? 0)}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Active Paying Facilities</span>
-                <span className="font-semibold text-gyment-text">{subData?.activeSubscriptions ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5">
-                <span className="text-gyment-muted">Avg Monthly Revenue</span>
-                <span className="font-semibold text-gyment-text">
-                  {subData?.activeSubscriptions ? fmtRs(Math.round((subData?.mrr ?? 0) / subData.activeSubscriptions)) : '₹0'}
-                </span>
-              </div>
-            </div>
-          </MotionItem>
+              {/* Revenue Reports */}
+              <MotionItem className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+                <h3 className="text-[13px] font-bold text-gyment-text m-0 mb-2.5">
+                  Revenue Reports
+                </h3>
+                <div className="space-y-1 text-[13px]">
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Monthly Recurring</span>
+                    <span className="font-semibold text-gyment-text">{fmtRs(subData?.mrr ?? 0)}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Annual Recurring</span>
+                    <span className="font-semibold text-gyment-text">{fmtRs(subData?.arr ?? 0)}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Active Paying Facilities</span>
+                    <span className="font-semibold text-gyment-text">{subData?.activeSubscriptions ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-gyment-muted">Avg Monthly Revenue</span>
+                    <span className="font-semibold text-gyment-text">
+                      {subData?.activeSubscriptions ? fmtRs(Math.round((subData?.mrr ?? 0) / subData.activeSubscriptions)) : '₹0'}
+                    </span>
+                  </div>
+                </div>
+              </MotionItem>
 
-          {/* User Reports */}
-          <MotionItem className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
-            <h3 className="text-[13px] font-bold text-gyment-text m-0 mb-2.5">
-              User Reports
-            </h3>
-            <div className="space-y-1 text-[13px]">
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Total platform users</span>
-                <span className="font-semibold text-gyment-text">{userData?.totalUsers ?? 0}</span>
+              {/* User Reports */}
+              <MotionItem className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+                <h3 className="text-[13px] font-bold text-gyment-text m-0 mb-2.5">
+                  User Reports
+                </h3>
+                <div className="space-y-1 text-[13px]">
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Total platform users</span>
+                    <span className="font-semibold text-gyment-text">{userData?.totalUsers ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Super Admins</span>
+                    <span className="font-semibold text-gyment-text">{userData?.superAdmins ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Gym Owners / Admins</span>
+                    <span className="font-semibold text-gyment-text">{userData?.gymOwners ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
+                    <span className="text-gyment-muted">Staff / Receptionists</span>
+                    <span className="font-semibold text-gyment-text">{userData?.staffUsers ?? 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-gyment-muted">Trainers</span>
+                    <span className="font-semibold text-gyment-text">{userData?.trainers ?? 0}</span>
+                  </div>
+                </div>
+              </MotionItem>
+            </MotionStagger>
+
+            {/* Visual Analytics ECharts Section */}
+            <MotionFadeIn delay={0.1}>
+              <div className="flex items-baseline justify-between mb-3 mt-1">
+                <div>
+                  <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Platform Analytics</h2>
+                  <p className="text-[12px] text-gyment-muted m-0">Interactive visual breakdowns and performance distributions</p>
+                </div>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Super Admins</span>
-                <span className="font-semibold text-gyment-text">{userData?.superAdmins ?? 0}</span>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+                {/* Gym Status & Growth EChart */}
+                <div className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+                  <div className="flex justify-between items-baseline mb-2">
+                    <h3 className="text-sm font-bold text-gyment-text m-0">Gym Status & Growth</h3>
+                    <span className="text-xs text-gyment-muted">Distribution by operational status</span>
+                  </div>
+                  <GymsReportChart data={gymData} />
+                </div>
+
+                {/* Subscription Health EChart */}
+                <div className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-sm font-bold text-gyment-text m-0">Subscription Health</h3>
+                    <span className="text-xs text-gyment-muted">Active vs Trial vs Past Due</span>
+                  </div>
+                  <SubscriptionReportChart data={subData} />
+                </div>
+
+                {/* User Roles Demographics EChart */}
+                <div className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+                  <div className="flex justify-between items-baseline mb-2">
+                    <h3 className="text-sm font-bold text-gyment-text m-0">Platform Stakeholders</h3>
+                    <span className="text-xs text-gyment-muted">Distribution across user roles</span>
+                  </div>
+                  <UserDemographicsChart data={userData} />
+                </div>
+
+                {/* Revenue Velocity Run-Rate EChart */}
+                <div className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+                  <div className="flex justify-between items-baseline mb-2">
+                    <h3 className="text-sm font-bold text-gyment-text m-0">Financial Velocity</h3>
+                    <span className="text-xs text-gyment-muted">MRR vs Annualized Run-Rate (ARR)</span>
+                  </div>
+                  <RevenueVelocityChart data={subData} />
+                </div>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Gym Owners / Admins</span>
-                <span className="font-semibold text-gyment-text">{userData?.gymOwners ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Staff / Receptionists</span>
-                <span className="font-semibold text-gyment-text">{userData?.staffUsers ?? 0}</span>
-              </div>
-              <div className="flex justify-between py-1.5">
-                <span className="text-gyment-muted">Trainers</span>
-                <span className="font-semibold text-gyment-text">{userData?.trainers ?? 0}</span>
-              </div>
-            </div>
-          </MotionItem>
-        </MotionStagger>
+            </MotionFadeIn>
+          </>
+        )}
 
         {/* Export Section */}
         <MotionFadeIn delay={0.15}>

@@ -66,7 +66,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Sidebar Container */}
       <aside
-        className={`bg-gyment-dark text-[#CFE0D6] flex flex-col p-3.5 pt-4 shrink-0 z-40 h-screen sticky top-0 transition-all duration-200 select-none
+        className={`bg-[#16211B] text-[#CFE0D6] flex flex-col p-3.5 pt-4 shrink-0 z-40 h-screen sticky top-0 transition-all duration-200 select-none
           ${sidebarCollapsed ? 'w-18' : 'w-64'}
           ${mobileSidebarOpen
             ? 'fixed left-0 top-0 bottom-0 translate-x-0 w-64'
@@ -143,7 +143,7 @@ export const Sidebar: React.FC = () => {
         {/* Sidebar Footer */}
         <div className="mt-auto pt-3.5 border-t border-white/8">
           <div className="flex items-center gap-2.5 px-1.5 py-2">
-            <div className="w-8 h-8 rounded-full bg-primary-light text-primary-dark flex items-center justify-center font-bold text-xs shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#E7F6ED] text-[#1f8954] flex items-center justify-center font-bold text-xs shrink-0">
               {(() => {
                 const user = tokenStorage.getUser();
                 const name = user?.name || 'Super Admin';

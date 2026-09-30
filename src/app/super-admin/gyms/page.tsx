@@ -20,6 +20,7 @@ import { initials } from '@/lib/formatters';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { reportsApi } from '@/lib/api/superadmin/reports.api';
+import { TableSkeleton } from '@/components/shared/skeletons';
 
 export default function GymsPage() {
   const router = useRouter();
@@ -274,7 +275,7 @@ export default function GymsPage() {
             <button
               type="button"
               onClick={handleExport}
-              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-[#232D27] flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
+              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export</span>
@@ -329,8 +330,8 @@ export default function GymsPage() {
                 type="button"
                 onClick={() => setStatusFilter(s === 'All' ? '' : s)}
                 className={`px-3.5 py-1.5 rounded-full border text-[12.5px] transition-colors cursor-pointer ${active
-                  ? 'bg-[#16211B] text-white font-bold border-[#16211B]'
-                  : 'bg-white text-[#16211B] font-bold border-[#CED5D1] hover:border-[#2FAE68] hover:bg-gyment-bg'
+                  ? 'bg-gyment-dark text-white font-bold border-gyment-dark dark:bg-white dark:text-[#0A0A0A] dark:border-white'
+                  : 'bg-white text-gyment-text font-bold border-gyment-border hover:border-primary hover:bg-gyment-bg'
                   }`}
               >
                 {s}
@@ -341,11 +342,14 @@ export default function GymsPage() {
 
         {/* AntD Table Card */}
         <MotionFadeIn delay={0.12} className="bg-white border border-gyment-border rounded-[14px] overflow-hidden shadow-2xs">
-          <Table<GymData>
-            columns={columns}
-            dataSource={filteredGyms}
-            rowKey="id"
-            loading={isLoading}
+          {isLoading && gymList.length === 0 ? (
+            <TableSkeleton rows={6} columns={7} />
+          ) : (
+            <Table<GymData>
+              columns={columns}
+              dataSource={filteredGyms}
+              rowKey="id"
+              loading={isLoading}
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
@@ -365,6 +369,7 @@ export default function GymsPage() {
               ),
             }}
           />
+        )}
         </MotionFadeIn>
       </main>
       

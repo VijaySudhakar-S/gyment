@@ -11,6 +11,7 @@ import { initials } from '@/lib/formatters';
 import { AddUserModal } from '@/components/super-admin/modals/AddUserModal';
 import { usersApi, UserItem } from '@/lib/api/superadmin/users.api';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
+import { TableSkeleton } from '@/components/shared/skeletons';
 
 export default function UsersPage() {
   const { message, modal } = App.useApp();
@@ -223,7 +224,7 @@ export default function UsersPage() {
             <button
               type="button"
               onClick={handleExport}
-              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3 py-2 rounded-[9px] text-[13px] font-semibold text-[#232D27] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
             >
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export</span>
@@ -308,33 +309,37 @@ export default function UsersPage() {
 
         {/* AntD Users Table */}
         <MotionFadeIn delay={0.1} className="bg-white border border-gyment-border rounded-xl overflow-hidden shadow-2xs">
-          <Table<UserItem>
-            columns={columns}
-            dataSource={filteredUsers}
-            rowKey={(r) => `${r.userType}-${r.id}-${r.gymId || 'none'}`}
-            loading={isLoading}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
-            }}
-            locale={{
-              emptyText: (
-                <div className="flex flex-col items-center py-6">
-                  <UsersIcon className="w-9 h-9 mb-2.5 opacity-40 text-gyment-muted" />
-                  <div className="font-bold text-sm text-gyment-text mb-1">
-                    No User Accounts Found
+          {isLoading && userList.length === 0 ? (
+            <TableSkeleton rows={6} columns={6} />
+          ) : (
+            <Table<UserItem>
+              columns={columns}
+              dataSource={filteredUsers}
+              rowKey={(r) => `${r.userType}-${r.id}-${r.gymId || 'none'}`}
+              loading={isLoading}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
+              }}
+              locale={{
+                emptyText: (
+                  <div className="flex flex-col items-center py-6">
+                    <UsersIcon className="w-9 h-9 mb-2.5 opacity-40 text-gyment-muted" />
+                    <div className="font-bold text-sm text-gyment-text mb-1">
+                      No User Accounts Found
+                    </div>
+                    <div className="text-xs text-gyment-muted max-w-sm mx-auto mb-3">
+                      No users matched your active search query or filter selection. Click "Add User" to register a new user.
+                    </div>
+                    <Button type="primary" icon={<Plus className="w-3.5 h-3.5" />} onClick={handleCreateUser}>
+                      Add First User
+                    </Button>
                   </div>
-                  <div className="text-xs text-gyment-muted max-w-sm mx-auto mb-3">
-                    No users matched your active search query or filter selection. Click "Add User" to register a new user.
-                  </div>
-                  <Button type="primary" icon={<Plus className="w-3.5 h-3.5" />} onClick={handleCreateUser}>
-                    Add First User
-                  </Button>
-                </div>
-              ),
-            }}
-          />
+                ),
+              }}
+            />
+          )}
         </MotionFadeIn>
       </main>
 

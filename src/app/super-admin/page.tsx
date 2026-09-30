@@ -16,6 +16,12 @@ import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/Mot
 import { dashboardApi, DashboardOverviewData } from '@/lib/api/superadmin/dashboard.api';
 import { GymData } from '@/lib/api/superadmin/gyms.api';
 import { AddGymModal } from '@/components/super-admin/modals/AddGymModal';
+import {
+  StatCardSkeleton,
+  ChartCardSkeleton,
+  TableSkeleton,
+  ListSkeleton,
+} from '@/components/shared/skeletons';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -97,42 +103,76 @@ export default function DashboardPage() {
         }
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-6">
-        {/* Primary KPI Row */}
-        <MotionStagger className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <MotionItem><StatCard label="Total Gyms" value={totalGyms} delta="Registered" deltaType="neu" /></MotionItem>
-          <MotionItem><StatCard label="Active Gyms" value={activeGyms} delta="Operational" deltaType="up" /></MotionItem>
-          <MotionItem><StatCard label="Trial Gyms" value={trialGyms} delta="Under evaluation" deltaType="neu" /></MotionItem>
-          <MotionItem><StatCard
-            label="Suspended Gyms"
-            value={suspendedGyms}
-            delta="Action required"
-            deltaType={suspendedGyms > 0 ? 'down' : 'neu'}
-          /></MotionItem>
-          <MotionItem><StatCard
-            label="Total Platform Users"
-            value={totalMembers.toLocaleString('en-IN')}
-            delta="Gym staff & admins"
-            deltaType="up"
-          /></MotionItem>
-          <MotionItem><StatCard
-            label="Monthly Recurring Revenue"
-            value={fmtRs(mrr)}
-            delta="Active subscriptions"
-            deltaType="up"
-          /></MotionItem>
-          <MotionItem><StatCard
-            label="Active Subscriptions"
-            value={activeSubs}
-            delta="Billing active"
-            deltaType="up"
-          /></MotionItem>
-          <MotionItem><StatCard
-            label="Expiring Subscriptions"
-            value={expiringSubs}
-            delta="Within 30 days"
-            deltaType={expiringSubs > 0 ? 'down' : 'neu'}
-          /></MotionItem>
-        </MotionStagger>
+        {isLoading && !overview ? (
+          <>
+            {/* Primary KPI Row Skeleton */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <StatCardSkeleton count={8} />
+            </div>
+
+            {/* Charts Section Skeleton */}
+            <div>
+              <div className="mb-3 space-y-1">
+                <div className="h-4.5 w-36 bg-black/6 dark:bg-white/8 rounded animate-pulse" />
+                <div className="h-3 w-52 bg-black/6 dark:bg-white/8 rounded animate-pulse" />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+                <ChartCardSkeleton className="lg:col-span-7" type="line" height={190} />
+                <ChartCardSkeleton className="lg:col-span-5" type="donut" height={190} />
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3.5">
+                <StatCardSkeleton count={4} />
+              </div>
+            </div>
+
+            {/* Recent Activity Skeleton */}
+            <div className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
+              <ListSkeleton count={4} />
+            </div>
+
+            {/* Registrations Table Skeleton */}
+            <div className="bg-white border border-gyment-border rounded-xl overflow-hidden shadow-2xs">
+              <TableSkeleton rows={4} columns={6} />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Primary KPI Row */}
+            <MotionStagger className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <MotionItem><StatCard label="Total Gyms" value={totalGyms} delta="Registered" deltaType="neu" /></MotionItem>
+              <MotionItem><StatCard label="Active Gyms" value={activeGyms} delta="Operational" deltaType="up" /></MotionItem>
+              <MotionItem><StatCard label="Trial Gyms" value={trialGyms} delta="Under evaluation" deltaType="neu" /></MotionItem>
+              <MotionItem><StatCard
+                label="Suspended Gyms"
+                value={suspendedGyms}
+                delta="Action required"
+                deltaType={suspendedGyms > 0 ? 'down' : 'neu'}
+              /></MotionItem>
+              <MotionItem><StatCard
+                label="Total Platform Users"
+                value={totalMembers.toLocaleString('en-IN')}
+                delta="Gym staff & admins"
+                deltaType="up"
+              /></MotionItem>
+              <MotionItem><StatCard
+                label="Monthly Recurring Revenue"
+                value={fmtRs(mrr)}
+                delta="Active subscriptions"
+                deltaType="up"
+              /></MotionItem>
+              <MotionItem><StatCard
+                label="Active Subscriptions"
+                value={activeSubs}
+                delta="Billing active"
+                deltaType="up"
+              /></MotionItem>
+              <MotionItem><StatCard
+                label="Expiring Subscriptions"
+                value={expiringSubs}
+                delta="Within 30 days"
+                deltaType={expiringSubs > 0 ? 'down' : 'neu'}
+              /></MotionItem>
+            </MotionStagger>
 
         {/* Charts Section */}
         <MotionFadeIn delay={0.12}>
@@ -293,6 +333,8 @@ export default function DashboardPage() {
             />
           </div>
         </MotionFadeIn>
+          </>
+        )}
       </main>
       <AddGymModal 
         open={isAddGymModalOpen} 

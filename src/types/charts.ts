@@ -6,12 +6,14 @@ export interface DonutItem {
 
 export interface SubscriptionDonutChartProps {
   data?: DonutItem[];
+  height?: number;
 }
 
 export interface SubscriptionComparisonBarChartProps {
   months?: string[];
   newSubs?: number[];
   cancelledSubs?: number[];
+  height?: number;
 }
 
 export interface RevenueChartProps {

@@ -11,6 +11,7 @@ import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/Mot
 import { fmtRs } from '@/lib/formatters';
 import { revenueApi, RevenueStatsData } from '@/lib/api/superadmin/revenue.api';
 import { reportsApi } from '@/lib/api/superadmin/reports.api';
+import { StatCardSkeleton, ChartCardSkeleton, TableSkeleton, SkeletonBlock } from '@/components/shared/skeletons';
 
 export default function RevenuePage() {
   const { message } = App.useApp();
@@ -79,16 +80,42 @@ export default function RevenuePage() {
         }
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-6">
-        {/* KPI Cards */}
-        <MotionStagger className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <MotionItem>
-            <StatCard
-              label="Monthly Recurring Revenue"
-              value={fmtRs(mrr)}
-              delta="Active MRR"
-              deltaType="up"
-            />
-          </MotionItem>
+        {isLoading && !stats ? (
+          <>
+            {/* KPI Cards Skeleton */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <StatCardSkeleton count={6} />
+            </div>
+
+            {/* Trends Section Skeleton */}
+            <div>
+              <div className="mb-3 space-y-1">
+                <div className="h-4 w-36 bg-black/6 dark:bg-white/8 rounded animate-pulse" />
+                <div className="h-3 w-48 bg-black/6 dark:bg-white/8 rounded animate-pulse" />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-3.5">
+                <ChartCardSkeleton height={190} type="line" />
+                <ChartCardSkeleton height={190} type="bar" />
+              </div>
+            </div>
+
+            {/* Table Skeleton */}
+            <div className="bg-white border border-gyment-border rounded-xl overflow-hidden shadow-2xs">
+              <TableSkeleton rows={4} columns={4} />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* KPI Cards */}
+            <MotionStagger className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <MotionItem>
+                <StatCard
+                  label="Monthly Recurring Revenue"
+                  value={fmtRs(mrr)}
+                  delta="Active MRR"
+                  deltaType="up"
+                />
+              </MotionItem>
           <MotionItem>
             <StatCard
               label="Total Platform Revenue"
@@ -195,11 +222,14 @@ export default function RevenuePage() {
                 </thead>
                 <tbody className="divide-y divide-gyment-border">
                   {isLoading ? (
-                    <tr>
-                      <td colSpan={4} className="p-6 text-center text-gyment-muted">
-                        Loading plan revenue metrics...
-                      </td>
-                    </tr>
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <tr key={`skel-row-${i}`} className="border-b border-gyment-border">
+                        <td className="px-3 py-3"><SkeletonBlock className="h-4 w-28" /></td>
+                        <td className="px-3 py-3"><SkeletonBlock className="h-4 w-12" /></td>
+                        <td className="px-3 py-3"><SkeletonBlock className="h-4 w-16" /></td>
+                        <td className="px-3 py-3"><SkeletonBlock className="h-4 w-20" /></td>
+                      </tr>
+                    ))
                   ) : planBreakdown.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="p-6 text-center text-gyment-muted">
@@ -223,6 +253,8 @@ export default function RevenuePage() {
             </div>
           </div>
         </MotionFadeIn>
+          </>
+        )}
       </main>
     </>
   );

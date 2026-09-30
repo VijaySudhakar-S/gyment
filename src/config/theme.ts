@@ -1,4 +1,4 @@
-import type { ThemeConfig } from 'antd';
+import { theme as antdTheme, type ThemeConfig } from 'antd';
 
 export const gymentTheme: ThemeConfig = {
   token: {
@@ -94,6 +94,118 @@ export const gymentTheme: ThemeConfig = {
     Pagination: {
       borderRadius: 8,
       colorPrimary: '#2FAE68',
+    },
+  },
+};
+
+export const gymentDarkTheme: ThemeConfig = {
+  algorithm: antdTheme.darkAlgorithm,
+  token: {
+    colorPrimary: '#2FAE68',
+    colorSuccess: '#2FAE68',
+    colorWarning: '#E5A13B',
+    colorError: '#F26C58',
+    colorInfo: '#5290DF',
+    colorTextBase: '#F0F0F0',
+    colorText: '#F0F0F0',
+    colorTextHeading: '#FFFFFF',
+    colorTextSecondary: '#8E8E8E',
+    colorTextPlaceholder: '#666666',
+    colorBgBase: '#0A0A0A',
+    colorBgContainer: '#141414',
+    colorBgElevated: '#1A1A1A',
+    colorBorder: '#262626',
+    colorBorderSecondary: '#1C1C1C',
+    colorLink: '#2FAE68',
+    borderRadius: 10,
+    fontFamily: 'var(--font-plus-jakarta), Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  components: {
+    Table: {
+      headerBg: '#171717',
+      headerColor: '#A0A0A0',
+      borderColor: '#262626',
+      cellPaddingBlock: 11,
+      cellPaddingInline: 12,
+      fontSize: 13,
+      rowHoverBg: '#1F1F1F',
+      colorBgContainer: '#141414',
+    },
+    Button: {
+      borderRadius: 9,
+      colorPrimary: '#2FAE68',
+      colorPrimaryHover: '#35C777',
+      colorPrimaryActive: '#22935A',
+      colorText: '#F0F0F0',
+      borderColorDisabled: '#262626',
+      defaultBorderColor: '#2C2C2C',
+      defaultBg: '#171717',
+      defaultHoverBg: '#222222',
+      defaultHoverBorderColor: '#2FAE68',
+      defaultHoverColor: '#FFFFFF',
+    },
+    Input: {
+      borderRadius: 8,
+      colorBorder: '#2C2C2C',
+      hoverBorderColor: '#2FAE68',
+      activeBorderColor: '#2FAE68',
+      colorBgContainer: '#141414',
+      colorText: '#F0F0F0',
+      colorTextPlaceholder: '#666666',
+    },
+    Select: {
+      borderRadius: 8,
+      colorBorder: '#2C2C2C',
+      hoverBorderColor: '#2FAE68',
+      activeBorderColor: '#2FAE68',
+      colorBgContainer: '#141414',
+      colorBgElevated: '#1A1A1A',
+      colorText: '#F0F0F0',
+      colorTextPlaceholder: '#666666',
+      optionSelectedBg: '#222222',
+    },
+    DatePicker: {
+      borderRadius: 8,
+      colorBorder: '#2C2C2C',
+      hoverBorderColor: '#2FAE68',
+      activeBorderColor: '#2FAE68',
+      colorBgContainer: '#141414',
+      colorBgElevated: '#1A1A1A',
+      colorText: '#F0F0F0',
+      colorTextPlaceholder: '#666666',
+    },
+    Modal: {
+      borderRadiusLG: 14,
+      headerBg: '#141414',
+      contentBg: '#141414',
+      footerBg: '#141414',
+      titleColor: '#F0F0F0',
+      titleFontSize: 16,
+    },
+    Drawer: {
+      colorBgElevated: '#141414',
+    },
+    Tabs: {
+      colorPrimary: '#2FAE68',
+      itemColor: '#8E8E8E',
+      itemHoverColor: '#FFFFFF',
+      itemSelectedColor: '#FFFFFF',
+      inkBarColor: '#2FAE68',
+    },
+    Tag: {
+      borderRadiusSM: 99,
+    },
+    Badge: {
+      colorError: '#F26C58',
+    },
+    Pagination: {
+      borderRadius: 8,
+      colorPrimary: '#2FAE68',
+      itemBg: '#171717',
+    },
+    Dropdown: {
+      colorBgElevated: '#1A1A1A',
+      colorText: '#F0F0F0',
     },
   },
 };

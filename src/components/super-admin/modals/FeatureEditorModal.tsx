@@ -5,6 +5,7 @@ import { Modal, message } from 'antd';
 import { FEATURES_CONFIG } from '@/data/plans';
 import { FeatureLimits } from '@/types/plan';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
+import { SkeletonBlock } from '@/components/shared/skeletons';
 
 const LIMIT_KEYS = [
   { key: 'Max Members', label: 'Max Members', placeholder: 'e.g. 100 or Unlimited' },
@@ -22,11 +23,13 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
   const [currentFeatures, setCurrentFeatures] = useState<Record<string, boolean>>({});
   const [currentLimits, setCurrentLimits] = useState<FeatureLimits>({});
   const [activeTab, setActiveTab] = useState<'features' | 'limits'>('features');
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const loadPlan = useCallback(async () => {
     if (!editingPlanKey) return;
     try {
+      setIsLoading(true);
       const res = await plansApi.getAll();
       if (res.status && Array.isArray(res.data)) {
         const found = res.data.find(
@@ -40,6 +43,8 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
       }
     } catch (error) {
       console.error('Failed to load plan features:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, [editingPlanKey]);
 
@@ -130,7 +135,19 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
         </button>
       </div>
 
-      {activeTab === 'features' ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 py-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="p-3.5 rounded-xl border border-gyment-border flex items-center justify-between">
+              <div className="space-y-1.5 flex-1">
+                <SkeletonBlock className="h-4 w-32" />
+                <SkeletonBlock className="h-3 w-48" />
+              </div>
+              <SkeletonBlock className="w-10 h-5 rounded-full" />
+            </div>
+          ))}
+        </div>
+      ) : activeTab === 'features' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-2">
           {FEATURES_CONFIG.map((feat) => {
             const isEnabled = !!currentFeatures[feat.key];

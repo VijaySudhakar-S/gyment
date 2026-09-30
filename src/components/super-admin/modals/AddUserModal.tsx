@@ -21,11 +21,13 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, userT
   const [selectedGymId, setSelectedGymId] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState<GymRole>('GYM_ADMIN');
   const [password, setPassword] = useState('');
+  const [isGymsLoading, setIsGymsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load gym choices directly from API
   useEffect(() => {
     if (open) {
+      setIsGymsLoading(true);
       gymsApi.getAll()
         .then((res) => {
           if (res.status && Array.isArray(res.data)) {
@@ -35,7 +37,8 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, userT
             }
           }
         })
-        .catch((err) => console.error('Failed to load gym options:', err));
+        .catch((err) => console.error('Failed to load gym options:', err))
+        .finally(() => setIsGymsLoading(false));
     }
   }, [open, selectedGymId]);
 
@@ -220,6 +223,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, userT
                   showSearch
                   placeholder="Select a gym"
                   optionFilterProp="label"
+                  loading={isGymsLoading}
                   value={selectedGymId || undefined}
                   onChange={(val) => setSelectedGymId(val)}
                   className="w-full text-sm"

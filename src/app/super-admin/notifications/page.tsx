@@ -5,6 +5,7 @@ import { Bell } from 'lucide-react';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/MotionContainer';
 import { notificationsApi, NotificationItem } from '@/lib/api/superadmin/notifications.api';
+import { ListSkeleton } from '@/components/shared/skeletons';
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -67,9 +68,7 @@ export default function NotificationsPage() {
         {/* Notifications List Card */}
         <MotionFadeIn delay={0.06} className="bg-white border border-gyment-border rounded-[14px] overflow-hidden">
           {isLoading ? (
-            <div className="p-8 text-center text-gyment-muted text-[13px]">
-              Loading notifications...
-            </div>
+            <ListSkeleton count={5} />
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center text-gyment-muted text-[13px]">
               No notifications

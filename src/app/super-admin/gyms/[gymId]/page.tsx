@@ -12,6 +12,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/MotionContainer';
 import { initials } from '@/lib/formatters';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
+import { GymDetailSkeleton } from '@/components/shared/skeletons';
 
 export default function GymDetailPage({
   params,
@@ -46,11 +47,9 @@ export default function GymDetailPage({
   if (isLoading) {
     return (
       <>
-        <Topbar title="Loading..." subtitle="Fetching gym profile..." />
+        <Topbar title="Loading Gym..." subtitle="Fetching gym profile and records..." />
         <main className="p-4 sm:p-5 w-full mx-auto">
-          <div className="p-12 text-center text-gyment-muted bg-white border border-gyment-border rounded-xl">
-            Loading gym details...
-          </div>
+          <GymDetailSkeleton />
         </main>
       </>
     );

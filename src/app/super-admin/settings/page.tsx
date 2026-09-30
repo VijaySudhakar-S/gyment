@@ -5,6 +5,7 @@ import { App } from 'antd';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
 import { settingsApi, PlatformSettingsData } from '@/lib/api/superadmin/settings.api';
+import { FormSkeleton } from '@/components/shared/skeletons';
 
 export default function SettingsPage() {
   const { message } = App.useApp();
@@ -162,9 +163,15 @@ export default function SettingsPage() {
           ))}
         </MotionFadeIn>
 
-        {/* Panel 1: Platform Settings */}
-        {activeTab === 'platform' && (
-          <MotionFadeIn key="platform" delay={0.04} className="bg-white border border-gyment-border rounded-[14px] p-5 max-w-3xl">
+        {isLoading ? (
+          <div className="bg-white border border-gyment-border rounded-[14px] p-5 max-w-3xl">
+            <FormSkeleton fields={6} columns={2} />
+          </div>
+        ) : (
+          <>
+            {/* Panel 1: Platform Settings */}
+            {activeTab === 'platform' && (
+              <MotionFadeIn key="platform" delay={0.04} className="bg-white border border-gyment-border rounded-[14px] p-5 max-w-3xl">
             <form onSubmit={handleSavePlatform} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
@@ -440,6 +447,8 @@ export default function SettingsPage() {
             </form>
           </MotionFadeIn>
         )}
+        </>
+      )}
       </main>
     </>
   );

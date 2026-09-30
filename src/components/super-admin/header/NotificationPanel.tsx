@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bell } from 'lucide-react';
-import { notificationsApi, NotificationItem } from '@/lib/api/superadmin/notifications.api';
+import { NotificationItem, notificationsApi } from '@/lib/api/superadmin/notifications.api';
+import { ListSkeleton } from '@/components/shared/skeletons';
 
 import { NotificationPanelProps } from '@/types/header';
 
@@ -74,8 +75,8 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
 
       <div className="max-h-95 overflow-y-auto divide-y divide-gyment-border">
         {isLoading ? (
-          <div className="p-6 text-center text-gyment-muted text-xs">
-            Loading alerts...
+          <div className="p-3">
+            <ListSkeleton count={4} />
           </div>
         ) : notifications.length === 0 ? (
           <div className="p-6 text-center text-gyment-muted text-xs">

@@ -7,7 +7,8 @@ import { LogIn, Users } from 'lucide-react';
 import { useSuperAdmin } from '@/context/SuperAdminContext';
 import { StatusBadge } from '../../shared/StatusBadge';
 import { initials } from '@/lib/formatters';
-import { usersApi, UserItem } from '@/lib/api/superadmin/users.api';
+import { UserItem, usersApi } from '@/lib/api/superadmin/users.api';
+import { UserDrawerSkeleton } from '@/components/shared/skeletons';
 
 import { UserDetailDrawerProps } from '@/types/modals';
 
@@ -94,9 +95,7 @@ export const UserDetailDrawer: React.FC<UserDetailDrawerProps> = ({ open, onClos
       }}
     >
       {isLoading ? (
-        <div className="p-8 text-center text-gyment-muted text-xs">
-          Loading user details...
-        </div>
+        <UserDrawerSkeleton />
       ) : !user ? (
         <div className="p-8 text-center text-gyment-muted text-xs">
           User record not found.

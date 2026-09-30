@@ -12,6 +12,7 @@ import { PlanFormModal } from '@/components/super-admin/modals/PlanFormModal';
 import { FeatureEditorModal } from '@/components/super-admin/modals/FeatureEditorModal';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
+import { PlanCardsSkeleton, TableSkeleton } from '@/components/shared/skeletons';
 
 export default function PlansPage() {
   const { message, modal } = App.useApp();
@@ -136,21 +137,12 @@ export default function PlansPage() {
       <main className="p-4 sm:p-5 w-full mx-auto space-y-6">
         {/* Loading state */}
         {isPlansLoading && planList.length === 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-            {[1, 2, 3].map((idx) => (
-              <div
-                key={idx}
-                className="border border-gyment-border rounded-xl p-5 bg-white animate-pulse h-64 flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="h-5 bg-gray-200 rounded w-1/3" />
-                  <div className="h-7 bg-gray-200 rounded w-1/2" />
-                  <div className="h-4 bg-gray-200 rounded w-2/3" />
-                </div>
-                <div className="h-9 bg-gray-200 rounded w-full" />
-              </div>
-            ))}
-          </div>
+          <>
+            <PlanCardsSkeleton count={3} />
+            <div className="bg-white border border-gyment-border rounded-xl overflow-hidden shadow-2xs mt-6">
+              <TableSkeleton rows={3} columns={5} />
+            </div>
+          </>
         ) : planList.length === 0 ? (
           <div className="border border-dashed border-gyment-border rounded-xl p-10 bg-white text-center">
             <ShieldAlert className="w-10 h-10 text-gyment-muted mx-auto mb-3" />

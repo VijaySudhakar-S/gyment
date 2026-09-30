@@ -7,6 +7,7 @@ import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
 import { supportApi, SupportTicketItem } from '@/lib/api/superadmin/support.api';
+import { SkeletonBlock } from '@/components/shared/skeletons';
 
 export default function SupportPage() {
   const { message } = App.useApp();
@@ -119,11 +120,17 @@ export default function SupportPage() {
               </thead>
               <tbody className="divide-y divide-gyment-border">
                 {isLoading ? (
-                  <tr>
-                    <td colSpan={7} className="p-8 text-center text-gyment-muted">
-                      Loading support tickets...
-                    </td>
-                  </tr>
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i}>
+                      <td className="px-3 py-3.5"><SkeletonBlock className="h-4 w-44 rounded" /></td>
+                      <td className="px-3 py-3.5"><SkeletonBlock className="h-4 w-28 rounded" /></td>
+                      <td className="px-3 py-3.5"><SkeletonBlock className="h-4 w-24 rounded" /></td>
+                      <td className="px-3 py-3.5"><SkeletonBlock className="h-5 w-16 rounded-full" /></td>
+                      <td className="px-3 py-3.5"><SkeletonBlock className="h-5 w-16 rounded-full" /></td>
+                      <td className="px-3 py-3.5"><SkeletonBlock className="h-3.5 w-20 rounded" /></td>
+                      <td className="px-3 py-3.5 text-right"><SkeletonBlock className="h-7 w-14 rounded inline-block" /></td>
+                    </tr>
+                  ))
                 ) : tickets.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="p-8 text-center text-gyment-muted">

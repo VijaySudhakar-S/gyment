@@ -2,15 +2,17 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, ArrowRight } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Moon, Sun } from 'lucide-react';
 import { App } from 'antd';
 import { motion } from 'framer-motion';
 import { loginSuperAdmin } from '@/lib/api/superadmin/auth.api';
 import { tokenStorage } from '@/lib/auth/tokenStorage';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function LoginPage() {
   const router = useRouter();
   const { message } = App.useApp();
+  const { isDark, toggleTheme } = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,7 +51,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gyment-bg flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-gyment-bg flex flex-col justify-center items-center p-4 relative">
+      {/* Theme Toggle Button */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="w-9 h-9 rounded-lg border border-gyment-border bg-white hover:bg-gyment-bg flex items-center justify-center shrink-0 transition-colors cursor-pointer shadow-xs"
+          aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {isDark ? (
+            <Sun className="w-4 h-4 text-amber-400 stroke-2" />
+          ) : (
+            <Moon className="w-4 h-4 text-gyment-text stroke-2" />
+          )}
+        </button>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

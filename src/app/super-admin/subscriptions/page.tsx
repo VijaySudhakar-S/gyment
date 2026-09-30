@@ -18,6 +18,7 @@ import { fmtRs } from '@/lib/formatters';
 import { subscriptionsApi, SubscriptionItem, SubscriptionKPIs } from '@/lib/api/superadmin/subscriptions.api';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { reportsApi } from '@/lib/api/superadmin/reports.api';
+import { StatCardSkeleton, TableSkeleton } from '@/components/shared/skeletons';
 
 export default function SubscriptionsPage() {
   const router = useRouter();
@@ -278,13 +279,19 @@ export default function SubscriptionsPage() {
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-6">
         {/* KPI Cards */}
-        <MotionStagger className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-          <MotionItem><StatCard label="Active Subscriptions" value={kpis.activeSubs} delta="Billing normally" deltaType="up" /></MotionItem>
-          <MotionItem><StatCard label="Trial Subscriptions" value={kpis.trialSubs} delta="Converting" deltaType="neu" /></MotionItem>
-          <MotionItem><StatCard label="Expiring Soon" value={kpis.expiringSubs} delta="Within 30 days" deltaType={kpis.expiringSubs > 0 ? 'down' : 'neu'} /></MotionItem>
-          <MotionItem><StatCard label="Cancelled" value={kpis.cancelledSubs} delta="Past churn" deltaType="neu" /></MotionItem>
-          <MotionItem><StatCard label="Suspended / Past Due" value={kpis.suspendedOrPastDue} delta="Action required" deltaType={kpis.suspendedOrPastDue > 0 ? 'down' : 'neu'} /></MotionItem>
-        </MotionStagger>
+        {isLoading && subscriptions.length === 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <StatCardSkeleton count={5} />
+          </div>
+        ) : (
+          <MotionStagger className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <MotionItem><StatCard label="Active Subscriptions" value={kpis.activeSubs} delta="Billing normally" deltaType="up" /></MotionItem>
+            <MotionItem><StatCard label="Trial Subscriptions" value={kpis.trialSubs} delta="Converting" deltaType="neu" /></MotionItem>
+            <MotionItem><StatCard label="Expiring Soon" value={kpis.expiringSubs} delta="Within 30 days" deltaType={kpis.expiringSubs > 0 ? 'down' : 'neu'} /></MotionItem>
+            <MotionItem><StatCard label="Cancelled" value={kpis.cancelledSubs} delta="Past churn" deltaType="neu" /></MotionItem>
+            <MotionItem><StatCard label="Suspended / Past Due" value={kpis.suspendedOrPastDue} delta="Action required" deltaType={kpis.suspendedOrPastDue > 0 ? 'down' : 'neu'} /></MotionItem>
+          </MotionStagger>
+        )}
 
         {/* AntD Filter Bar */}
         <MotionFadeIn delay={0.06} className="flex items-center gap-2.5 flex-wrap">
@@ -324,30 +331,34 @@ export default function SubscriptionsPage() {
 
         {/* AntD Subscriptions Table */}
         <MotionFadeIn delay={0.1} className="bg-white border border-gyment-border rounded-[14px] overflow-hidden shadow-2xs">
-          <Table<SubscriptionItem>
-            columns={columns}
-            dataSource={subscriptions}
-            rowKey="id"
-            loading={isLoading}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} subscriptions`,
-            }}
-            locale={{
-              emptyText: (
-                <div className="flex flex-col items-center py-6">
-                  <CreditCard className="w-9 h-9 mb-2.5 opacity-40 text-gyment-muted" />
-                  <div className="font-bold text-sm text-gyment-text mb-1">
-                    No subscriptions found
+          {isLoading && subscriptions.length === 0 ? (
+            <TableSkeleton rows={6} columns={7} />
+          ) : (
+            <Table<SubscriptionItem>
+              columns={columns}
+              dataSource={subscriptions}
+              rowKey="id"
+              loading={isLoading}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} subscriptions`,
+              }}
+              locale={{
+                emptyText: (
+                  <div className="flex flex-col items-center py-6">
+                    <CreditCard className="w-9 h-9 mb-2.5 opacity-40 text-gyment-muted" />
+                    <div className="font-bold text-sm text-gyment-text mb-1">
+                      No subscriptions found
+                    </div>
+                    <div className="text-xs text-gyment-muted">
+                      Try adjusting your filters or search query.
+                    </div>
                   </div>
-                  <div className="text-xs text-gyment-muted">
-                    Try adjusting your filters or search query.
-                  </div>
-                </div>
-              ),
-            }}
-          />
+                ),
+              }}
+            />
+          )}
         </MotionFadeIn>
 
         {/* Subscription Detail Modal */}
