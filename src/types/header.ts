@@ -7,6 +7,7 @@ export interface TopbarProps {
 export interface ProfileMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  className?: string;
 }
 
 export interface NotificationPanelProps {

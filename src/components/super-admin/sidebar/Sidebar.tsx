@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useSuperAdmin } from '@/context/SuperAdminContext';
 import { tokenStorage } from '@/lib/auth/tokenStorage';
+import { ProfileMenu } from '@/components/super-admin/header/ProfileMenu';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
@@ -28,6 +29,19 @@ export const Sidebar: React.FC = () => {
     mobileSidebarOpen,
     setMobileSidebarOpen,
   } = useSuperAdmin();
+
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const navItems = [
     { label: 'Dashboard', href: '/super-admin', icon: LayoutDashboard },
@@ -141,8 +155,11 @@ export const Sidebar: React.FC = () => {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="mt-auto pt-3.5 border-t border-white/8">
-          <div className="flex items-center gap-2.5 px-1.5 py-2">
+        <div className="mt-auto pt-3.5 border-t border-white/8 relative" ref={profileRef}>
+          <div 
+            className="flex items-center gap-2.5 px-1.5 py-2 cursor-pointer hover:bg-white/5 rounded-lg transition-colors"
+            onClick={() => setProfileOpen(prev => !prev)}
+          >
             <div className="w-8 h-8 rounded-full bg-[#E7F6ED] text-[#1f8954] flex items-center justify-center font-bold text-xs shrink-0">
               {(() => {
                 const user = tokenStorage.getUser();
@@ -151,7 +168,7 @@ export const Sidebar: React.FC = () => {
               })()}
             </div>
             {!sidebarCollapsed && (
-              <div className="min-w-0 overflow-hidden leading-tight">
+              <div className="min-w-0 overflow-hidden leading-tight flex-1">
                 <div className="text-xs font-bold text-white truncate">
                   {tokenStorage.getUser()?.name || 'Super Admin'}
                 </div>
@@ -161,6 +178,12 @@ export const Sidebar: React.FC = () => {
               </div>
             )}
           </div>
+
+          <ProfileMenu 
+             isOpen={profileOpen} 
+             onClose={() => setProfileOpen(false)} 
+             className={`absolute bottom-full mb-2 ${sidebarCollapsed ? 'left-12' : 'left-0'} w-55 origin-bottom-left`} 
+          />
 
           <button
             onClick={toggleSidebar}

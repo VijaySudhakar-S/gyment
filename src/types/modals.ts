@@ -2,7 +2,7 @@ import { PlanData } from '@/lib/api/superadmin/plans.api';
 
 export interface PlanFormModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (didSave?: boolean) => void;
   planToEdit?: PlanData | null;
   onSuccess?: () => void;
 }

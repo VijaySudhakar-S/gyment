@@ -11,6 +11,7 @@ import {
   PlanResponseDTO,
   PlanFeaturesPayload,
 } from '@interface/plan';
+import { sanitizeFeaturesPayload } from '@constants/planFeatures';
 
 @Service()
 export default class PlanService {
@@ -145,9 +146,9 @@ export default class PlanService {
         throw new ConflictError(PLAN.ERROR.NAME_EXISTS);
       }
 
-      const featuresPayload: PlanFeaturesPayload = dto.features || {
-        enabledFeatures: {},
-        limits: {},
+      const rawFeatures = dto.features || { enabledFeatures: {}, limits: {} };
+      const featuresPayload: PlanFeaturesPayload = {
+        ...sanitizeFeaturesPayload(rawFeatures.enabledFeatures, rawFeatures.limits),
       };
 
       const created = await this.db.plan.create({
@@ -213,7 +214,13 @@ export default class PlanService {
       if (dto.description !== undefined) updateData.description = dto.description?.trim() || null;
       if (dto.monthlyPrice !== undefined) updateData.monthlyPrice = dto.monthlyPrice;
       if (dto.yearlyPrice !== undefined) updateData.yearlyPrice = dto.yearlyPrice;
-      if (dto.features !== undefined) updateData.features = dto.features;
+      if (dto.features !== undefined) {
+        const sanitized = sanitizeFeaturesPayload(
+          dto.features.enabledFeatures,
+          dto.features.limits
+        );
+        updateData.features = sanitized;
+      }
       if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
 
       const updated = await this.db.plan.update({
@@ -334,12 +341,14 @@ export default class PlanService {
         throw new NotFoundError(`Plan '${planKeyOrId}' not found`);
       }
 
+      const sanitized = sanitizeFeaturesPayload(features, limits);
+
       const updatedPlan = await this.db.plan.update({
         where: { id: plan.id },
         data: {
           features: {
-            enabledFeatures: features,
-            limits: limits,
+            enabledFeatures: sanitized.enabledFeatures,
+            limits: sanitized.limits,
           },
         },
         include: {

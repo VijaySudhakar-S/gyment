@@ -36,7 +36,8 @@
       "@interface/*": ["./src/backend/interface/*"],
       "@api/*": ["./src/backend/api/*"],
       "@errors/*": ["./src/backend/api/errors/*"],
-      "@responseMessages/*": ["./src/backend/responseMessages/*"]
+      "@responseMessages/*": ["./src/backend/responseMessages/*"],
+      "@constants/*": ["./src/backend/constants/*"]
     }
   },
   "include": [

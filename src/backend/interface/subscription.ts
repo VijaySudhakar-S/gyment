@@ -45,6 +45,39 @@ export interface UpdateSubscriptionStatusDTO {
   notes?: string;
 }
 
+export interface PlanChangePreviewDTO {
+  currentSubscription: {
+    id: string;
+    planName: string;
+    billingCycle: BillingCycle;
+    price: number;
+    startDate: string;
+    renewalDate: string;
+    daysRemaining: number;
+    totalDays: number;
+  } | null;
+  newPlan: {
+    id: string;
+    name: string;
+    billingCycle: BillingCycle;
+    price: number;
+  };
+  proration: {
+    unusedCredit: number;
+    netPayable: number;
+    daysRemaining: number;
+    effectiveStartDate: string;
+    newRenewalDate: string;
+  };
+}
+
+export interface ExpireSubscriptionsResultDTO {
+  processedCount: number;
+  expiredSubscriptions: GymSubscriptionResponseDTO[];
+  suspendedGymCount: number;
+  suspendedGymIds: string[];
+}
+
 export interface SubscriptionFilterDTO {
   search?: string;
   planId?: string;

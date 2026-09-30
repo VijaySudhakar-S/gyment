@@ -8,6 +8,9 @@ import {
   Download,
   Search,
   CreditCard,
+  Clock,
+  History,
+  RotateCw,
 } from 'lucide-react';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { ChangePlanModal } from '@/components/super-admin/modals/ChangePlanModal';
@@ -37,12 +40,15 @@ export default function SubscriptionsPage() {
     suspendedOrPastDue: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessingExpiry, setIsProcessingExpiry] = useState(false);
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [planFilter, setPlanFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [detailModalSub, setDetailModalSub] = useState<SubscriptionItem | null>(null);
+  const [historyList, setHistoryList] = useState<SubscriptionItem[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
   // Debounce search input to avoid hitting API on every keystroke
   useEffect(() => {
@@ -92,6 +98,55 @@ export default function SubscriptionsPage() {
   useEffect(() => {
     loadPlans();
   }, [loadPlans]);
+
+  const loadHistory = useCallback(async (gymId: string) => {
+    try {
+      setIsHistoryLoading(true);
+      const res = await subscriptionsApi.getHistory(gymId);
+      if (res.status && Array.isArray(res.data)) {
+        setHistoryList(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to load subscription history:', err);
+    } finally {
+      setIsHistoryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (detailModalSub?.gymId) {
+      loadHistory(detailModalSub.gymId);
+    } else {
+      setHistoryList([]);
+    }
+  }, [detailModalSub, loadHistory]);
+
+  const handleRunExpiryCheck = () => {
+    modal.confirm({
+      title: 'Run Overdue Subscriptions Expiry Check?',
+      content: 'This will check all subscriptions against their renewal date. Any active or trial subscriptions past due will be marked as EXPIRED, and gyms without active subscriptions will be suspended.',
+      okText: 'Run Check Now',
+      centered: true,
+      onOk: async () => {
+        try {
+          setIsProcessingExpiry(true);
+          const res = await subscriptionsApi.processExpired();
+          if (res.status && res.data) {
+            if (res.data.processedCount > 0) {
+              message.warning(`Marked ${res.data.processedCount} overdue subscriptions as EXPIRED. Suspended ${res.data.suspendedGymCount} gym(s).`);
+            } else {
+              message.success('All subscriptions are up-to-date! No overdue subscriptions found.');
+            }
+            await loadSubscriptions();
+          }
+        } catch (error: any) {
+          message.error(error.message || 'Failed to process expired subscriptions');
+        } finally {
+          setIsProcessingExpiry(false);
+        }
+      },
+    });
+  };
 
   const handleExport = async () => {
     try {
@@ -267,14 +322,28 @@ export default function SubscriptionsPage() {
         title="Subscriptions"
         subtitle="Manage GYMENT SaaS subscriptions across all gyms."
         actions={
-          <button
-            type="button"
-            onClick={handleExport}
-            className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Export Subscriptions</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleRunExpiryCheck}
+              disabled={isProcessingExpiry}
+              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+              title="Run automated expiration check for overdue subscriptions"
+            >
+              <Clock className="w-4 h-4 text-warning" />
+              <span className="hidden sm:inline">
+                {isProcessingExpiry ? 'Checking...' : 'Process Overdue'}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Export Subscriptions</span>
+            </button>
+          </div>
         }
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-6">
@@ -285,11 +354,31 @@ export default function SubscriptionsPage() {
           </div>
         ) : (
           <MotionStagger className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            <MotionItem><StatCard label="Active Subscriptions" value={kpis.activeSubs} delta="Billing normally" deltaType="up" /></MotionItem>
-            <MotionItem><StatCard label="Trial Subscriptions" value={kpis.trialSubs} delta="Converting" deltaType="neu" /></MotionItem>
-            <MotionItem><StatCard label="Expiring Soon" value={kpis.expiringSubs} delta="Within 30 days" deltaType={kpis.expiringSubs > 0 ? 'down' : 'neu'} /></MotionItem>
-            <MotionItem><StatCard label="Cancelled" value={kpis.cancelledSubs} delta="Past churn" deltaType="neu" /></MotionItem>
-            <MotionItem><StatCard label="Suspended / Past Due" value={kpis.suspendedOrPastDue} delta="Action required" deltaType={kpis.suspendedOrPastDue > 0 ? 'down' : 'neu'} /></MotionItem>
+            <MotionItem>
+              <div onClick={() => setStatusFilter(statusFilter === 'ACTIVE' ? '' : 'ACTIVE')} className="cursor-pointer transition-transform hover:scale-[1.01]">
+                <StatCard label="Active Subscriptions" value={kpis.activeSubs} delta={statusFilter === 'ACTIVE' ? 'Active Filter' : 'Billing normally'} deltaType="up" />
+              </div>
+            </MotionItem>
+            <MotionItem>
+              <div onClick={() => setStatusFilter(statusFilter === 'TRIAL' ? '' : 'TRIAL')} className="cursor-pointer transition-transform hover:scale-[1.01]">
+                <StatCard label="Trial Subscriptions" value={kpis.trialSubs} delta={statusFilter === 'TRIAL' ? 'Trial Filter' : 'Converting'} deltaType="neu" />
+              </div>
+            </MotionItem>
+            <MotionItem>
+              <div onClick={() => setStatusFilter(statusFilter === 'EXPIRING' ? '' : 'EXPIRING')} className="cursor-pointer transition-transform hover:scale-[1.01]">
+                <StatCard label="Expiring Soon" value={kpis.expiringSubs} delta={statusFilter === 'EXPIRING' ? 'Expiring Filter' : 'Within 30 days'} deltaType={kpis.expiringSubs > 0 ? 'down' : 'neu'} />
+              </div>
+            </MotionItem>
+            <MotionItem>
+              <div onClick={() => setStatusFilter(statusFilter === 'CANCELLED' ? '' : 'CANCELLED')} className="cursor-pointer transition-transform hover:scale-[1.01]">
+                <StatCard label="Cancelled" value={kpis.cancelledSubs} delta={statusFilter === 'CANCELLED' ? 'Cancelled Filter' : 'Past churn'} deltaType="neu" />
+              </div>
+            </MotionItem>
+            <MotionItem>
+              <div onClick={() => setStatusFilter(statusFilter === 'PAST_DUE' ? '' : 'PAST_DUE')} className="cursor-pointer transition-transform hover:scale-[1.01]">
+                <StatCard label="Suspended / Past Due" value={kpis.suspendedOrPastDue} delta={statusFilter === 'PAST_DUE' ? 'Past Due Filter' : 'Action required'} deltaType={kpis.suspendedOrPastDue > 0 ? 'down' : 'neu'} />
+              </div>
+            </MotionItem>
           </MotionStagger>
         )}
 
@@ -318,10 +407,11 @@ export default function SubscriptionsPage() {
             placeholder="All Statuses"
             value={statusFilter || undefined}
             onChange={val => setStatusFilter(val || '')}
-            className="w-40 text-xs"
+            className="w-44 text-xs"
             options={[
               { value: 'ACTIVE', label: 'Active' },
               { value: 'TRIAL', label: 'Trial' },
+              { value: 'EXPIRING', label: 'Expiring Soon (30d)' },
               { value: 'PAST_DUE', label: 'Past Due' },
               { value: 'CANCELLED', label: 'Cancelled' },
               { value: 'EXPIRED', label: 'Expired' },
@@ -425,6 +515,71 @@ export default function SubscriptionsPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Subscription History Timeline */}
+              <div className="border border-gyment-border rounded-xl p-4 bg-gyment-card">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-[13px] font-bold text-gyment-text m-0 flex items-center gap-1.5">
+                    <History size={14} className="text-gyment-primary" />
+                    Subscription History & Lifecycle
+                  </h3>
+                  <span className="text-[11px] text-gyment-muted">
+                    {historyList.length} recorded {historyList.length === 1 ? 'cycle' : 'cycles'}
+                  </span>
+                </div>
+
+                {isHistoryLoading ? (
+                  <div className="py-4 text-center text-xs text-gyment-muted flex items-center justify-center gap-2">
+                    <RotateCw className="w-3.5 h-3.5 animate-spin text-gyment-primary" />
+                    Loading subscription history...
+                  </div>
+                ) : historyList.length === 0 ? (
+                  <div className="py-2 text-xs text-gyment-muted">No prior subscription history recorded.</div>
+                ) : (
+                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {historyList.map((histSub) => (
+                      <div
+                        key={histSub.id}
+                        className={`p-2.5 rounded-lg border text-xs flex flex-col gap-1 transition-colors ${
+                          histSub.id === detailModalSub.id
+                            ? 'border-gyment-primary/40 bg-gyment-primary/5'
+                            : 'border-gyment-border/70 bg-gyment-bg/60'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-semibold">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gyment-text">{histSub.planName}</span>
+                            <span className="text-[10px] text-gyment-muted">({histSub.billingCycle})</span>
+                            {histSub.id === detailModalSub.id && (
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary/10 text-primary font-bold">
+                                Current
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gyment-text">{fmtRs(histSub.price)}</span>
+                            <StatusBadge status={histSub.status} />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between text-[11px] text-gyment-muted">
+                          <span>
+                            {new Date(histSub.startDate).toLocaleDateString()} →{' '}
+                            {new Date(histSub.renewalDate).toLocaleDateString()}
+                          </span>
+                          <span>Recorded {new Date(histSub.createdAt).toLocaleDateString()}</span>
+                        </div>
+
+                        {histSub.notes && (
+                          <div className="text-[10.5px] text-gyment-muted italic pt-0.5 border-t border-dashed border-gyment-border/50">
+                            {histSub.notes}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Actions */}

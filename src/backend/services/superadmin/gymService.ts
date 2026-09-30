@@ -83,7 +83,7 @@ export default class GymService {
       const gyms = await this.db.gym.findMany({
         include: {
           subscriptions: {
-            where: { status: GymSubscriptionStatus.ACTIVE },
+            where: { status: { in: [GymSubscriptionStatus.ACTIVE, GymSubscriptionStatus.TRIAL] } },
             include: { plan: true },
             orderBy: { createdAt: 'desc' },
             take: 1,

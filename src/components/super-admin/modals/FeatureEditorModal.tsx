@@ -7,12 +7,13 @@ import { FeatureLimits } from '@/types/plan';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { SkeletonBlock } from '@/components/shared/skeletons';
 
+
 const LIMIT_KEYS = [
-  { key: 'Max Members', label: 'Max Members', placeholder: 'e.g. 100 or Unlimited' },
-  { key: 'Max Receptionists', label: 'Max Receptionists', placeholder: 'e.g. 2 or Unlimited' },
-  { key: 'Max Admins', label: 'Max Admins', placeholder: 'e.g. 1 or Unlimited' },
-  { key: 'Max Trainers', label: 'Max Trainers', placeholder: 'e.g. 5 or Unlimited' },
-  { key: 'Multiple Branch Management', label: 'Branch Limit', placeholder: 'e.g. 1 branch or Unlimited' },
+  { key: 'Max Members',               label: 'Max Members',              placeholder: 'e.g. 100 or Unlimited' },
+  { key: 'Max Receptionists',         label: 'Max Receptionists',        placeholder: 'e.g. 2 or Unlimited' },
+  { key: 'Max Admins',                label: 'Max Admins',               placeholder: 'e.g. 1 or Unlimited' },
+  { key: 'Max Trainers',              label: 'Max Trainers',             placeholder: 'e.g. 5 or Unlimited' },
+  { key: 'Multiple Branch Management', label: 'Branch Limit',            placeholder: 'e.g. 1 or Unlimited' },
 ];
 
 import { FeatureEditorModalProps } from '@/types/modals';
@@ -30,19 +31,16 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
     if (!editingPlanKey) return;
     try {
       setIsLoading(true);
-      const res = await plansApi.getAll();
-      if (res.status && Array.isArray(res.data)) {
-        const found = res.data.find(
-          p => p.id === editingPlanKey || p.name.toLowerCase() === editingPlanKey.toLowerCase()
-        );
-        if (found) {
-          setActivePlan(found);
-          setCurrentFeatures({ ...(found.features?.enabledFeatures || {}) });
-          setCurrentLimits({ ...(found.features?.limits || {}) });
-        }
+      // Use getById instead of fetching all plans
+      const res = await plansApi.getById(editingPlanKey);
+      if (res.status && res.data) {
+        setActivePlan(res.data);
+        setCurrentFeatures({ ...(res.data.features?.enabledFeatures || {}) });
+        setCurrentLimits({ ...(res.data.features?.limits || {}) });
       }
     } catch (error) {
       console.error('Failed to load plan features:', error);
+      message.error('Failed to load plan features');
     } finally {
       setIsLoading(false);
     }
@@ -50,6 +48,7 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
 
   useEffect(() => {
     if (open && editingPlanKey) {
+      setActiveTab('features');
       loadPlan();
     }
   }, [open, editingPlanKey, loadPlan]);
@@ -72,8 +71,9 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
     if (!activePlan) return;
     try {
       setIsSaving(true);
+      // Use planId for safe identification — not the mutable name
       const res = await plansApi.updateFeatures({
-        planKey: activePlan.name.toLowerCase(),
+        planKey: activePlan.id,
         features: currentFeatures,
         limits: currentLimits,
       });
@@ -81,14 +81,17 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
         message.success('Plan features updated successfully');
         onClose();
         if (onSuccess) onSuccess();
+      } else {
+        message.error('Failed to save features');
       }
     } catch (error: any) {
-      message.error(error.message || 'Failed to save features');
+      message.error(error?.message || 'Failed to save features');
     } finally {
       setIsSaving(false);
     }
   };
 
+  const enabledCount = Object.values(currentFeatures).filter(Boolean).length;
   const planName = activePlan?.name || 'Plan';
 
   return (
@@ -101,10 +104,10 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
       title={
         <div className="pt-1">
           <h2 className="text-base font-bold text-gyment-text m-0">
-            Edit {planName} Plan Features & Limits
+            Edit {planName} Plan — Features &amp; Limits
           </h2>
           <p className="text-xs text-gyment-muted mt-0.5">
-            Configure feature access flags and capacity limits in JSON for this plan
+            Configure feature access flags and capacity limits for this plan
           </p>
         </div>
       }
@@ -120,7 +123,7 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
               : 'border-transparent text-gyment-muted hover:text-gyment-text'
           }`}
         >
-          Feature Access Flags ({Object.values(currentFeatures).filter(Boolean).length} / {FEATURES_CONFIG.length})
+          Feature Access ({enabledCount} / {FEATURES_CONFIG.length} enabled)
         </button>
         <button
           type="button"
@@ -131,7 +134,7 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
               : 'border-transparent text-gyment-muted hover:text-gyment-text'
           }`}
         >
-          Capacity Limits (JSON)
+          Capacity Limits ({LIMIT_KEYS.length} fields)
         </button>
       </div>
 
@@ -180,10 +183,7 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
                   }`}
                 >
                   {isEnabled && (
-                    <svg
-                      className="w-3 h-3 fill-current"
-                      viewBox="0 0 20 20"
-                    >
+                    <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
                       <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
                     </svg>
                   )}
@@ -195,7 +195,7 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
       ) : (
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
           <div className="bg-gyment-bg/60 border border-gyment-border p-3.5 rounded-xl text-xs text-gyment-muted">
-            Define numeric constraints or text rules for this plan tier (e.g. &apos;Unlimited&apos;, &apos;500&apos;, &apos;1 branch&apos;). These limits are enforced in tenant workspaces.
+            Define numeric constraints or text rules for this plan tier (e.g. &apos;Unlimited&apos;, &apos;500&apos;, &apos;1&apos;). These limits are enforced in tenant workspaces.
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {LIMIT_KEYS.map((lim) => (
@@ -208,7 +208,7 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
                   placeholder={lim.placeholder}
                   value={currentLimits[lim.key] || ''}
                   onChange={(e) => updateLimit(lim.key, e.target.value)}
-                  className="border border-gyment-border rounded-lg px-3 py-2 text-xs outline-none focus:border-primary bg-white"
+                  className="border border-gyment-border rounded-lg px-3 py-2 text-xs outline-none focus:border-primary bg-white transition-colors"
                 />
               </div>
             ))}
@@ -227,7 +227,7 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
         </button>
         <button
           type="button"
-          disabled={isSaving}
+          disabled={isSaving || isLoading}
           onClick={handleSave}
           className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow-md cursor-pointer disabled:opacity-50"
         >

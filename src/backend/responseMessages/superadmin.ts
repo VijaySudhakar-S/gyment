@@ -113,12 +113,16 @@ export const SUBSCRIPTION = {
     EXTENDED: "Subscription extended successfully.",
     STATUS_CHANGED: "Subscription status updated successfully.",
     PLAN_CHANGED: "Gym plan changed successfully.",
+    EXPIRED_PROCESSED: "Expired subscriptions processed successfully.",
+    HISTORY_FETCHED: "Subscription history retrieved successfully.",
+    PRORATION_PREVIEW: "Plan change proration preview calculated successfully.",
   },
   ERROR: {
     NOT_FOUND: "Subscription not found.",
     GYM_NOT_FOUND: "Gym not found.",
     PLAN_NOT_FOUND: "Plan not found.",
     UPDATE_FAILED: "Failed to update subscription.",
+    PROCESS_FAILED: "Failed to process expired subscriptions.",
   },
 };
 

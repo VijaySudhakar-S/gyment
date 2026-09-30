@@ -47,3 +47,37 @@ export interface UpdateStatusPayload {
   status: 'ACTIVE' | 'TRIAL' | 'PAST_DUE' | 'CANCELLED' | 'EXPIRED';
   notes?: string;
 }
+
+export interface PlanChangePreviewData {
+  currentSubscription: {
+    id: string;
+    planName: string;
+    billingCycle: 'MONTHLY' | 'YEARLY';
+    price: number;
+    startDate: string;
+    renewalDate: string;
+    daysRemaining: number;
+    totalDays: number;
+  } | null;
+  newPlan: {
+    id: string;
+    name: string;
+    billingCycle: 'MONTHLY' | 'YEARLY';
+    price: number;
+  };
+  proration: {
+    unusedCredit: number;
+    netPayable: number;
+    daysRemaining: number;
+    effectiveStartDate: string;
+    newRenewalDate: string;
+  };
+}
+
+export interface ExpireSubscriptionsResult {
+  processedCount: number;
+  expiredSubscriptions: SubscriptionItem[];
+  suspendedGymCount: number;
+  suspendedGymIds: string[];
+}
+

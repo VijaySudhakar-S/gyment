@@ -126,13 +126,6 @@ export const Topbar: React.FC<TopbarProps> = ({
         <ProfileMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
       </div>
 
-      {/* Header Owner Info */}
-      <div className="hidden lg:flex flex-col pl-1.5 shrink-0 leading-[1.1]">
-        <div className="text-sm font-bold text-gyment-text">
-          {tokenStorage.getUser()?.name || 'Super Admin'}
-        </div>
-        <div className="text-xs text-gyment-muted mt-0.5">Super Admin</div>
-      </div>
     </header>
   );
 };
