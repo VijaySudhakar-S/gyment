@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { App } from 'antd';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatCard } from '@/components/shared/StatCard';
 import { StatusBadge } from '@/components/shared/StatusBadge';
@@ -89,7 +88,8 @@ export default function GymDetailPage({
       centered : true,
       onOk: async () => {
         try {
-          const res = await gymsApi.toggleStatus(gym.id);
+          const newStatus = isSuspended ? 'ACTIVE' : 'SUSPENDED';
+          const res = await gymsApi.toggleStatus(gym.id, newStatus);
           if (res.status) {
             message.success(isSuspended ? 'Gym activated successfully' : 'Gym suspended successfully');
             await fetchGym();

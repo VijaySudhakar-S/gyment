@@ -31,8 +31,8 @@ export const gymsApi = {
     return response.data;
   },
 
-  toggleStatus: async (id: string) => {
-    const response = await apiClient.patch<ApiResponse<GymData>>(`/api/v1/superadmin/gyms/${id}`);
+  toggleStatus: async (id: string, status?: string) => {
+    const response = await apiClient.patch<ApiResponse<GymData>>(`/api/v1/superadmin/gyms/${id}`, { status });
     return response.data;
   },
 

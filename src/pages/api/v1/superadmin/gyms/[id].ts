@@ -91,7 +91,8 @@ async function handleUpdate(id: string, req: NextApiRequest, res: NextApiRespons
 
 async function handleToggleStatus(id: string, req: NextApiRequest, res: NextApiResponse) {
   try {
-    const data = await gymService.toggleGymStatus(id);
+    const { status } = req.body || {};
+    const data = await gymService.toggleGymStatus(id, status);
     return res.status(200).json({
       status: true,
       message: GYM_TENANT.SUCCESS.UPDATED,

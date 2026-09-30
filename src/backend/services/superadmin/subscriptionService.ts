@@ -153,9 +153,14 @@ export default class SubscriptionService {
         throw new NotFoundError(SUBSCRIPTION.ERROR.PLAN_NOT_FOUND);
       }
 
-      const price = billingCycle === BillingCycle.YEARLY ? plan.yearlyPrice : plan.monthlyPrice;
-      const renewalDays = billingCycle === BillingCycle.YEARLY ? 365 : 30;
-      const renewalDate = new Date(Date.now() + renewalDays * 24 * 60 * 60 * 1000);
+      const newPrice = billingCycle === BillingCycle.YEARLY ? plan.yearlyPrice : plan.monthlyPrice;
+      const now = new Date();
+      const renewalDate = new Date();
+      if (billingCycle === BillingCycle.YEARLY) {
+        renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+      } else {
+        renewalDate.setMonth(renewalDate.getMonth() + 1);
+      }
 
       // 1. Find existing active or trial subscription
       const existingSub = await tx.gymSubscription.findFirst({
@@ -179,17 +184,34 @@ export default class SubscriptionService {
         });
       }
 
+      let netPayable = Number(newPrice);
+      if (existingSub) {
+        const currentStartDate = new Date(existingSub.startDate);
+        const currentRenewalDate = new Date(existingSub.renewalDate);
+        const currentPrice = Number(existingSub.price);
+
+        const totalDurationMs = Math.max(1, currentRenewalDate.getTime() - currentStartDate.getTime());
+        const remainingMs = Math.max(0, currentRenewalDate.getTime() - now.getTime());
+
+        const totalDays = Math.max(1, Math.round(totalDurationMs / (24 * 60 * 60 * 1000)));
+        const daysRemaining = Math.max(0, Math.round(remainingMs / (24 * 60 * 60 * 1000)));
+
+        const dailyRate = currentPrice / totalDays;
+        const unusedCredit = Math.round(dailyRate * daysRemaining);
+        netPayable = Math.max(0, Number(newPrice) - unusedCredit);
+      }
+
       // 3. Create brand-new subscription record for new plan
       const newSubscription = await tx.gymSubscription.create({
         data: {
           gymId,
           planId,
           billingCycle,
-          price,
+          price: netPayable,
           status: GymSubscriptionStatus.ACTIVE,
-          startDate: new Date(),
+          startDate: now,
           renewalDate,
-          notes: notes || (existingSub ? `Changed from ${existingSub.plan?.name || 'previous plan'}` : null),
+          notes: notes || (existingSub ? `Changed from ${existingSub.plan?.name || 'previous plan'}. Net payable (after proration credit): ${netPayable}` : null),
         },
         include: { gym: true, plan: true },
       });

@@ -122,7 +122,8 @@ export default function GymsPage() {
       centered : true,
       onOk: async () => {
         try {
-          const res = await gymsApi.toggleStatus(gym.id);
+          const newStatus = isSuspended ? 'ACTIVE' : 'SUSPENDED';
+          const res = await gymsApi.toggleStatus(gym.id, newStatus);
           if (res.status) {
             message.success(isSuspended ? 'Gym activated successfully' : 'Gym suspended successfully');
             await loadGyms();

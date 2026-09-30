@@ -205,7 +205,7 @@ export default class GymService {
       }
 
       // Hash admin password
-      const rawPassword = dto.password && dto.password.trim() ? dto.password.trim() : 'GymentAdmin@123';
+      const rawPassword = dto.password && dto.password.trim() ? dto.password.trim() : crypto.randomBytes(8).toString('hex');
       const passwordHash = await hashPassword(rawPassword);
 
       // Determine billing cycle & price
@@ -218,7 +218,7 @@ export default class GymService {
       if (billingCycle === BillingCycle.YEARLY) {
         renewalDate.setFullYear(renewalDate.getFullYear() + 1);
       } else {
-        renewalDate.setDate(renewalDate.getDate() + 30);
+        renewalDate.setMonth(renewalDate.getMonth() + 1);
       }
 
       const gymStatus: GymStatus = dto.status || GymStatus.ACTIVE;
@@ -297,7 +297,19 @@ export default class GymService {
       }
 
       // Re-fetch formatted gym result
-      return await this.getGymById(result.gym.id);
+      const formattedGym = await this.getGymById(result.gym.id);
+
+      await this.db.auditLog.create({
+        data: {
+          type: 'CREATE',
+          action: `Gym Provisioned: ${trimmedName}`,
+          entityType: 'Gym',
+          entityId: result.gym.id,
+          metadata: { schema: schemaName, planId: plan.id }
+        }
+      });
+
+      return formattedGym;
     } catch (error: any) {
       this.logger.error('Error creating gym: %o', error.message || error);
       throw error;
@@ -326,9 +338,19 @@ export default class GymService {
       if (dto.ownerPhone !== undefined) updateData.ownerPhone = dto.ownerPhone;
       if (dto.status !== undefined) updateData.status = dto.status;
 
-      await this.db.gym.update({
+      const updatedGym = await this.db.gym.update({
         where: { id },
         data: updateData,
+      });
+
+      await this.db.auditLog.create({
+        data: {
+          type: 'UPDATE',
+          action: `Gym updated: ${updatedGym.name}`,
+          entityType: 'Gym',
+          entityId: updatedGym.id,
+          metadata: { status: updatedGym.status, city: updatedGym.city }
+        }
       });
 
       return await this.getGymById(id);
@@ -341,18 +363,28 @@ export default class GymService {
   /**
    * Toggle or update gym active/suspended status
    */
-  public async toggleGymStatus(id: string): Promise<GymResponseDTO> {
+  public async toggleGymStatus(id: string, explicitStatus?: GymStatus): Promise<GymResponseDTO> {
     try {
       const existing = await this.db.gym.findUnique({ where: { id } });
       if (!existing) {
         throw new NotFoundError(GYM_TENANT.ERROR.NOT_FOUND);
       }
 
-      const newStatus = existing.status === GymStatus.ACTIVE ? GymStatus.SUSPENDED : GymStatus.ACTIVE;
+      const newStatus = explicitStatus !== undefined ? explicitStatus : (existing.status === GymStatus.ACTIVE ? GymStatus.SUSPENDED : GymStatus.ACTIVE);
 
-      await this.db.gym.update({
+      const updated = await this.db.gym.update({
         where: { id },
         data: { status: newStatus },
+      });
+
+      await this.db.auditLog.create({
+        data: {
+          type: 'STATUS',
+          action: `Gym status changed to ${updated.status}: ${updated.name}`,
+          entityType: 'Gym',
+          entityId: updated.id,
+          metadata: { status: updated.status }
+        }
       });
 
       return await this.getGymById(id);
@@ -372,7 +404,20 @@ export default class GymService {
         throw new NotFoundError(GYM_TENANT.ERROR.NOT_FOUND);
       }
 
+      await this.db.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${existing.schemaName}" CASCADE;`);
+
       await this.db.gym.delete({ where: { id } });
+
+      await this.db.auditLog.create({
+        data: {
+          type: 'DELETE',
+          action: `Gym Deleted (Schema dropped): ${existing.name}`,
+          entityType: 'Gym',
+          entityId: existing.id,
+          metadata: { schema: existing.schemaName }
+        }
+      });
+
       return { id };
     } catch (error: any) {
       this.logger.error('Error deleting gym: %o', error.message || error);

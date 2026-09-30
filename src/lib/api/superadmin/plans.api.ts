@@ -1,5 +1,4 @@
 import apiClient from '@/lib/api/axiosClient';
-import { FeatureLimits } from '@/types/plan';
 
 import {
   PlanFeaturesPayload,
