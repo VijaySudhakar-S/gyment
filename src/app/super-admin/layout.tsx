@@ -4,11 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/super-admin/sidebar/Sidebar';
 import { MobileBottomNav } from '@/components/super-admin/shared/MobileBottomNav';
-import { AddGymModal } from '@/components/super-admin/modals/AddGymModal';
-import { ChangePlanModal } from '@/components/super-admin/modals/ChangePlanModal';
-import { ConfirmModal } from '@/components/super-admin/modals/ConfirmModal';
-import { FeatureEditorModal } from '@/components/super-admin/modals/FeatureEditorModal';
-import { UserDetailDrawer } from '@/components/super-admin/drawers/UserDetailDrawer';
+
 import { tokenStorage } from '@/lib/auth/tokenStorage';
 import { getSuperAdminProfile } from '@/lib/api/superadmin/auth.api';
 import { SuperAdminSkeleton } from '@/components/super-admin/shared/SuperAdminSkeleton';
@@ -83,12 +79,7 @@ export default function SuperAdminLayout({
         <MobileBottomNav />
       </div>
 
-      {/* Global Modals & Drawers */}
-      <AddGymModal />
-      <ChangePlanModal />
-      <ConfirmModal />
-      <FeatureEditorModal />
-      <UserDetailDrawer />
+
     </div>
   );
 }

@@ -1,13 +1,6 @@
 import React from 'react';
 
-export type BadgeVariant = 'ok' | 'warn' | 'bad' | 'neu' | 'info';
-
-interface StatusBadgeProps {
-  status?: string;
-  variant?: BadgeVariant;
-  children?: React.ReactNode;
-  className?: string;
-}
+import { StatusBadgeProps, BadgeVariant } from '@/types/sharedComponents';
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
   status,

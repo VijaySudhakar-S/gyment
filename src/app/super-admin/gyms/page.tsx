@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Dropdown, message } from 'antd';
-import type { MenuProps } from 'antd';
+import { Dropdown, App, Table, Select, Input, Button, DatePicker } from 'antd';
+import type { MenuProps, TableColumnsType } from 'antd';
 import {
   Download,
   Plus,
@@ -11,69 +11,150 @@ import {
   MoreVertical,
   Dumbbell,
 } from 'lucide-react';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
 import { Topbar } from '@/components/super-admin/header/Topbar';
+import { AddGymModal } from '@/components/super-admin/modals/AddGymModal';
+import { ChangePlanModal } from '@/components/super-admin/modals/ChangePlanModal';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
-import { Gym, GymStatus, PlanType } from '@/types/gym';
 import { initials } from '@/lib/formatters';
+import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
+import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
+import { reportsApi } from '@/lib/api/superadmin/reports.api';
 
 export default function GymsPage() {
   const router = useRouter();
-  const {
-    gyms,
-    setAddGymModalOpen,
-    setSelectedGymId,
-    toggleGymStatus,
-    openConfirmModal,
-  } = useSuperAdmin();
+  const { message, modal } = App.useApp();
+  
+  const [isAddGymOpen, setIsAddGymOpen] = useState(false);
+  const [isChangePlanOpen, setIsChangePlanOpen] = useState(false);
+  const [selectedGymForPlan, setSelectedGymForPlan] = useState<string | null>(null);
+
+  const [gymList, setGymList] = useState<GymData[]>([]);
+  const [plans, setPlans] = useState<PlanData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [search, setSearch] = useState('');
   const [planFilter, setPlanFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [dateFilter, setDateFilter] = useState<string>('');
 
-  const statuses = ['All', 'Active', 'Trial', 'Suspended', 'Cancelled'];
+  const statuses = ['All', 'Active', 'Trial', 'Suspended', 'Inactive'];
+
+  const loadGyms = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await gymsApi.getAll();
+      if (res.status && Array.isArray(res.data)) {
+        setGymList(res.data);
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to load gyms');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [message]);
+
+  const loadPlans = useCallback(async () => {
+    try {
+      const res = await plansApi.getAll();
+      if (res.status && Array.isArray(res.data)) {
+        setPlans(res.data);
+      }
+    } catch (error) {
+      console.error('Failed to load plans:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadGyms();
+    loadPlans();
+  }, [loadGyms, loadPlans]);
 
   const filteredGyms = useMemo(() => {
-    return gyms.filter(g => {
+    return gymList.filter(g => {
       const q = search.trim().toLowerCase();
       const matchSearch =
         !q ||
         g.name.toLowerCase().includes(q) ||
-        g.owner.toLowerCase().includes(q);
+        g.code.toLowerCase().includes(q) ||
+        (g.ownerName && g.ownerName.toLowerCase().includes(q)) ||
+        (g.location && g.location.toLowerCase().includes(q));
 
-      const matchPlan = !planFilter || g.plan === planFilter;
+      const planName = g.activeSubscription?.planName || '';
+      const matchPlan = !planFilter || planName.toLowerCase() === planFilter.toLowerCase();
       const matchStatus =
-        !statusFilter || statusFilter === 'All' || g.gymStatus === statusFilter;
+        !statusFilter || statusFilter === 'All' || g.status.toUpperCase() === statusFilter.toUpperCase();
 
-      return matchSearch && matchPlan && matchStatus;
+      const matchDate = !dateFilter || new Date(g.createdAt) >= new Date(dateFilter);
+
+      return matchSearch && matchPlan && matchStatus && matchDate;
     });
-  }, [gyms, search, planFilter, statusFilter]);
+  }, [gymList, search, planFilter, statusFilter, dateFilter]);
 
-  const handleExport = () => {
-    message.success('Gyms export prepared');
+  const handleExport = async () => {
+    try {
+      const res = await reportsApi.exportData('gyms');
+      if (res.status && res.data) {
+        const blob = new Blob([res.data.content], { type: res.data.mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = res.data.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        message.success('Gyms export downloaded successfully');
+      }
+    } catch (error) {
+      message.error('Failed to export gyms');
+    }
   };
 
-  const handleToggleStatus = (gym: Gym) => {
-    const isSuspended = gym.gymStatus === 'Suspended';
-    openConfirmModal({
+  const handleToggleStatus = (gym: GymData) => {
+    const isSuspended = gym.status === 'SUSPENDED';
+    modal.confirm({
       title: isSuspended ? 'Activate this gym?' : 'Suspend this gym?',
-      body: isSuspended
-        ? 'Are you sure you want to reactivate this gym?'
-        : 'Are you sure you want to suspend this gym? Owners and staff will lose access.',
-      actionLabel: isSuspended ? 'Activate Gym' : 'Suspend Gym',
-      isDanger: !isSuspended,
-      onConfirm: () => {
-        toggleGymStatus(gym.id);
-        message.success(
-          isSuspended ? 'Gym activated successfully' : 'Gym suspended successfully'
-        );
+      content: isSuspended
+        ? `Are you sure you want to reactivate ${gym.name}?`
+        : `Are you sure you want to suspend ${gym.name}? Gym owners and staff will lose access to the system.`,
+      okText: isSuspended ? 'Activate Gym' : 'Suspend Gym',
+      okType: !isSuspended ? 'danger' : 'primary',
+      centered : true,
+      onOk: async () => {
+        try {
+          const res = await gymsApi.toggleStatus(gym.id);
+          if (res.status) {
+            message.success(isSuspended ? 'Gym activated successfully' : 'Gym suspended successfully');
+            await loadGyms();
+          }
+        } catch (error: any) {
+          message.error(error.message || 'Failed to update gym status');
+        }
       },
     });
   };
 
-  const getRowMenuItems = (gym: Gym): MenuProps['items'] => [
+  const handleDeleteGym = (gym: GymData) => {
+    modal.confirm({
+      title: 'Delete Gym',
+      content: `Are you sure you want to permanently delete ${gym.name}? This action cannot be undone.`,
+      okText: 'Delete',
+      okType: 'danger',
+      centered : true,
+      onOk: async () => {
+        try {
+          const res = await gymsApi.delete(gym.id);
+          if (res.status) {
+            message.success('Gym deleted successfully');
+            await loadGyms();
+          }
+        } catch (error: any) {
+          message.error(error.message || 'Failed to delete gym');
+        }
+      },
+    });
+  };
+
+  const getRowMenuItems = (gym: GymData): MenuProps['items'] => [
     {
       key: '1',
       label: 'Open Details',
@@ -85,13 +166,101 @@ export default function GymsPage() {
       onClick: () => router.push(`/super-admin/subscriptions`),
     },
     {
+      key: 'change-plan',
+      label: 'Change Plan',
+      onClick: () => {
+        setSelectedGymForPlan(gym.id);
+        setIsChangePlanOpen(true);
+      },
+    },
+    {
       type: 'divider',
     },
     {
       key: '3',
-      label: gym.gymStatus === 'Suspended' ? 'Activate' : 'Suspend',
-      danger: gym.gymStatus !== 'Suspended',
+      label: gym.status === 'SUSPENDED' ? 'Activate' : 'Suspend',
+      danger: gym.status !== 'SUSPENDED',
       onClick: () => handleToggleStatus(gym),
+    },
+    {
+      key: 'delete',
+      label: 'Delete Gym',
+      danger: true,
+      onClick: () => handleDeleteGym(gym),
+    },
+  ];
+
+  const columns: TableColumnsType<GymData> = [
+    {
+      title: 'GYM',
+      dataIndex: 'name',
+      key: 'name',
+      render: (_, record) => (
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-primary-light text-primary-dark flex items-center justify-center font-bold text-xs shrink-0">
+            {initials(record.name)}
+          </div>
+          <div>
+            <div className="font-bold text-gyment-text">{record.name}</div>
+            <div className="text-[11px] text-gyment-muted">{record.code}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'OWNER',
+      dataIndex: 'ownerName',
+      key: 'ownerName',
+      render: (_, record) => record.ownerName || record.primaryAdmin?.name || '-',
+    },
+    {
+      title: 'PLAN',
+      key: 'plan',
+      render: (_, record) => record.activeSubscription?.planName || '-',
+    },
+    {
+      title: 'LOCATION',
+      dataIndex: 'location',
+      key: 'location',
+      render: (val) => val || '-',
+    },
+    {
+      title: 'SUBSCRIPTION',
+      key: 'activeSubscription',
+      render: (_, record) => (
+        <StatusBadge status={record.activeSubscription?.status || 'INACTIVE'} />
+      ),
+    },
+    {
+      title: 'STATUS',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => <StatusBadge status={status} />,
+    },
+    {
+      title: 'JOINED',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (val) => new Date(val).toLocaleDateString(),
+    },
+    {
+      title: '',
+      key: 'actions',
+      align: 'right',
+      render: (_, record) => (
+        <div className="flex items-center justify-end gap-1.5">
+          <Button
+            size="small"
+            onClick={() => router.push(`/super-admin/gyms/${record.id}`)}
+            className="text-xs font-semibold"
+          >
+            View
+          </Button>
+          <Dropdown menu={{ items: getRowMenuItems(record) }} trigger={['click']}>
+            <Button size="small" icon={<MoreVertical className="w-3.5 h-3.5" />} />
+          </Dropdown>
+        </div>
+      ),
     },
   ];
 
@@ -105,14 +274,14 @@ export default function GymsPage() {
             <button
               type="button"
               onClick={handleExport}
-              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-[#232D27] flex items-center gap-1.5 transition-colors shrink-0"
+              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-[#232D27] flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export</span>
             </button>
             <button
               type="button"
-              onClick={() => setAddGymModalOpen(true)}
+              onClick={() => setIsAddGymOpen(true)}
               className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shrink-0 transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-2" />
@@ -122,40 +291,30 @@ export default function GymsPage() {
         }
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-4">
-        {/* Filters Bar */}
+        {/* AntD Filters Bar */}
         <MotionFadeIn delay={0.04} className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center gap-2 bg-white border border-gyment-border rounded-lg px-3 py-1.5 w-52.5 focus-within:border-primary">
-            <Search className="w-4 h-4 text-gyment-muted shrink-0" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search gym or owner…"
-              className="bg-transparent border-none outline-none text-[12.5px] text-gyment-text placeholder-gyment-muted w-full"
-            />
-          </div>
+          <Input
+            prefix={<Search className="w-4 h-4 text-gyment-muted mr-1" />}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search gym, code, owner…"
+            className="w-56"
+            allowClear
+          />
 
-          <select
-            value={planFilter}
-            onChange={e => setPlanFilter(e.target.value)}
-            className="border border-gyment-border rounded-lg px-3 py-1.5 text-[12.5px] bg-white text-gyment-text outline-none focus:border-primary"
-          >
-            <option value="">All Plans</option>
-            <option value="Starter">Starter</option>
-            <option value="Growth">Growth</option>
-            <option value="Pro">Pro</option>
-          </select>
+          <Select
+            allowClear
+            placeholder="All Plans"
+            value={planFilter || undefined}
+            onChange={val => setPlanFilter(val || '')}
+            className="w-44"
+            options={plans.map(p => ({ value: p.name, label: p.name }))}
+          />
 
-          <input
-            type={dateFilter ? 'date' : 'text'}
-            onFocus={e => (e.target.type = 'date')}
-            onBlur={e => {
-              if (!e.target.value) e.target.type = 'text';
-            }}
-            value={dateFilter}
-            onChange={e => setDateFilter(e.target.value)}
+          <DatePicker
             placeholder="Registered after"
-            className="border border-gyment-border rounded-lg px-3 py-1.5 text-[12.5px] bg-white text-gyment-text outline-none focus:border-primary"
+            className="w-44"
+            onChange={(_, dateString) => setDateFilter(Array.isArray(dateString) ? dateString[0] : dateString)}
           />
         </MotionFadeIn>
 
@@ -169,9 +328,9 @@ export default function GymsPage() {
                 key={s}
                 type="button"
                 onClick={() => setStatusFilter(s === 'All' ? '' : s)}
-                className={`px-3.5 py-1.5 rounded-full border text-[12.5px] font-semibold transition-colors ${active
-                  ? 'bg-gyment-dark text-white border-gyment-dark'
-                  : 'bg-white text-gyment-muted border-gyment-border hover:bg-gyment-bg'
+                className={`px-3.5 py-1.5 rounded-full border text-[12.5px] transition-colors cursor-pointer ${active
+                  ? 'bg-[#16211B] text-white font-bold border-[#16211B]'
+                  : 'bg-white text-[#16211B] font-bold border-[#CED5D1] hover:border-[#2FAE68] hover:bg-gyment-bg'
                   }`}
               >
                 {s}
@@ -180,107 +339,51 @@ export default function GymsPage() {
           })}
         </MotionFadeIn>
 
-        {/* Gyms Table Card */}
-        <MotionFadeIn delay={0.12} className="bg-white border border-gyment-border rounded-[14px] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-[13px]">
-              <thead>
-                <tr>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Gym
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Owner
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Plan
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Members
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Staff
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Branches
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Subscription
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Status
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Joined
-                  </th>
-                  <th className="px-3 py-2.5 border-b border-gyment-border"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gyment-border">
-                {filteredGyms.length === 0 ? (
-                  <tr>
-                    <td colSpan={10} className="p-8 text-center text-gyment-muted">
-                      <div className="flex flex-col items-center">
-                        <Dumbbell className="w-9 h-9 mb-2.5 opacity-40 text-gyment-muted" />
-                        <div className="font-bold text-[14px] text-gyment-text mb-1">
-                          No gyms found
-                        </div>
-                        <div className="text-[12.5px]">
-                          Try adjusting your filters or search query.
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredGyms.map(gym => (
-                    <tr key={gym.id} className="hover:bg-gyment-bg transition-colors">
-                      <td className="px-3 py-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-primary-light text-primary-dark flex items-center justify-center font-bold text-xs shrink-0">
-                            {initials(gym.name)}
-                          </div>
-                          <div className="font-bold text-gyment-text">{gym.name}</div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2.5 text-gyment-text">{gym.owner}</td>
-                      <td className="px-3 py-2.5 text-gyment-text">{gym.plan}</td>
-                      <td className="px-3 py-2.5 text-gyment-text">{gym.members}</td>
-                      <td className="px-3 py-2.5 text-gyment-text">{gym.staff}</td>
-                      <td className="px-3 py-2.5 text-gyment-text">{gym.branches}</td>
-                      <td className="px-3 py-2.5">
-                        <StatusBadge status={gym.subStatus} />
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <StatusBadge status={gym.gymStatus} />
-                      </td>
-                      <td className="px-3 py-2.5 text-gyment-text">{gym.joined}</td>
-                      <td className="px-3 py-2.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => router.push(`/super-admin/gyms/${gym.id}`)}
-                            className="border border-gyment-border bg-white hover:bg-gyment-bg px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gyment-text transition-colors shadow-sm"
-                          >
-                            View
-                          </button>
-                          <Dropdown menu={{ items: getRowMenuItems(gym) }} trigger={['click']}>
-                            <button
-                              type="button"
-                              className="w-7 h-7 rounded-lg border border-gyment-border bg-white hover:bg-gyment-bg flex items-center justify-center text-gyment-text transition-colors"
-                            >
-                              <MoreVertical className="w-3.5 h-3.5" />
-                            </button>
-                          </Dropdown>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+        {/* AntD Table Card */}
+        <MotionFadeIn delay={0.12} className="bg-white border border-gyment-border rounded-[14px] overflow-hidden shadow-2xs">
+          <Table<GymData>
+            columns={columns}
+            dataSource={filteredGyms}
+            rowKey="id"
+            loading={isLoading}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} gyms`,
+            }}
+            locale={{
+              emptyText: (
+                <div className="flex flex-col items-center py-6">
+                  <Dumbbell className="w-9 h-9 mb-2.5 opacity-40 text-gyment-muted" />
+                  <div className="font-bold text-[14px] text-gyment-text mb-1">
+                    No gyms found
+                  </div>
+                  <div className="text-[12.5px] text-gyment-muted">
+                    Try adjusting your filters or search query.
+                  </div>
+                </div>
+              ),
+            }}
+          />
         </MotionFadeIn>
       </main>
+      
+      <AddGymModal 
+        open={isAddGymOpen} 
+        onClose={() => setIsAddGymOpen(false)} 
+        onSuccess={() => loadGyms()}
+      />
+      {selectedGymForPlan && (
+        <ChangePlanModal
+          open={isChangePlanOpen}
+          onClose={() => {
+            setIsChangePlanOpen(false);
+            setSelectedGymForPlan(null);
+          }}
+          gymId={selectedGymForPlan}
+          onSuccess={() => loadGyms()}
+        />
+      )}
     </>
   );
 }

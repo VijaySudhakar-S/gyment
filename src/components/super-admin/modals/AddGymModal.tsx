@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Modal } from 'antd';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
+import React, { useState, useEffect } from 'react';
+import { Modal, message, Input, Select, Button } from 'antd';
+import { gymsApi } from '@/lib/api/superadmin/gyms.api';
+import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 
-export const AddGymModal: React.FC = () => {
-  const { addGymModalOpen, setAddGymModalOpen, addGym, planList } = useSuperAdmin();
+import { AddGymModalProps } from '@/types/modals';
 
+export const AddGymModal: React.FC<AddGymModalProps> = ({ open, onClose, onSuccess }) => {
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [adminName, setAdminName] = useState('');
@@ -17,13 +18,31 @@ export const AddGymModal: React.FC = () => {
   const [status, setStatus] = useState<'ACTIVE' | 'TRIAL'>('ACTIVE');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [planList, setPlanList] = useState<PlanData[]>([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(false);
 
-  // Set default selectedPlanId when modal opens or planList loads
-  React.useEffect(() => {
-    if (planList.length > 0 && !selectedPlanId) {
-      setSelectedPlanId(planList[0].id);
-    }
-  }, [planList, selectedPlanId]);
+  useEffect(() => {
+    const fetchPlans = async () => {
+      if (open && planList.length === 0) {
+        setIsLoadingPlans(true);
+        try {
+          const res = await plansApi.getAll();
+          const plans = Array.isArray(res?.data) ? res.data : [];
+          const activePlans = plans.filter((p: PlanData) => p.isActive);
+          setPlanList(activePlans);
+          if (activePlans.length > 0) {
+            setSelectedPlanId(activePlans[0].id);
+          }
+        } catch (error) {
+          message.error('Failed to load plans');
+        } finally {
+          setIsLoadingPlans(false);
+        }
+      }
+    };
+    fetchPlans();
+  }, [open, planList.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +52,7 @@ export const AddGymModal: React.FC = () => {
 
     try {
       setIsSubmitting(true);
-      await addGym({
+      await gymsApi.create({
         name: name.trim(),
         location: location.trim() || 'Main Branch',
         adminName: adminName.trim(),
@@ -45,6 +64,8 @@ export const AddGymModal: React.FC = () => {
         password: password.trim() || undefined,
       });
 
+      message.success('Gym created and provisioned successfully');
+      
       // Reset form
       setName('');
       setLocation('');
@@ -54,8 +75,13 @@ export const AddGymModal: React.FC = () => {
       setPassword('');
       setBillingCycle('MONTHLY');
       setStatus('ACTIVE');
-    } catch {
-      // Error notification handled by context
+      onClose();
+      
+      if (onSuccess) {
+        await onSuccess();
+      }
+    } catch (err: any) {
+      message.error(err?.response?.data?.message || err?.message || 'Failed to create gym');
     } finally {
       setIsSubmitting(false);
     }
@@ -63,8 +89,8 @@ export const AddGymModal: React.FC = () => {
 
   return (
     <Modal
-      open={addGymModalOpen}
-      onCancel={() => setAddGymModalOpen(false)}
+      open={open}
+      onCancel={onClose}
       footer={null}
       width={600}
       centered
@@ -86,24 +112,20 @@ export const AddGymModal: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gyment-text">Gym Name *</label>
-              <input
-                type="text"
+              <Input
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Flex Arena Gym"
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gyment-text">Location / Branch</label>
-              <input
-                type="text"
+              <Input
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Jubilee Hills, Hyderabad"
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
               />
             </div>
           </div>
@@ -117,37 +139,33 @@ export const AddGymModal: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2 flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gyment-text">Admin Name *</label>
-              <input
-                type="text"
+              <Input
                 required
                 value={adminName}
                 onChange={(e) => setAdminName(e.target.value)}
                 placeholder="e.g. Rajesh Kumar"
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gyment-text">Admin Email *</label>
-              <input
+              <Input
                 type="email"
                 required
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
                 placeholder="admin@flexarena.com"
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gyment-text">Admin Phone Number *</label>
-              <input
+              <Input
                 type="tel"
                 required
                 value={adminPhone}
                 onChange={(e) => setAdminPhone(e.target.value)}
                 placeholder="+91 98765 43210"
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
               />
             </div>
 
@@ -155,12 +173,10 @@ export const AddGymModal: React.FC = () => {
               <label className="text-xs font-bold text-gyment-text">
                 Initial Admin Password <span className="font-normal text-gyment-muted">(leave blank for default)</span>
               </label>
-              <input
-                type="password"
+              <Input.Password
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Leave empty to use default password (GymentAdmin@123)"
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+                placeholder="Default: GymentAdmin@123"
               />
             </div>
           </div>
@@ -174,65 +190,57 @@ export const AddGymModal: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="flex flex-col gap-1.5 sm:col-span-1">
               <label className="text-xs font-bold text-gyment-text">Select Plan *</label>
-              <select
-                required
-                value={selectedPlanId}
-                onChange={(e) => setSelectedPlanId(e.target.value)}
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary bg-white cursor-pointer"
-              >
-                {planList.length === 0 ? (
-                  <option value="">Loading plans...</option>
-                ) : (
-                  planList.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} (₹{p.monthlyPrice}/mo)
-                    </option>
-                  ))
-                )}
-              </select>
+              <Select
+                loading={isLoadingPlans}
+                value={selectedPlanId || undefined}
+                onChange={(val) => setSelectedPlanId(val)}
+                className="w-full text-xs"
+                options={planList.map((p) => ({
+                  value: p.id,
+                  label: `${p.name} (₹${p.monthlyPrice}/mo)`,
+                }))}
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gyment-text">Billing Cycle</label>
-              <select
+              <Select
                 value={billingCycle}
-                onChange={(e) => setBillingCycle(e.target.value as 'MONTHLY' | 'YEARLY')}
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary bg-white cursor-pointer"
-              >
-                <option value="MONTHLY">Monthly</option>
-                <option value="YEARLY">Yearly</option>
-              </select>
+                onChange={(val) => setBillingCycle(val)}
+                className="w-full text-xs"
+                options={[
+                  { value: 'MONTHLY', label: 'Monthly' },
+                  { value: 'YEARLY', label: 'Yearly' },
+                ]}
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gyment-text">Initial Status</label>
-              <select
+              <Select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as 'ACTIVE' | 'TRIAL')}
-                className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary bg-white cursor-pointer"
-              >
-                <option value="ACTIVE">Active Subscription</option>
-                <option value="TRIAL">Trial Period</option>
-              </select>
+                onChange={(val) => setStatus(val)}
+                className="w-full text-xs"
+                options={[
+                  { value: 'ACTIVE', label: 'Active Subscription' },
+                  { value: 'TRIAL', label: 'Trial Period' },
+                ]}
+              />
             </div>
           </div>
         </div>
 
         <div className="pt-4 border-t border-gyment-border flex justify-end gap-2.5">
-          <button
-            type="button"
-            onClick={() => setAddGymModalOpen(false)}
-            className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-lg text-sm font-semibold text-gyment-text transition-colors"
-          >
+          <Button onClick={onClose}>
             Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer disabled:opacity-50"
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isSubmitting}
           >
-            {isSubmitting ? 'Creating Gym...' : 'Create Gym & Provision Schema'}
-          </button>
+            Create Gym & Provision Schema
+          </Button>
         </div>
       </form>
     </Modal>

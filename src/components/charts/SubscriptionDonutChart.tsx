@@ -2,23 +2,19 @@
 
 import React from 'react';
 
-interface DonutItem {
-  name: string;
-  value: number;
-  color: string;
-}
-
-interface SubscriptionDonutChartProps {
-  data?: DonutItem[];
-}
+import { SubscriptionDonutChartProps, DonutItem } from '@/types/charts';
 
 export const SubscriptionDonutChart: React.FC<SubscriptionDonutChartProps> = ({
-  data = [
-    { name: 'Starter', value: 48, color: '#8FA098' },
-    { name: 'Growth', value: 37, color: '#2FAE68' },
-    { name: 'Pro', value: 15, color: '#22935A' },
-  ],
+  data = [],
 }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full h-39 text-gyment-muted text-xs border border-dashed border-gyment-border rounded-lg">
+        No subscription data available
+      </div>
+    );
+  }
+
   const r = 52;
   const cx = 70;
   const cy = 70;

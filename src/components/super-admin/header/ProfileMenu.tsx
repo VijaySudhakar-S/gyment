@@ -6,10 +6,7 @@ import { useRouter } from 'next/navigation';
 import { User, Settings, LogOut } from 'lucide-react';
 import { tokenStorage } from '@/lib/auth/tokenStorage';
 
-interface ProfileMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { ProfileMenuProps } from '@/types/header';
 
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({ isOpen, onClose }) => {
   const router = useRouter();

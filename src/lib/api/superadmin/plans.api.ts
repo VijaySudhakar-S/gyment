@@ -1,53 +1,16 @@
 import apiClient from '@/lib/api/axiosClient';
 import { FeatureLimits } from '@/types/plan';
 
-export interface PlanFeaturesPayload {
-  enabledFeatures: Record<string, boolean>;
-  limits: FeatureLimits;
-}
+import {
+  PlanFeaturesPayload,
+  PlanData,
+  CreatePlanRequest,
+  UpdatePlanRequest,
+  UpdatePlanFeaturesRequest,
+} from '@/types/plan';
+import { ApiResponse } from '@/types/api';
 
-export interface PlanData {
-  id: string;
-  name: string;
-  description: string | null;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  features: PlanFeaturesPayload;
-  isActive: boolean;
-  activeGymsCount?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreatePlanRequest {
-  name: string;
-  description?: string | null;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  features?: PlanFeaturesPayload;
-  isActive?: boolean;
-}
-
-export interface UpdatePlanRequest {
-  name?: string;
-  description?: string | null;
-  monthlyPrice?: number;
-  yearlyPrice?: number;
-  features?: PlanFeaturesPayload;
-  isActive?: boolean;
-}
-
-export interface UpdatePlanFeaturesRequest {
-  planKey: string;
-  features: Record<string, boolean>;
-  limits: FeatureLimits;
-}
-
-export interface ApiResponse<T = any> {
-  status: boolean;
-  message: string;
-  data: T;
-}
+export type { PlanFeaturesPayload, PlanData, CreatePlanRequest, UpdatePlanRequest, UpdatePlanFeaturesRequest };
 
 export const plansApi = {
   getAll: async () => {

@@ -1,75 +1,14 @@
 import apiClient from '@/lib/api/axiosClient';
+import {
+  CreateGymRequest,
+  UpdateGymRequest,
+  GymSubscriptionData,
+  PrimaryAdminData,
+  GymData,
+} from '@/types/gym';
+import { ApiResponse } from '@/types/api';
 
-export interface CreateGymRequest {
-  name: string;
-  location: string;
-  adminName: string;
-  adminEmail: string;
-  adminPhone: string;
-  planId: string;
-  billingCycle?: 'MONTHLY' | 'YEARLY';
-  status?: 'ACTIVE' | 'TRIAL' | 'INACTIVE' | 'SUSPENDED';
-  password?: string;
-}
-
-export interface UpdateGymRequest {
-  name?: string;
-  location?: string;
-  address?: string | null;
-  city?: string | null;
-  state?: string | null;
-  contactEmail?: string | null;
-  contactPhone?: string | null;
-  ownerName?: string | null;
-  ownerPhone?: string | null;
-  status?: 'ACTIVE' | 'TRIAL' | 'INACTIVE' | 'SUSPENDED';
-}
-
-export interface GymSubscriptionData {
-  id: string;
-  planId: string;
-  planName: string;
-  billingCycle: 'MONTHLY' | 'YEARLY';
-  status: 'ACTIVE' | 'TRIAL' | 'PAST_DUE' | 'CANCELLED' | 'EXPIRED';
-  price: number;
-  startDate: string;
-  renewalDate: string;
-}
-
-export interface PrimaryAdminData {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-}
-
-export interface GymData {
-  id: string;
-  code: string;
-  schemaName: string;
-  name: string;
-  location: string;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  country: string | null;
-  pincode: string | null;
-  contactEmail: string | null;
-  contactPhone: string | null;
-  ownerName: string | null;
-  ownerPhone: string | null;
-  status: 'ACTIVE' | 'TRIAL' | 'INACTIVE' | 'SUSPENDED';
-  activeSubscription?: GymSubscriptionData | null;
-  primaryAdmin?: PrimaryAdminData | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ApiResponse<T = any> {
-  status: boolean;
-  message: string;
-  data: T;
-}
+export type { CreateGymRequest, UpdateGymRequest, GymSubscriptionData, PrimaryAdminData, GymData };
 
 export const gymsApi = {
   getAll: async () => {

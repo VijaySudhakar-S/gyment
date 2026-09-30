@@ -1,16 +1,54 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Bell } from 'lucide-react';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
+import { notificationsApi, NotificationItem } from '@/lib/api/superadmin/notifications.api';
 
-interface NotificationPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { NotificationPanelProps } from '@/types/header';
 
 export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }) => {
-  const { notifications, markNotificationRead, markAllNotificationsRead } = useSuperAdmin();
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const loadNotifications = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await notificationsApi.getAll();
+      if (res.status && res.data) {
+        setNotifications(res.data.notifications || []);
+      }
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadNotifications();
+    }
+  }, [isOpen, loadNotifications]);
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setNotifications(prev =>
+        prev.map(n => (n.id === id ? { ...n, read: true } : n))
+      );
+    } catch (error) {
+      console.error('Failed to mark notification read:', error);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationsApi.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error('Failed to mark all notifications read:', error);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -20,14 +58,14 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
         <span>Notifications</span>
         <div className="flex items-center gap-3">
           <button
-            onClick={markAllNotificationsRead}
-            className="text-xs font-semibold text-primary-dark hover:underline"
+            onClick={handleMarkAllRead}
+            className="text-xs font-semibold text-primary-dark hover:underline cursor-pointer"
           >
             Mark all read
           </button>
           <button
             onClick={onClose}
-            className="text-xs font-semibold text-gyment-muted hover:text-gyment-text"
+            className="text-xs font-semibold text-gyment-muted hover:text-gyment-text cursor-pointer"
           >
             Close
           </button>
@@ -35,7 +73,11 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
       </div>
 
       <div className="max-h-95 overflow-y-auto divide-y divide-gyment-border">
-        {notifications.length === 0 ? (
+        {isLoading ? (
+          <div className="p-6 text-center text-gyment-muted text-xs">
+            Loading alerts...
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="p-6 text-center text-gyment-muted text-xs">
             No notifications
           </div>
@@ -43,7 +85,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
           notifications.map(item => (
             <div
               key={item.id}
-              onClick={() => markNotificationRead(item.id)}
+              onClick={() => handleMarkRead(item.id)}
               className={`px-4 py-3 flex gap-2.5 cursor-pointer transition-colors ${item.read ? 'bg-white hover:bg-gyment-bg' : 'bg-primary-light/70 hover:bg-primary-light'
                 }`}
             >
@@ -52,13 +94,13 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-bold text-gyment-text leading-tight flex items-center justify-between">
-                  <span>{item.t}</span>
+                  <span>{item.title}</span>
                   {!item.read && (
                     <span className="w-1.5 h-1.5 rounded-full bg-danger shrink-0" />
                   )}
                 </div>
-                <div className="text-xs text-gyment-muted mt-1 leading-snug">{item.d}</div>
-                <div className="text-[11px] text-gyment-muted mt-1">{item.ti}</div>
+                <div className="text-xs text-gyment-muted mt-1 leading-snug">{item.description}</div>
+                <div className="text-[11px] text-gyment-muted mt-1">{item.timestamp}</div>
               </div>
             </div>
           ))

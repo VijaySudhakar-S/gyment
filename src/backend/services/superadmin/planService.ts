@@ -21,11 +21,8 @@ export default class PlanService {
     @Inject('logger') logger?: Logger,
     @Inject('adminDB') db?: PrismaClient
   ) {
-    this.logger =
-      logger && typeof (logger as any).info === 'function'
-        ? logger
-        : (LoggerInstance as any);
-    this.db = db && (db as any).plan ? db : adminDB;
+    this.logger = logger ?? (LoggerInstance as any);
+    this.db = db ?? adminDB;
   }
 
   /**

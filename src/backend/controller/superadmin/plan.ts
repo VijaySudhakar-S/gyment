@@ -5,6 +5,7 @@ import PlanService from '@services/superadmin/planService';
 import { PLAN } from '@responseMessages/superadmin';
 import { CreatePlanDTO, UpdatePlanDTO } from '@interface/plan';
 
+// get all plans
 export const getAllPlansController = async (
   req: Request,
   res: Response,
@@ -26,6 +27,7 @@ export const getAllPlansController = async (
   }
 };
 
+// get plan by id
 export const getPlanByIdController = async (
   req: Request,
   res: Response,
@@ -48,6 +50,7 @@ export const getPlanByIdController = async (
   }
 };
 
+// create plan
 export const createPlanController = async (
   req: Request,
   res: Response,
@@ -70,6 +73,7 @@ export const createPlanController = async (
   }
 };
 
+// update plan
 export const updatePlanController = async (
   req: Request,
   res: Response,
@@ -93,6 +97,7 @@ export const updatePlanController = async (
   }
 };
 
+// delete plan
 export const deletePlanController = async (
   req: Request,
   res: Response,
@@ -115,6 +120,7 @@ export const deletePlanController = async (
   }
 };
 
+// update plan features
 export const updatePlanFeaturesController = async (
   req: Request,
   res: Response,

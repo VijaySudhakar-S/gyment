@@ -48,11 +48,7 @@ export const staggerItemVariants: Variants = {
   },
 };
 
-interface MotionContainerProps extends HTMLMotionProps<'div'> {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}
+import { MotionContainerProps } from '@/types/sharedComponents';
 
 export const MotionFadeIn: React.FC<MotionContainerProps> = ({
   children,

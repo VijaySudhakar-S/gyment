@@ -1,18 +1,21 @@
 'use client';
 
 import React from 'react';
-
-interface SubscriptionComparisonBarChartProps {
-  months?: string[];
-  newSubs?: number[];
-  cancelledSubs?: number[];
-}
+import { SubscriptionComparisonBarChartProps } from '@/types/charts';
 
 export const SubscriptionComparisonBarChart: React.FC<SubscriptionComparisonBarChartProps> = ({
-  months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-  newSubs = [8, 11, 9, 14, 12, 15],
-  cancelledSubs = [2, 3, 1, 4, 2, 4],
+  months = [],
+  newSubs = [],
+  cancelledSubs = [],
 }) => {
+  if (!months || months.length === 0 || !newSubs || newSubs.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full h-47.5 text-gyment-muted text-xs border border-dashed border-gyment-border rounded-lg">
+        No subscription data available
+      </div>
+    );
+  }
+
   const w = 300;
   const h = 190;
   const pad = 22;
@@ -20,25 +23,31 @@ export const SubscriptionComparisonBarChart: React.FC<SubscriptionComparisonBarC
   const groups = newSubs.length;
   const gw = (w - pad * 2 - gap * (groups - 1)) / groups;
   const bw = gw / 2 - 2;
-  const max = Math.max(...newSubs, ...cancelledSubs) * 1.25;
+  const rawMax = Math.max(...newSubs, ...cancelledSubs, 0);
+  const max = rawMax > 0 ? rawMax * 1.25 : 10;
 
   return (
     <div className="flex flex-col items-center select-none">
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-47.5">
         {newSubs.map((valA, i) => {
-          const valB = cancelledSubs[i];
+          const valB = cancelledSubs[i] || 0;
           const gx = pad + i * (gw + gap);
           const ha = (valA / max) * (h - pad * 2);
           const hb = (valB / max) * (h - pad * 2);
+
+          const safeY_a = h - pad - (Number.isNaN(ha) ? 0 : ha);
+          const safeY_b = h - pad - (Number.isNaN(hb) ? 0 : hb);
+          const safeH_a = Number.isNaN(ha) ? 0 : ha;
+          const safeH_b = Number.isNaN(hb) ? 0 : hb;
 
           return (
             <g key={i}>
               {/* New Subs Bar (Green) */}
               <rect
                 x={gx}
-                y={h - pad - ha}
+                y={safeY_a}
                 width={bw}
-                height={ha}
+                height={safeH_a}
                 rx={3}
                 fill="#2FAE68"
                 className="transition-all duration-200"
@@ -46,9 +55,9 @@ export const SubscriptionComparisonBarChart: React.FC<SubscriptionComparisonBarC
               {/* Cancelled Subs Bar (Red) */}
               <rect
                 x={gx + bw + 2}
-                y={h - pad - hb}
+                y={safeY_b}
                 width={bw}
-                height={hb}
+                height={safeH_b}
                 rx={3}
                 fill="#C5432E"
                 className="transition-all duration-200"

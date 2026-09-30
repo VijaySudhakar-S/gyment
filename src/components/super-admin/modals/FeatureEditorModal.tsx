@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Modal } from 'antd';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
-import { FEATURES_CONFIG, FeatureConfig } from '@/data/plans';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Modal, message } from 'antd';
+import { FEATURES_CONFIG } from '@/data/plans';
 import { FeatureLimits } from '@/types/plan';
+import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 
 const LIMIT_KEYS = [
   { key: 'Max Members', label: 'Max Members', placeholder: 'e.g. 100 or Unlimited' },
@@ -14,35 +14,45 @@ const LIMIT_KEYS = [
   { key: 'Multiple Branch Management', label: 'Branch Limit', placeholder: 'e.g. 1 branch or Unlimited' },
 ];
 
-export const FeatureEditorModal: React.FC = () => {
-  const {
-    featureEditorModalOpen,
-    setFeatureEditorModalOpen,
-    editingPlanKey,
-    plans,
-    planFeatures,
-    featureLimits,
-    savePlanFeatures,
-  } = useSuperAdmin();
+import { FeatureEditorModalProps } from '@/types/modals';
 
+export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, onClose, editingPlanKey, onSuccess }) => {
+
+  const [activePlan, setActivePlan] = useState<PlanData | null>(null);
   const [currentFeatures, setCurrentFeatures] = useState<Record<string, boolean>>({});
   const [currentLimits, setCurrentLimits] = useState<FeatureLimits>({});
   const [activeTab, setActiveTab] = useState<'features' | 'limits'>('features');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const planKey = editingPlanKey || 'starter';
-  const planName = plans[planKey]?.name || 'Plan';
+  const loadPlan = useCallback(async () => {
+    if (!editingPlanKey) return;
+    try {
+      const res = await plansApi.getAll();
+      if (res.status && Array.isArray(res.data)) {
+        const found = res.data.find(
+          p => p.id === editingPlanKey || p.name.toLowerCase() === editingPlanKey.toLowerCase()
+        );
+        if (found) {
+          setActivePlan(found);
+          setCurrentFeatures({ ...(found.features?.enabledFeatures || {}) });
+          setCurrentLimits({ ...(found.features?.limits || {}) });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load plan features:', error);
+    }
+  }, [editingPlanKey]);
 
   useEffect(() => {
-    if (editingPlanKey) {
-      setCurrentFeatures({ ...(planFeatures[editingPlanKey] || {}) });
-      setCurrentLimits({ ...(featureLimits[editingPlanKey] || {}) });
+    if (open && editingPlanKey) {
+      loadPlan();
     }
-  }, [editingPlanKey, planFeatures, featureLimits]);
+  }, [open, editingPlanKey, loadPlan]);
 
   const toggleFeature = (featKey: string) => {
     setCurrentFeatures(prev => ({
       ...prev,
-      [featKey]: !prev[featKey]
+      [featKey]: !prev[featKey],
     }));
   };
 
@@ -53,14 +63,33 @@ export const FeatureEditorModal: React.FC = () => {
     }));
   };
 
-  const handleSave = () => {
-    savePlanFeatures(planKey, currentFeatures, currentLimits);
+  const handleSave = async () => {
+    if (!activePlan) return;
+    try {
+      setIsSaving(true);
+      const res = await plansApi.updateFeatures({
+        planKey: activePlan.name.toLowerCase(),
+        features: currentFeatures,
+        limits: currentLimits,
+      });
+      if (res.status) {
+        message.success('Plan features updated successfully');
+        onClose();
+        if (onSuccess) onSuccess();
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to save features');
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  const planName = activePlan?.name || 'Plan';
 
   return (
     <Modal
-      open={featureEditorModalOpen}
-      onCancel={() => setFeatureEditorModalOpen(false)}
+      open={open}
+      onCancel={onClose}
       footer={null}
       width={900}
       centered
@@ -102,62 +131,67 @@ export const FeatureEditorModal: React.FC = () => {
       </div>
 
       {activeTab === 'features' ? (
-        <div className="max-h-[55vh] overflow-y-auto pr-1">
-          {/* Table Header */}
-          <div className="grid grid-cols-[200px_90px_1fr] gap-3 pb-2 border-b border-gyment-border text-[11px] font-bold text-gyment-muted uppercase tracking-[0.4px] sticky top-0 bg-white z-10">
-            <div>Feature Key</div>
-            <div>Enabled</div>
-            <div>Description</div>
-          </div>
-
-          {/* Feature Rows */}
-          <div className="divide-y divide-gyment-border">
-            {FEATURES_CONFIG.map((feat: FeatureConfig) => {
-              const isEnabled = Boolean(currentFeatures[feat.key]);
-
-              return (
-                <div
-                  key={feat.key}
-                  className="grid grid-cols-[200px_90px_1fr] gap-3 py-2.5 items-center text-[13px]"
-                >
-                  <div>
-                    <div className="font-semibold text-gyment-text">{feat.label}</div>
-                    <code className="text-[10px] text-gyment-muted bg-gray-100 px-1 py-0.5 rounded">{feat.key}</code>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-2">
+          {FEATURES_CONFIG.map((feat) => {
+            const isEnabled = !!currentFeatures[feat.key];
+            return (
+              <div
+                key={feat.key}
+                onClick={() => toggleFeature(feat.key)}
+                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                  isEnabled
+                    ? 'border-primary/40 bg-primary/5 shadow-xs'
+                    : 'border-gyment-border bg-white hover:border-gyment-muted/60'
+                }`}
+              >
+                <div className="flex-1 pr-3">
+                  <div className="text-xs font-bold text-gyment-text flex items-center gap-1.5">
+                    <span>{feat.label}</span>
                   </div>
-                  <div>
-                    <label className="inline-flex items-center gap-1.5 text-[12px] cursor-pointer font-medium text-gyment-text">
-                      <input
-                        type="checkbox"
-                        checked={isEnabled}
-                        onChange={() => toggleFeature(feat.key)}
-                        className="accent-primary w-4 h-4 cursor-pointer rounded"
-                      />
-                      <span className={isEnabled ? 'text-emerald-600 font-bold' : 'text-gray-400'}>
-                        {isEnabled ? 'Yes' : 'No'}
-                      </span>
-                    </label>
+                  <div className="text-[11px] text-gyment-muted mt-0.5 line-clamp-1">
+                    {feat.description}
                   </div>
-                  <div className="text-[12px] text-gyment-muted">{feat.description}</div>
+                  <div className="text-[10px] text-gyment-muted/70 font-mono mt-0.5">
+                    {feat.key}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+                <div
+                  className={`w-4 h-4 rounded-sm flex items-center justify-center border transition-colors ${
+                    isEnabled
+                      ? 'bg-primary border-primary text-white'
+                      : 'border-gyment-border bg-white'
+                  }`}
+                >
+                  {isEnabled && (
+                    <svg
+                      className="w-3 h-3 fill-current"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
-        <div className="max-h-[55vh] overflow-y-auto space-y-4 p-1">
-          <p className="text-xs text-gyment-muted">
-            Set capacity constraints stored directly inside the plan features JSON object under <code className="bg-gray-100 px-1 py-0.5 rounded text-[11px]">limits</code>.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {LIMIT_KEYS.map((l) => (
-              <div key={l.key} className="flex flex-col gap-1.5 border border-gyment-border rounded-lg p-3 bg-white">
-                <label className="text-xs font-bold text-gyment-text">{l.label}</label>
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+          <div className="bg-gyment-bg/60 border border-gyment-border p-3.5 rounded-xl text-xs text-gyment-muted">
+            Define numeric constraints or text rules for this plan tier (e.g. &apos;Unlimited&apos;, &apos;500&apos;, &apos;1 branch&apos;). These limits are enforced in tenant workspaces.
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {LIMIT_KEYS.map((lim) => (
+              <div key={lim.key} className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gyment-text">
+                  {lim.label}
+                </label>
                 <input
                   type="text"
-                  value={currentLimits[l.key] || ''}
-                  onChange={(e) => updateLimit(l.key, e.target.value)}
-                  placeholder={l.placeholder}
-                  className="w-full text-xs border border-gyment-border rounded-md px-3 py-1.5 outline-none focus:border-primary"
+                  placeholder={lim.placeholder}
+                  value={currentLimits[lim.key] || ''}
+                  onChange={(e) => updateLimit(lim.key, e.target.value)}
+                  className="border border-gyment-border rounded-lg px-3 py-2 text-xs outline-none focus:border-primary bg-white"
                 />
               </div>
             ))}
@@ -165,20 +199,22 @@ export const FeatureEditorModal: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-gyment-border flex justify-end gap-2.5">
+      {/* Footer Controls */}
+      <div className="flex justify-end gap-2.5 mt-6 pt-4 border-t border-gyment-border">
         <button
           type="button"
-          onClick={() => setFeatureEditorModalOpen(false)}
-          className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-lg text-sm font-semibold text-gyment-text transition-colors"
+          onClick={onClose}
+          className="px-4 py-2 rounded-lg border border-gyment-border text-xs font-semibold text-gyment-text hover:bg-gyment-bg transition-colors cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="button"
+          disabled={isSaving}
           onClick={handleSave}
-          className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
+          className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow-md cursor-pointer disabled:opacity-50"
         >
-          Save Changes
+          {isSaving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
     </Modal>

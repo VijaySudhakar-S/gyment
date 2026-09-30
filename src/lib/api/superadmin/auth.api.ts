@@ -1,31 +1,7 @@
 import apiClient from '@/lib/api/axiosClient';
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface SuperAdminUser {
-  id: string;
-  email: string;
-  name: string;
-  mobile: string;
-  role: 'SUPER_ADMIN';
-  lastLogin?: string;
-  isActive?: boolean;
-}
-
-export interface LoginResponseData {
-  user: SuperAdminUser;
-  token: string;
-  refreshtoken: string;
-}
-
-export interface ApiResponse<T = any> {
-  status: boolean;
-  message: string;
-  data?: T;
-}
+import { LoginRequest, SuperAdminUser, LoginResponseData } from '@/types/auth';
+import { ApiResponse } from '@/types/api';
 
 /**
  * Authenticates SuperAdmin with email and password

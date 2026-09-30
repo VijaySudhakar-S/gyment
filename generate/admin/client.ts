@@ -101,3 +101,8 @@ export type PlatformConfig = Prisma.PlatformConfigModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model ReadNotification
+ * 
+ */
+export type ReadNotification = Prisma.ReadNotificationModel

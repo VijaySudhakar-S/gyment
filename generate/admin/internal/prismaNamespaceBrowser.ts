@@ -62,7 +62,8 @@ export const ModelName = {
   GymSubscription: 'GymSubscription',
   GymFeature: 'GymFeature',
   PlatformConfig: 'PlatformConfig',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  ReadNotification: 'ReadNotification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -268,6 +269,14 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const ReadNotificationScalarFieldEnum = {
+  id: 'id',
+  readAt: 'readAt'
+} as const
+
+export type ReadNotificationScalarFieldEnum = (typeof ReadNotificationScalarFieldEnum)[keyof typeof ReadNotificationScalarFieldEnum]
 
 
 export const SortOrder = {

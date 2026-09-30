@@ -1,27 +1,66 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Download } from 'lucide-react';
 import { App } from 'antd';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatCard } from '@/components/shared/StatCard';
 import { RevenueChart } from '@/components/charts/RevenueChart';
 import { SubscriptionComparisonBarChart } from '@/components/charts/SubscriptionComparisonBarChart';
 import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/MotionContainer';
 import { fmtRs } from '@/lib/formatters';
+import { revenueApi, RevenueStatsData } from '@/lib/api/superadmin/revenue.api';
+import { reportsApi } from '@/lib/api/superadmin/reports.api';
 
 export default function RevenuePage() {
   const { message } = App.useApp();
-  const { gyms, plans } = useSuperAdmin();
 
-  const handleExport = () => {
-    message.success('Revenue export prepared');
+  const [stats, setStats] = useState<RevenueStatsData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const fetchRevenueData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await revenueApi.getStats();
+      if (res.status && res.data) {
+        setStats(res.data);
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to load revenue statistics');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [message]);
+
+  useEffect(() => {
+    fetchRevenueData();
+  }, [fetchRevenueData]);
+
+  const handleExport = async () => {
+    try {
+      const res = await reportsApi.exportData('revenue');
+      if (res.status && res.data) {
+        const blob = new Blob([res.data.content], { type: res.data.mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = res.data.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        message.success('Revenue export downloaded successfully');
+      }
+    } catch (error) {
+      message.error('Failed to export revenue');
+    }
   };
 
-  const activePayingGyms = gyms.filter(g => g.subStatus === 'Active').length;
-
-  const planKeys = ['starter', 'growth', 'pro'];
+  const mrr = stats?.monthlyRecurringRevenue ?? 0;
+  const totalRevenue = stats?.totalSubscriptionRevenue ?? 0;
+  const avgRev = stats?.averageRevenuePerGym ?? 0;
+  const activePayingGyms = stats?.activePayingGyms ?? 0;
+  const newSubs = stats?.newPaidSubscriptions30Days ?? 0;
+  const cancelledSubs = stats?.cancelledSubscriptions30Days ?? 0;
+  const planBreakdown = stats?.planBreakdown ?? [];
 
   return (
     <>
@@ -32,7 +71,7 @@ export default function RevenuePage() {
           <button
             type="button"
             onClick={handleExport}
-            className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text flex items-center gap-1.5 transition-colors shrink-0"
+            className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Export Revenue</span>
@@ -45,24 +84,24 @@ export default function RevenuePage() {
           <MotionItem>
             <StatCard
               label="Monthly Recurring Revenue"
-              value="₹16.9L"
-              delta="+9% MoM"
+              value={fmtRs(mrr)}
+              delta="Active MRR"
               deltaType="up"
             />
           </MotionItem>
           <MotionItem>
             <StatCard
-              label="Total Subscription Revenue"
-              value="₹1.42Cr"
-              delta="Year to date"
+              label="Total Platform Revenue"
+              value={fmtRs(totalRevenue)}
+              delta="Cumulative to date"
               deltaType="neu"
             />
           </MotionItem>
           <MotionItem>
             <StatCard
               label="Average Revenue / Gym"
-              value="₹1,180"
-              delta="Per month"
+              value={fmtRs(avgRev)}
+              delta="Per active facility"
               deltaType="neu"
             />
           </MotionItem>
@@ -70,14 +109,14 @@ export default function RevenuePage() {
             <StatCard
               label="Active Paying Gyms"
               value={activePayingGyms}
-              delta="+12 this month"
+              delta="Active subscriptions"
               deltaType="up"
             />
           </MotionItem>
           <MotionItem>
             <StatCard
               label="New Paid Subscriptions"
-              value={23}
+              value={newSubs}
               delta="Last 30 days"
               deltaType="up"
             />
@@ -85,9 +124,9 @@ export default function RevenuePage() {
           <MotionItem>
             <StatCard
               label="Cancelled Subscriptions"
-              value={4}
+              value={cancelledSubs}
               delta="Last 30 days"
-              deltaType="down"
+              deltaType={cancelledSubs > 0 ? 'down' : 'neu'}
             />
           </MotionItem>
         </MotionStagger>
@@ -96,8 +135,8 @@ export default function RevenuePage() {
         <MotionFadeIn delay={0.12}>
           <div className="flex items-baseline justify-between mb-3">
             <div>
-              <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Trends</h2>
-              <p className="text-[12px] text-gyment-muted m-0">Demo data only</p>
+              <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Revenue Analytics</h2>
+              <p className="text-[12px] text-gyment-muted m-0">Live aggregated performance trends</p>
             </div>
           </div>
 
@@ -105,9 +144,12 @@ export default function RevenuePage() {
             <div className="bg-white border border-gyment-border rounded-[14px] p-4.5">
               <div className="flex justify-between items-baseline mb-2.5">
                 <h3 className="text-[13.5px] font-bold text-gyment-text m-0">Monthly Revenue</h3>
-                <span className="text-[12px] text-gyment-muted">Jan – Sep</span>
+                <span className="text-[12px] text-gyment-muted">Last 6 Months</span>
               </div>
-              <RevenueChart />
+              <RevenueChart
+                labels={stats?.monthlyTrends?.map(t => t.month) || []}
+                data={stats?.monthlyTrends?.map(t => t.revenue) || []}
+              />
             </div>
 
             <div className="bg-white border border-gyment-border rounded-[14px] p-4.5">
@@ -117,7 +159,11 @@ export default function RevenuePage() {
                 </h3>
                 <span className="text-[12px] text-gyment-muted">Last 6 months</span>
               </div>
-              <SubscriptionComparisonBarChart />
+              <SubscriptionComparisonBarChart
+                months={stats?.monthlyTrends?.map(t => t.month) || []}
+                newSubs={stats?.monthlyTrends?.map(t => t.newSubscriptions) || []}
+                cancelledSubs={stats?.monthlyTrends?.map(t => t.cancelledSubscriptions) || []}
+              />
             </div>
           </div>
         </MotionFadeIn>
@@ -140,29 +186,38 @@ export default function RevenuePage() {
                       Active Gyms
                     </th>
                     <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                      Monthly Revenue
+                      Monthly Price
+                    </th>
+                    <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
+                      Monthly Run-Rate
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gyment-border">
-                  {planKeys.map(key => {
-                    const p = plans[key];
-                    if (!p) return null;
-                    const count = gyms.filter(
-                      g => g.plan.toLowerCase() === key && g.subStatus === 'Active'
-                    ).length;
-                    const rev = count * p.price;
-
-                    return (
-                      <tr key={key} className="hover:bg-gyment-bg transition-colors">
-                        <td className="px-3 py-2.5 font-bold text-gyment-text">{p.name}</td>
-                        <td className="px-3 py-2.5 text-gyment-text">{count}</td>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={4} className="p-6 text-center text-gyment-muted">
+                        Loading plan revenue metrics...
+                      </td>
+                    </tr>
+                  ) : planBreakdown.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="p-6 text-center text-gyment-muted">
+                        No active plans recorded.
+                      </td>
+                    </tr>
+                  ) : (
+                    planBreakdown.map((plan: any) => (
+                      <tr key={plan.planId} className="hover:bg-gyment-bg transition-colors">
+                        <td className="px-3 py-2.5 font-bold text-gyment-text">{plan.planName}</td>
+                        <td className="px-3 py-2.5 text-gyment-text">{plan.activeGymsCount}</td>
+                        <td className="px-3 py-2.5 text-gyment-text">{fmtRs(plan.price)}</td>
                         <td className="px-3 py-2.5 font-semibold text-gyment-text">
-                          {fmtRs(rev)}
+                          {fmtRs(plan.monthlyRevenue)}
                         </td>
                       </tr>
-                    );
-                  })}
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

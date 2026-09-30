@@ -1,79 +1,134 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Modal } from 'antd';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
-import { PlanType } from '@/types/gym';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Modal, message, Select, Button } from 'antd';
+import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
+import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
+import { subscriptionsApi } from '@/lib/api/superadmin/subscriptions.api';
 
-export const ChangePlanModal: React.FC = () => {
-  const {
-    changePlanModalOpen,
-    setChangePlanModalOpen,
-    gyms,
-    selectedGymId,
-    updateGymPlan,
-  } = useSuperAdmin();
+import { ChangePlanModalProps } from '@/types/modals';
 
-  const selectedGym = gyms.find(g => g.id === selectedGymId);
-  const [selectedPlan, setSelectedPlan] = useState<PlanType>('Growth');
+export const ChangePlanModal: React.FC<ChangePlanModalProps> = ({ open, onClose, gymId, onSuccess }) => {
+  const [gym, setGym] = useState<GymData | null>(null);
+  const [plans, setPlans] = useState<PlanData[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+  const [billingCycle, setBillingCycle] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const loadData = useCallback(async () => {
+    if (!gymId) return;
+    try {
+      const [gymRes, plansRes] = await Promise.all([
+        gymsApi.getById(String(gymId)),
+        plansApi.getAll(),
+      ]);
+
+      if (gymRes.status && gymRes.data) {
+        setGym(gymRes.data);
+        if (gymRes.data.activeSubscription?.planId) {
+          setSelectedPlanId(gymRes.data.activeSubscription.planId);
+          setBillingCycle(gymRes.data.activeSubscription.billingCycle || 'MONTHLY');
+        }
+      }
+
+      if (plansRes.status && Array.isArray(plansRes.data)) {
+        const activePlans = plansRes.data.filter(p => p.isActive);
+        setPlans(activePlans);
+        if (!gymRes.data?.activeSubscription?.planId && activePlans.length > 0) {
+          setSelectedPlanId(activePlans[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load plan change data:', error);
+    }
+  }, [gymId]);
 
   useEffect(() => {
-    if (selectedGym) {
-      setSelectedPlan(selectedGym.plan);
+    if (open && gymId) {
+      loadData();
     }
-  }, [selectedGym]);
+  }, [open, gymId, loadData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedGymId) {
-      updateGymPlan(selectedGymId, selectedPlan);
+    if (!gymId || !selectedPlanId) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await subscriptionsApi.changePlan({
+        gymId: String(gymId),
+        planId: selectedPlanId,
+        billingCycle,
+      });
+
+      if (res.status) {
+        message.success('Subscription plan updated successfully');
+        onClose();
+        if (onSuccess) onSuccess();
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to change plan');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Modal
-      open={changePlanModalOpen}
-      onCancel={() => setChangePlanModalOpen(false)}
+      open={open}
+      onCancel={onClose}
       footer={null}
-      width={420}
+      width={460}
       centered
       title={
         <div className="pt-1">
-          <h2 className="text-base font-bold text-gyment-text m-0">Change Plan</h2>
+          <h2 className="text-base font-bold text-gyment-text m-0">Change Subscription Plan</h2>
           <p className="text-xs text-gyment-muted mt-0.5">
-            Move {selectedGym?.name || 'this gym'} to a different plan
+            Update SaaS subscription tier for {gym?.name || 'this gym'}
           </p>
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="pt-4">
+      <form onSubmit={handleSubmit} className="pt-4 space-y-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold text-gyment-text">New Plan</label>
-          <select
-            value={selectedPlan}
-            onChange={e => setSelectedPlan(e.target.value as PlanType)}
-            className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary bg-white w-full"
-          >
-            <option value="Starter">Starter (₹499/mo)</option>
-            <option value="Growth">Growth (₹999/mo)</option>
-            <option value="Pro">Pro (₹1,999/mo)</option>
-          </select>
+          <label className="text-xs font-bold text-gyment-text">Select Plan *</label>
+          <Select
+            value={selectedPlanId || undefined}
+            onChange={(val) => setSelectedPlanId(val)}
+            className="w-full text-sm"
+            placeholder="Select a plan"
+            options={plans.map(p => ({
+              value: p.id,
+              label: `${p.name} (₹${p.monthlyPrice}/mo • ₹${p.yearlyPrice}/yr)`,
+            }))}
+          />
         </div>
 
-        <div className="mt-6 pt-4 border-t border-gyment-border flex justify-end gap-2.5">
-          <button
-            type="button"
-            onClick={() => setChangePlanModalOpen(false)}
-            className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-lg text-sm font-semibold text-gyment-text transition-colors"
-          >
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold text-gyment-text">Billing Cycle</label>
+          <Select
+            value={billingCycle}
+            onChange={(val) => setBillingCycle(val)}
+            className="w-full text-sm"
+            options={[
+              { value: 'MONTHLY', label: 'Monthly Billing' },
+              { value: 'YEARLY', label: 'Yearly Billing (Discounted)' },
+            ]}
+          />
+        </div>
+
+        <div className="flex justify-end gap-2 pt-3 border-t border-gyment-border">
+          <Button onClick={onClose}>
             Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isSubmitting}
+            disabled={!selectedPlanId}
           >
-            Update Plan
-          </button>
+            Confirm Change
+          </Button>
         </div>
       </form>
     </Modal>

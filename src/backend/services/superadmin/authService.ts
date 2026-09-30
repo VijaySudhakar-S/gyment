@@ -18,16 +18,11 @@ export default class AuthService {
     @Inject("logger") logger?: Logger,
     @Inject("adminDB") adminDB?: PrismaClient,
   ) {
-    this.logger =
-      logger && typeof (logger as any).info === "function"
-        ? logger
-        : Container.get("logger");
-    this.adminDB =
-      adminDB && (adminDB as any).superAdmin
-        ? adminDB
-        : Container.get("adminDB");
+    this.logger = logger ?? Container.get("logger");
+    this.adminDB = adminDB ?? Container.get("adminDB");
   }
 
+  // login super admin
   public async login(userDTO: login): Promise<{
     user: {
       id: string;
@@ -84,6 +79,7 @@ export default class AuthService {
     };
   }
 
+  // refresh token super admin
   public async refreshToken(refreshtoken: string): Promise<{
     token: string;
     refreshtoken: string;
@@ -112,6 +108,7 @@ export default class AuthService {
     };
   }
 
+  // read user super admin
   public async readUser(id: string): Promise<Omit<SuperAdmin, "passwordHash">> {
     this.logger.info("Fetching SuperAdmin profile: %s", id);
     const admin = await this.adminDB.superAdmin.findUnique({
@@ -161,6 +158,7 @@ export default class AuthService {
     };
   }
 
+  // validate reset password token
   public async validateTokenResetPass(rawToken: string): Promise<boolean> {
     this.logger.info("Validating password reset token");
     const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
@@ -181,8 +179,9 @@ export default class AuthService {
     return true;
   }
 
+  // reset password super admin
   public async resetPassword(data: {
-    id: string; // raw token passed in body
+    id: string; 
     newPassword: string;
     confirmPassword: string;
   }): Promise<User> {

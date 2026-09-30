@@ -11,10 +11,7 @@ import {
 } from 'lucide-react';
 import { ActivityItem, ActivityTone } from '@/types/activity';
 
-interface TimelineProps {
-  items: ActivityItem[];
-  className?: string;
-}
+import { TimelineProps } from '@/types/sharedComponents';
 
 export const Timeline: React.FC<TimelineProps> = ({ items, className = '' }) => {
   const getIcon = (iconName: ActivityItem['icon']) => {

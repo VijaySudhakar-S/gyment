@@ -3,14 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  delta?: string;
-  deltaType?: 'up' | 'down' | 'neu';
-  className?: string;
-  onClick?: () => void;
-}
+import { StatCardProps } from '@/types/sharedComponents';
 
 export const StatCard: React.FC<StatCardProps> = ({
   label,

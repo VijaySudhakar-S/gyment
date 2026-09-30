@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { App } from 'antd';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
+import { settingsApi, PlatformSettingsData } from '@/lib/api/superadmin/settings.api';
 
 export default function SettingsPage() {
   const { message } = App.useApp();
@@ -11,23 +12,66 @@ export default function SettingsPage() {
     'platform' | 'subscription' | 'notification' | 'profile'
   >('platform');
 
-  const [platformName, setPlatformName] = useState('GYMENT');
-  const [supportEmail, setSupportEmail] = useState('support@gyment.app');
-  const [supportPhone, setSupportPhone] = useState('+91 80000 12345');
-  const [currency, setCurrency] = useState('INR (₹)');
-  const [timezone, setTimezone] = useState('Asia/Kolkata (IST)');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
+  // Platform State
+  const [platformName, setPlatformName] = useState('');
+  const [supportEmail, setSupportEmail] = useState('');
+  const [supportPhone, setSupportPhone] = useState('');
+  const [currency, setCurrency] = useState('INR');
+  const [timezone, setTimezone] = useState('Asia/Kolkata');
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [maintenanceMessage, setMaintenanceMessage] = useState('');
+
+  // Subscription Settings State
   const [trialDuration, setTrialDuration] = useState('14 days');
   const [renewalRules, setRenewalRules] = useState('Auto-renew enabled');
   const [statusRules, setStatusRules] = useState('Suspend after 7 days past due');
 
+  // Notification Alerts State
   const [emailNotif, setEmailNotif] = useState(true);
   const [subAlerts, setSubAlerts] = useState(true);
   const [newGymAlerts, setNewGymAlerts] = useState(true);
 
-  const [adminName, setAdminName] = useState('Sanjay Kumar');
-  const [adminEmail, setAdminEmail] = useState('sanjay@gyment.app');
-  const [adminPhone, setAdminPhone] = useState('+91 90000 11223');
+  // Admin Profile State
+  const [adminId, setAdminId] = useState('');
+  const [adminName, setAdminName] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPhone, setAdminPhone] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+
+  const loadSettings = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await settingsApi.get();
+      if (res.status && res.data) {
+        const d = res.data;
+        setPlatformName(d.platformName || 'Gyment');
+        setSupportEmail(d.supportEmail || '');
+        setSupportPhone(d.supportPhone || '');
+        setCurrency(d.currency || 'INR');
+        setTimezone(d.defaultTimezone || 'Asia/Kolkata');
+        setMaintenanceMode(d.maintenanceMode || false);
+        setMaintenanceMessage(d.maintenanceMessage || '');
+
+        if (d.adminProfile) {
+          setAdminId(d.adminProfile.id);
+          setAdminName(d.adminProfile.name);
+          setAdminEmail(d.adminProfile.email);
+          setAdminPhone(d.adminProfile.mobile);
+        }
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to load platform settings');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [message]);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   const tabs = [
     { key: 'platform', label: 'Platform Settings' },
@@ -36,31 +80,69 @@ export default function SettingsPage() {
     { key: 'profile', label: 'Admin Profile' },
   ];
 
-  const handleSavePlatform = (e: React.FormEvent) => {
+  const handleSavePlatform = async (e: React.FormEvent) => {
     e.preventDefault();
-    message.success('Platform settings saved');
+    try {
+      setIsSaving(true);
+      const res = await settingsApi.updatePlatform({
+        platformName,
+        supportEmail,
+        supportPhone,
+        currency,
+        defaultTimezone: timezone,
+        maintenanceMode,
+        maintenanceMessage: maintenanceMessage || null,
+      });
+
+      if (res.status) {
+        message.success('Platform settings saved successfully');
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to save settings');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSaveSub = (e: React.FormEvent) => {
     e.preventDefault();
-    message.success('Subscription settings saved');
+    message.success('Subscription configuration saved');
   };
 
   const handleSaveNotif = (e: React.FormEvent) => {
     e.preventDefault();
-    message.success('Notification settings saved');
+    message.success('Notification preferences saved');
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    message.success('Profile updated');
+    if (!adminId) return;
+
+    try {
+      setIsSaving(true);
+      const res = await settingsApi.updateProfile(adminId, {
+        name: adminName,
+        email: adminEmail,
+        mobile: adminPhone,
+        password: adminPassword || undefined,
+      });
+
+      if (res.status) {
+        message.success('SuperAdmin profile updated successfully');
+        setAdminPassword('');
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <>
       <Topbar
         title="Settings"
-        subtitle="Configure platform-wide behavior."
+        subtitle="Configure platform-wide settings and system preferences."
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-5">
         {/* Tabs */}
@@ -70,7 +152,7 @@ export default function SettingsPage() {
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key as any)}
-              className={`py-2.5 px-1 mr-4 text-[13px] font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.key
+              className={`py-2.5 px-1 mr-4 text-[13px] font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === tab.key
                 ? 'text-gyment-text border-primary'
                 : 'text-gyment-muted border-transparent hover:text-gyment-text'
                 }`}
@@ -87,13 +169,14 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[12px] font-bold text-gyment-text">
-                    GYMENT Name
+                    GYMENT Platform Name
                   </label>
                   <input
                     type="text"
                     value={platformName}
                     onChange={e => setPlatformName(e.target.value)}
                     className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+                    required
                   />
                 </div>
 
@@ -106,6 +189,7 @@ export default function SettingsPage() {
                     value={supportEmail}
                     onChange={e => setSupportEmail(e.target.value)}
                     className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+                    required
                   />
                 </div>
 
@@ -118,6 +202,7 @@ export default function SettingsPage() {
                     value={supportPhone}
                     onChange={e => setSupportPhone(e.target.value)}
                     className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+                    required
                   />
                 </div>
 
@@ -130,8 +215,9 @@ export default function SettingsPage() {
                     onChange={e => setCurrency(e.target.value)}
                     className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary bg-white"
                   >
-                    <option>INR (₹)</option>
-                    <option>USD ($)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
                   </select>
                 </div>
 
@@ -144,18 +230,33 @@ export default function SettingsPage() {
                     onChange={e => setTimezone(e.target.value)}
                     className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary bg-white sm:w-1/2"
                   >
-                    <option>Asia/Kolkata (IST)</option>
-                    <option>UTC</option>
+                    <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                    <option value="UTC">UTC</option>
+                    <option value="America/New_York">America/New_York (EST)</option>
                   </select>
+                </div>
+
+                <div className="flex items-center gap-2 sm:col-span-2 pt-2">
+                  <input
+                    type="checkbox"
+                    id="maintMode"
+                    checked={maintenanceMode}
+                    onChange={e => setMaintenanceMode(e.target.checked)}
+                    className="accent-primary w-4 h-4 cursor-pointer"
+                  />
+                  <label htmlFor="maintMode" className="text-xs font-bold text-gyment-text cursor-pointer">
+                    Enable System Maintenance Mode (blocks non-superadmin access)
+                  </label>
                 </div>
               </div>
 
               <div className="pt-3">
                 <button
                   type="submit"
-                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
+                  disabled={isSaving}
+                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer disabled:opacity-50"
                 >
-                  Save Changes
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
@@ -169,7 +270,7 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[12px] font-bold text-gyment-text">
-                    Trial Duration
+                    Default Trial Duration
                   </label>
                   <select
                     value={trialDuration}
@@ -235,31 +336,31 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={emailNotif}
                       onChange={e => setEmailNotif(e.target.checked)}
-                      className="accent-primary w-4 h-4"
+                      className="accent-primary w-4 h-4 cursor-pointer"
                     />
                   </label>
                 </div>
 
                 <div className="flex justify-between items-center py-2.5">
-                  <span className="font-medium text-gyment-text">Subscription Alerts</span>
+                  <span className="font-medium text-gyment-text">Subscription Expiry Alerts</span>
                   <label className="cursor-pointer">
                     <input
                       type="checkbox"
                       checked={subAlerts}
                       onChange={e => setSubAlerts(e.target.checked)}
-                      className="accent-primary w-4 h-4"
+                      className="accent-primary w-4 h-4 cursor-pointer"
                     />
                   </label>
                 </div>
 
                 <div className="flex justify-between items-center py-2.5">
-                  <span className="font-medium text-gyment-text">New Gym Alerts</span>
+                  <span className="font-medium text-gyment-text">New Gym Onboarding Alerts</span>
                   <label className="cursor-pointer">
                     <input
                       type="checkbox"
                       checked={newGymAlerts}
                       onChange={e => setNewGymAlerts(e.target.checked)}
-                      className="accent-primary w-4 h-4"
+                      className="accent-primary w-4 h-4 cursor-pointer"
                     />
                   </label>
                 </div>
@@ -283,42 +384,46 @@ export default function SettingsPage() {
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12px] font-bold text-gyment-text">Name</label>
+                  <label className="text-[12px] font-bold text-gyment-text">Full Name</label>
                   <input
                     type="text"
                     value={adminName}
                     onChange={e => setAdminName(e.target.value)}
                     className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+                    required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12px] font-bold text-gyment-text">Email</label>
+                  <label className="text-[12px] font-bold text-gyment-text">Email Address</label>
                   <input
                     type="email"
                     value={adminEmail}
                     onChange={e => setAdminEmail(e.target.value)}
                     className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+                    required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12px] font-bold text-gyment-text">Phone</label>
+                  <label className="text-[12px] font-bold text-gyment-text">Phone / Mobile</label>
                   <input
                     type="text"
                     value={adminPhone}
                     onChange={e => setAdminPhone(e.target.value)}
                     className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+                    required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12px] font-bold text-gyment-text">
-                    Profile Photo
-                  </label>
+                  <label className="text-[12px] font-bold text-gyment-text">Change Password (leave blank to keep)</label>
                   <input
-                    type="file"
-                    className="border border-gyment-border rounded-lg px-3 py-1.5 text-xs outline-none file:mr-3 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-light file:text-primary-dark"
+                    type="password"
+                    value={adminPassword}
+                    onChange={e => setAdminPassword(e.target.value)}
+                    placeholder="New password (optional)"
+                    className="border border-gyment-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -326,9 +431,10 @@ export default function SettingsPage() {
               <div className="pt-3">
                 <button
                   type="submit"
-                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
+                  disabled={isSaving}
+                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer disabled:opacity-50"
                 >
-                  Save Changes
+                  {isSaving ? 'Updating...' : 'Update Profile'}
                 </button>
               </div>
             </form>

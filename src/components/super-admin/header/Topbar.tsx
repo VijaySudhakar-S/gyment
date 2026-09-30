@@ -7,11 +7,7 @@ import { NotificationPanel } from './NotificationPanel';
 import { ProfileMenu } from './ProfileMenu';
 import { tokenStorage } from '@/lib/auth/tokenStorage';
 
-export interface TopbarProps {
-  title: string;
-  subtitle?: string;
-  actions?: React.ReactNode;
-}
+import { TopbarProps } from '@/types/header';
 
 export const Topbar: React.FC<TopbarProps> = ({
   title,
@@ -19,9 +15,11 @@ export const Topbar: React.FC<TopbarProps> = ({
   actions,
 }) => {
   const {
-    unreadNotifCount,
     setMobileSidebarOpen,
   } = useSuperAdmin();
+
+  // Temporary local state until notifications are migrated to their own context/api
+  const unreadNotifCount = 0;
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);

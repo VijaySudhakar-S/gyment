@@ -408,7 +408,8 @@ export const ModelName = {
   GymSubscription: 'GymSubscription',
   GymFeature: 'GymFeature',
   PlatformConfig: 'PlatformConfig',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  ReadNotification: 'ReadNotification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -424,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "superAdmin" | "superAdminPasswordResetToken" | "user" | "gymUser" | "userPasswordResetToken" | "globalMember" | "plan" | "gym" | "gymSubscription" | "gymFeature" | "platformConfig" | "auditLog"
+    modelProps: "superAdmin" | "superAdminPasswordResetToken" | "user" | "gymUser" | "userPasswordResetToken" | "globalMember" | "plan" | "gym" | "gymSubscription" | "gymFeature" | "platformConfig" | "auditLog" | "readNotification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1316,6 +1317,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReadNotification: {
+      payload: Prisma.$ReadNotificationPayload<ExtArgs>
+      fields: Prisma.ReadNotificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReadNotificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReadNotificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>
+        }
+        findFirst: {
+          args: Prisma.ReadNotificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReadNotificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>
+        }
+        findMany: {
+          args: Prisma.ReadNotificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>[]
+        }
+        create: {
+          args: Prisma.ReadNotificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>
+        }
+        createMany: {
+          args: Prisma.ReadNotificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReadNotificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>[]
+        }
+        delete: {
+          args: Prisma.ReadNotificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>
+        }
+        update: {
+          args: Prisma.ReadNotificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReadNotificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReadNotificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReadNotificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReadNotificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadNotificationPayload>
+        }
+        aggregate: {
+          args: Prisma.ReadNotificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReadNotification>
+        }
+        groupBy: {
+          args: Prisma.ReadNotificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadNotificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReadNotificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadNotificationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1542,6 +1617,14 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const ReadNotificationScalarFieldEnum = {
+  id: 'id',
+  readAt: 'readAt'
+} as const
+
+export type ReadNotificationScalarFieldEnum = (typeof ReadNotificationScalarFieldEnum)[keyof typeof ReadNotificationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1914,6 +1997,7 @@ export type GlobalOmitConfig = {
   gymFeature?: Prisma.GymFeatureOmit
   platformConfig?: Prisma.PlatformConfigOmit
   auditLog?: Prisma.AuditLogOmit
+  readNotification?: Prisma.ReadNotificationOmit
 }
 
 /* Types for Logging */

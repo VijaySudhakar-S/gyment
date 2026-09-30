@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use } from 'react';
+import React, { use, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -9,29 +9,52 @@ import { useSuperAdmin } from '@/context/SuperAdminContext';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatCard } from '@/components/shared/StatCard';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { Timeline } from '@/components/shared/Timeline';
 import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/MotionContainer';
 import { initials } from '@/lib/formatters';
-import { ActivityItem } from '@/types/activity';
+import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 
 export default function GymDetailPage({
   params,
 }: {
   params: Promise<{ gymId: string }>;
 }) {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const { gymId } = use(params);
   const router = useRouter();
-  const {
-    gyms,
-    users,
-    toggleGymStatus,
-    openConfirmModal,
-    openUserDrawer,
-  } = useSuperAdmin();
 
-  const id = Number(gymId);
-  const gym = gyms.find(g => g.id === id);
+  const [gym, setGym] = useState<GymData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const fetchGym = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await gymsApi.getById(gymId);
+      if (res.status && res.data) {
+        setGym(res.data);
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to load gym details');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [gymId, message]);
+
+  useEffect(() => {
+    fetchGym();
+  }, [fetchGym]);
+
+  if (isLoading) {
+    return (
+      <>
+        <Topbar title="Loading..." subtitle="Fetching gym profile..." />
+        <main className="p-4 sm:p-5 w-full mx-auto">
+          <div className="p-12 text-center text-gyment-muted bg-white border border-gyment-border rounded-xl">
+            Loading gym details...
+          </div>
+        </main>
+      </>
+    );
+  }
 
   if (!gym) {
     return (
@@ -55,66 +78,38 @@ export default function GymDetailPage({
     );
   }
 
-  const matchedUser = users.find(u => u.name === gym.owner);
-
   const handleToggleStatus = () => {
-    const isSuspended = gym.gymStatus === 'Suspended';
-    openConfirmModal({
+    const isSuspended = gym.status === 'SUSPENDED';
+    modal.confirm({
       title: isSuspended ? 'Activate this gym?' : 'Suspend this gym?',
-      body: isSuspended
-        ? 'Are you sure you want to reactivate this gym?'
-        : 'Are you sure you want to suspend this gym? Owners and staff will lose access.',
-      actionLabel: isSuspended ? 'Activate Gym' : 'Suspend Gym',
-      isDanger: !isSuspended,
-      onConfirm: () => {
-        toggleGymStatus(gym.id);
-        message.success(
-          isSuspended ? 'Gym activated successfully' : 'Gym suspended successfully'
-        );
+      content: isSuspended
+        ? `Are you sure you want to reactivate ${gym.name}?`
+        : `Are you sure you want to suspend ${gym.name}? Owners and staff will lose access.`,
+      okText: isSuspended ? 'Activate Gym' : 'Suspend Gym',
+      okType: !isSuspended ? 'danger' : 'primary',
+      centered : true,
+      onOk: async () => {
+        try {
+          const res = await gymsApi.toggleStatus(gym.id);
+          if (res.status) {
+            message.success(isSuspended ? 'Gym activated successfully' : 'Gym suspended successfully');
+            await fetchGym();
+          }
+        } catch (error: any) {
+          message.error(error.message || 'Failed to toggle gym status');
+        }
       },
     });
   };
 
-  const gymActivities: ActivityItem[] = [
-    {
-      id: 1,
-      t: 'Member added',
-      d: `A new member was added to ${gym.name}.`,
-      ti: 'Today',
-      icon: 'USERS',
-      tone: 'green',
-    },
-    {
-      id: 2,
-      t: 'Payment recorded',
-      d: 'A membership payment was recorded.',
-      ti: 'Yesterday',
-      icon: 'REVENUE',
-      tone: 'blue',
-    },
-    {
-      id: 3,
-      t: 'Login activity',
-      d: `${gym.owner} logged in to the owner dashboard.`,
-      ti: gym.lastLogin,
-      icon: 'LOGIN',
-      tone: 'blue',
-    },
-    {
-      id: 4,
-      t: 'Subscription changed',
-      d: `Plan set to ${gym.plan}.`,
-      ti: gym.joined,
-      icon: 'UPGRADE',
-      tone: 'amber',
-    },
-  ];
+  const adminUser = gym.primaryAdmin;
+  const activeSub = gym.activeSubscription;
 
   return (
     <>
       <Topbar
         title="Gym Details"
-        subtitle="Full profile for a registered gym."
+        subtitle="Full profile for a registered facility."
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-6">
         {/* Back Link */}
@@ -136,11 +131,13 @@ export default function GymDetailPage({
             </div>
             <div>
               <div className="text-lg font-extrabold text-gyment-text">{gym.name}</div>
-              <div className="text-[12.5px] text-gyment-muted mt-0.5">Owned by {gym.owner}</div>
+              <div className="text-[12.5px] text-gyment-muted mt-0.5">Code: {gym.code} • Schema: {gym.schemaName}</div>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <StatusBadge variant="info">{gym.plan} Plan</StatusBadge>
-                <StatusBadge status={gym.gymStatus} />
-                <span className="text-[11.5px] text-gyment-muted">Registered {gym.joined}</span>
+                {activeSub && (
+                  <StatusBadge variant="info">{activeSub.planName} Plan</StatusBadge>
+                )}
+                <StatusBadge status={gym.status} />
+                <span className="text-[11.5px] text-gyment-muted">Registered {new Date(gym.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
@@ -149,19 +146,19 @@ export default function GymDetailPage({
             <button
               type="button"
               onClick={() => router.push('/super-admin/subscriptions')}
-              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text transition-colors"
+              className="border border-gyment-border bg-white hover:bg-gyment-bg px-3.5 py-2 rounded-[9px] text-[13px] font-semibold text-gyment-text transition-colors cursor-pointer"
             >
               View Subscription
             </button>
             <button
               type="button"
               onClick={handleToggleStatus}
-              className={`px-3.5 py-2 rounded-[9px] text-[13px] font-semibold transition-colors border ${gym.gymStatus === 'Suspended'
-                ? 'bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark border-primary transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer'
+              className={`px-3.5 py-2 rounded-[9px] text-[13px] font-semibold transition-colors border cursor-pointer ${gym.status === 'SUSPENDED'
+                ? 'bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark border-primary'
                 : 'bg-danger-light hover:bg-danger text-danger hover:text-white border-danger-light'
                 }`}
             >
-              {gym.gymStatus === 'Suspended' ? 'Activate Gym' : 'Suspend Gym'}
+              {gym.status === 'SUSPENDED' ? 'Activate Gym' : 'Suspend Gym'}
             </button>
           </div>
         </MotionFadeIn>
@@ -169,105 +166,67 @@ export default function GymDetailPage({
         {/* Overview Section */}
         <MotionFadeIn delay={0.1}>
           <div className="flex items-baseline justify-between mb-3">
-            <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Overview</h2>
+            <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Subscription & Facility Overview</h2>
           </div>
           <MotionStagger className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <MotionItem><StatCard label="Total Members" value={gym.members} /></MotionItem>
-            <MotionItem><StatCard label="Active Members" value={gym.activeMembers} /></MotionItem>
-            <MotionItem><StatCard label="Staff" value={gym.staff} /></MotionItem>
-            <MotionItem><StatCard label="Trainers" value={gym.trainers} /></MotionItem>
+            <MotionItem><StatCard label="Location" value={gym.location || '-'} /></MotionItem>
+            <MotionItem><StatCard label="Current Plan" value={activeSub?.planName || 'None'} /></MotionItem>
+            <MotionItem><StatCard label="Billing Cycle" value={activeSub?.billingCycle || '-'} /></MotionItem>
+            <MotionItem><StatCard label="Renewal Date" value={activeSub ? new Date(activeSub.renewalDate).toLocaleDateString() : '-'} /></MotionItem>
           </MotionStagger>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2.5">
-            <StatCard label="Branches" value={gym.branches} />
-            <StatCard label="Current Plan" value={gym.plan} />
-            <div className="bg-white border border-gyment-border rounded-xl px-4 py-3.5">
-              <div className="text-[11.5px] text-gyment-muted font-semibold">
-                Subscription Status
-              </div>
-              <div className="mt-1.5">
-                <StatusBadge status={gym.subStatus} />
-              </div>
-            </div>
-            <StatCard label="Next Billing Date" value={gym.nextBilling} />
-          </div>
         </MotionFadeIn>
 
-        {/* Gym Owner Section */}
+        {/* Gym Owner & Contact Section */}
         <MotionFadeIn delay={0.15}>
           <div className="flex items-baseline justify-between mb-3">
             <div>
-              <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Gym Owner</h2>
+              <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Owner & Primary Contact</h2>
               <p className="text-[12px] text-gyment-muted m-0">Contact details on file</p>
             </div>
           </div>
           <div className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
             <div className="space-y-0.5 text-[13px]">
               <div className="flex justify-between py-2 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Owner Name</span>
-                <span className="font-semibold text-gyment-text">{gym.owner}</span>
+                <span className="text-gyment-muted">Primary Admin / Owner</span>
+                <span className="font-semibold text-gyment-text">{gym.ownerName || adminUser?.name || '-'}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Email</span>
-                <span className="font-semibold text-gyment-text">{gym.email}</span>
+                <span className="text-gyment-muted">Contact Email</span>
+                <span className="font-semibold text-gyment-text">{gym.contactEmail || adminUser?.email || '-'}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Phone</span>
-                <span className="font-semibold text-gyment-text">{gym.phone}</span>
+                <span className="text-gyment-muted">Contact Phone</span>
+                <span className="font-semibold text-gyment-text">{gym.contactPhone || adminUser?.phone || '-'}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Account Created</span>
-                <span className="font-semibold text-gyment-text">{gym.created}</span>
+                <span className="text-gyment-muted">Address</span>
+                <span className="font-semibold text-gyment-text">
+                  {[gym.address, gym.city, gym.state, gym.pincode].filter(Boolean).join(', ') || '-'}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-dashed border-gyment-border">
-                <span className="text-gyment-muted">Last Login</span>
-                <span className="font-semibold text-gyment-text">{gym.lastLogin}</span>
+                <span className="text-gyment-muted">Account Registered</span>
+                <span className="font-semibold text-gyment-text">{new Date(gym.createdAt).toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-dashed border-gyment-border items-center">
-                <span className="text-gyment-muted">Account Status</span>
-                <StatusBadge variant="ok">Active</StatusBadge>
+                <span className="text-gyment-muted">Status</span>
+                <StatusBadge status={gym.status} />
               </div>
             </div>
 
             <div className="flex items-center gap-2.5 mt-4 pt-2">
-              {matchedUser && (
+              {(gym.contactEmail || adminUser?.email) && (
                 <button
                   type="button"
-                  onClick={() => openUserDrawer(matchedUser.id)}
-                  className="border border-gyment-border bg-white hover:bg-gyment-bg px-3 py-1.5 rounded-lg text-[12px] font-semibold text-gyment-text transition-colors"
+                  onClick={() => {
+                    window.location.href = `mailto:${gym.contactEmail || adminUser?.email}`;
+                  }}
+                  className="border border-gyment-border bg-white hover:bg-gyment-bg px-3 py-1.5 rounded-lg text-[12px] font-semibold text-gyment-text transition-colors cursor-pointer"
                 >
-                  View User
+                  Contact Owner
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = `mailto:${gym.email}`;
-                }}
-                className="border border-gyment-border bg-white hover:bg-gyment-bg px-3 py-1.5 rounded-lg text-[12px] font-semibold text-gyment-text transition-colors"
-              >
-                Contact Owner
-              </button>
-              <button
-                type="button"
-                onClick={() => message.info('Owner account status updated')}
-                className="border border-danger-light bg-danger-light text-danger hover:bg-danger hover:text-white px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors"
-              >
-                Disable Account
-              </button>
             </div>
-          </div>
-        </MotionFadeIn>
-
-        {/* Gym Activity Section */}
-        <MotionFadeIn delay={0.2}>
-          <div className="flex items-baseline justify-between mb-3">
-            <div>
-              <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Gym Activity</h2>
-              <p className="text-[12px] text-gyment-muted m-0">High-level activity log</p>
-            </div>
-          </div>
-          <div className="bg-white border border-gyment-border rounded-xl p-4 sm:p-5">
-            <Timeline items={gymActivities} />
           </div>
         </MotionFadeIn>
       </main>

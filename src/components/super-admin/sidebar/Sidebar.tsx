@@ -23,7 +23,6 @@ import { tokenStorage } from '@/lib/auth/tokenStorage';
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const {
-    gyms,
     sidebarCollapsed,
     toggleSidebar,
     mobileSidebarOpen,
@@ -32,7 +31,7 @@ export const Sidebar: React.FC = () => {
 
   const navItems = [
     { label: 'Dashboard', href: '/super-admin', icon: LayoutDashboard },
-    { label: 'Gyms', href: '/super-admin/gyms', icon: Dumbbell, count: gyms.length },
+    { label: 'Gyms', href: '/super-admin/gyms', icon: Dumbbell },
     { label: 'Subscriptions', href: '/super-admin/subscriptions', icon: CreditCard },
     { label: 'Plans', href: '/super-admin/plans', icon: Package },
     { label: 'Users', href: '/super-admin/users', icon: Users },

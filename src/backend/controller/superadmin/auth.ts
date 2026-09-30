@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { AuthenticatedRequest } from "@middlewares/auth";
 import { Logger } from "winston";
 import Container from "typedi";
 import { forgotPassword, loginUserDTO } from "@interface/user";
@@ -7,6 +8,7 @@ import { LOGIN } from "@responseMessages/superadmin";
 import { decodeJWT } from "@helpers/index";
 import config from "@config/index";
 
+// login
 export const loginController = async (
   req: Request,
   res: Response,
@@ -29,6 +31,7 @@ export const loginController = async (
   }
 };
 
+// forgot password
 export const forgotPasswordController = async (
   req: Request,
   res: Response,
@@ -51,17 +54,23 @@ export const forgotPasswordController = async (
   }
 };
 
+// read user
 export const readUserController = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
   const logger: Logger = Container.get("logger");
   try {
-    const authHeader = req.headers.authorization || "";
-    const { id } = decodeJWT(authHeader, "token");
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        status: false,
+        message: "User context not found on request",
+      });
+    }
     const authServiceInstance = Container.get(AuthService);
-    const data = await authServiceInstance.readUser(id);
+    const data = await authServiceInstance.readUser(userId);
 
     return res.json({
       data,
@@ -74,6 +83,7 @@ export const readUserController = async (
   }
 };
 
+// reset password
 export const resetPasswordController = async (
   req: Request,
   res: Response,
@@ -96,6 +106,7 @@ export const resetPasswordController = async (
   }
 };
 
+// validate reset token
 export const validateResetTokenController = async (
   req: Request,
   res: Response,
@@ -117,6 +128,7 @@ export const validateResetTokenController = async (
   }
 };
 
+// get public key
 export const getPublicKeyController = async (
   req: Request,
   res: Response,
@@ -138,6 +150,7 @@ export const getPublicKeyController = async (
   }
 };
 
+// refresh token
 export const refreshTokenController = async (
   req: Request,
   res: Response,

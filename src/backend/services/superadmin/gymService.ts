@@ -22,11 +22,8 @@ export default class GymService {
     @Inject('logger') logger?: Logger,
     @Inject('adminDB') db?: PrismaClient
   ) {
-    this.logger =
-      logger && typeof (logger as any).info === 'function'
-        ? logger
-        : (LoggerInstance as any);
-    this.db = db && (db as any).gym ? db : adminDB;
+    this.logger = logger ?? (LoggerInstance as any);
+    this.db = db ?? adminDB;
   }
 
   /**
@@ -57,7 +54,7 @@ export default class GymService {
         ? {
             id: activeSub.id,
             planId: activeSub.planId,
-            planName: activeSub.plan?.name || 'Unknown Plan',
+            planName: activeSub.plan?.name || '',
             billingCycle: activeSub.billingCycle,
             status: activeSub.status,
             price: Number(activeSub.price),
@@ -292,7 +289,7 @@ export default class GymService {
 
       // Provision tenant database schema dynamically
       try {
-        createAndMigrateNewSchema(schemaName);
+        await createAndMigrateNewSchema(schemaName);
         this.logger.info(`Successfully provisioned tenant schema '${schemaName}' for gym '${trimmedName}'`);
       } catch (schemaErr: any) {
         this.logger.error(`Error provisioning tenant schema '${schemaName}': %o`, schemaErr.message || schemaErr);

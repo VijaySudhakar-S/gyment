@@ -251,3 +251,8 @@ model AuditLog {
   @@index([gymId, createdAt])
   @@index([actorAdminId])
 }
+
+model ReadNotification {
+  id        String   @id
+  readAt    DateTime @default(now())
+}

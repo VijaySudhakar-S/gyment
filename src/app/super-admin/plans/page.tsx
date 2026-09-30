@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { App, Table } from 'antd';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/MotionContainer';
@@ -10,28 +10,54 @@ import { fmtRs } from '@/lib/formatters';
 import { Plus, Trash2, Edit3, Sliders, ShieldAlert } from 'lucide-react';
 import { PlanFormModal } from '@/components/super-admin/modals/PlanFormModal';
 import { FeatureEditorModal } from '@/components/super-admin/modals/FeatureEditorModal';
-import { PlanData } from '@/lib/api/superadmin/plans.api';
+import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
+import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 
 export default function PlansPage() {
-  const {
-    plans,
-    planList,
-    planFeatures,
-    gyms,
-    isPlansLoading,
-    togglePlanEnabled,
-    deletePlan,
-    setEditingPlanKey,
-    setFeatureEditorModalOpen,
-    openConfirmModal,
-  } = useSuperAdmin();
+  const { message, modal } = App.useApp();
+  
+  const [editingPlanKey, setEditingPlanKey] = useState<string | null>(null);
+  const [featureModalOpen, setFeatureModalOpen] = useState(false);
 
+  const [planList, setPlanList] = useState<PlanData[]>([]);
+  const [gymList, setGymList] = useState<GymData[]>([]);
+  const [isPlansLoading, setIsPlansLoading] = useState(true);
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [selectedPlanToEdit, setSelectedPlanToEdit] = useState<PlanData | null>(null);
 
+  const loadPlans = useCallback(async () => {
+    try {
+      setIsPlansLoading(true);
+      const res = await plansApi.getAll();
+      if (res.status && Array.isArray(res.data)) {
+        setPlanList(res.data);
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to load plans');
+    } finally {
+      setIsPlansLoading(false);
+    }
+  }, []);
+
+  const loadGyms = useCallback(async () => {
+    try {
+      const res = await gymsApi.getAll();
+      if (res.status && Array.isArray(res.data)) {
+        setGymList(res.data);
+      }
+    } catch (error) {
+      console.error('Failed to load gyms:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPlans();
+    loadGyms();
+  }, [loadPlans, loadGyms]);
+
   const handleOpenFeatureEditor = (key: string) => {
     setEditingPlanKey(key);
-    setFeatureEditorModalOpen(true);
+    setFeatureModalOpen(true);
   };
 
   const handleCreateNewPlan = () => {
@@ -44,30 +70,48 @@ export default function PlansPage() {
     setFormModalOpen(true);
   };
 
+  const handleTogglePlan = async (plan: PlanData) => {
+    try {
+      const res = await plansApi.toggleStatus(plan.id);
+      if (res.status) {
+        message.success(`Plan ${plan.isActive ? 'disabled' : 'enabled'} successfully`);
+        await loadPlans();
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to update plan status');
+    }
+  };
+
   const handleDeletePlan = (plan: PlanData) => {
-    const key = plan.name.toLowerCase();
-    const activeGymsCount = gyms.filter(
-      (g) => g.plan.toLowerCase() === key && g.subStatus === 'Active'
+    const activeGymsCount = gymList.filter(
+      (g) => g.activeSubscription?.planId === plan.id && g.activeSubscription?.status === 'ACTIVE'
     ).length;
 
     if (activeGymsCount > 0) {
-      openConfirmModal({
+      modal.warning({
         title: 'Cannot Delete Plan',
-        body: `The plan "${plan.name}" currently has ${activeGymsCount} active gym subscription(s). Please migrate or cancel the gyms' subscriptions first before deleting this plan.`,
-        actionLabel: 'Understood',
-        isDanger: false,
-        onConfirm: () => {},
+        content: `The plan "${plan.name}" currently has ${activeGymsCount} active gym subscription(s). Please migrate or cancel the gyms' subscriptions first before deleting this plan.`,
+        okText: 'Understood',
       });
       return;
     }
 
-    openConfirmModal({
+    modal.confirm({
       title: `Delete Plan "${plan.name}"?`,
-      body: `Are you sure you want to permanently delete the "${plan.name}" plan? This action cannot be undone.`,
-      actionLabel: 'Delete Plan',
-      isDanger: true,
-      onConfirm: async () => {
-        await deletePlan(plan.id);
+      content: `Are you sure you want to permanently delete the "${plan.name}" plan? This action cannot be undone.`,
+      okText: 'Delete Plan',
+      okType: 'danger',
+      centered : true,
+      onOk: async () => {
+        try {
+          const res = await plansApi.delete(plan.id);
+          if (res.status) {
+            message.success('Plan deleted successfully');
+            await loadPlans();
+          }
+        } catch (error: any) {
+          message.error(error.message || 'Failed to delete plan');
+        }
       },
     });
   };
@@ -117,7 +161,7 @@ export default function PlansPage() {
             <button
               type="button"
               onClick={handleCreateNewPlan}
-              className="mt-4 bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition-all"
+              className="mt-4 bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Create First Plan</span>
@@ -127,12 +171,11 @@ export default function PlansPage() {
           /* Plan Cards */
           <MotionStagger className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {planList.map((plan) => {
-              const key = plan.name.toLowerCase();
-              const activeGymsCount = gyms.filter(
-                (g) => g.plan.toLowerCase() === key && g.subStatus === 'Active'
+              const activeGymsCount = gymList.filter(
+                (g) => g.activeSubscription?.planId === plan.id && g.activeSubscription?.status === 'ACTIVE'
               ).length;
 
-              const enabledFeaturesMap = planFeatures[key] || plan.features?.enabledFeatures || {};
+              const enabledFeaturesMap = plan.features?.enabledFeatures || {};
               const enabledFeaturesCount = typeof enabledFeaturesMap === 'object' && !Array.isArray(enabledFeaturesMap)
                 ? Object.values(enabledFeaturesMap).filter(Boolean).length
                 : 0;
@@ -204,7 +247,7 @@ export default function PlansPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleOpenFeatureEditor(key)}
+                        onClick={() => handleOpenFeatureEditor(plan.id)}
                         className="border border-gyment-border bg-white hover:bg-gyment-bg px-2.5 py-1.5 rounded-lg text-[12px] font-semibold text-gyment-text transition-colors flex items-center gap-1 cursor-pointer"
                       >
                         <Sliders className="w-3.5 h-3.5" />
@@ -212,7 +255,7 @@ export default function PlansPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => togglePlanEnabled(key)}
+                        onClick={() => handleTogglePlan(plan)}
                         className="border border-gyment-border bg-white hover:bg-gyment-bg px-2.5 py-1.5 rounded-lg text-[12px] font-semibold text-gyment-text transition-colors cursor-pointer"
                       >
                         {plan.isActive ? 'Disable' : 'Enable'}
@@ -243,49 +286,46 @@ export default function PlansPage() {
               </div>
             </div>
 
-            <div className="bg-white border border-gyment-border rounded-xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-[13px]">
-                  <thead>
-                    <tr>
-                      <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                        Plan
-                      </th>
-                      <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                        Status
-                      </th>
-                      <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                        Active Gyms
-                      </th>
-                      <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                        Monthly Revenue
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gyment-border">
-                    {planList.map((plan) => {
-                      const key = plan.name.toLowerCase();
-                      const activeGyms = gyms.filter(
-                        (g) => g.plan.toLowerCase() === key && g.subStatus === 'Active'
+            <div className="bg-white border border-gyment-border rounded-xl overflow-hidden shadow-2xs">
+              <Table<PlanData>
+                dataSource={planList}
+                rowKey="id"
+                pagination={false}
+                columns={[
+                  {
+                    title: 'PLAN',
+                    dataIndex: 'name',
+                    key: 'name',
+                    render: (name) => <span className="font-bold text-gyment-text">{name}</span>,
+                  },
+                  {
+                    title: 'STATUS',
+                    dataIndex: 'isActive',
+                    key: 'isActive',
+                    render: (isActive) => <StatusBadge status={isActive ? 'Enabled' : 'Disabled'} />,
+                  },
+                  {
+                    title: 'ACTIVE GYMS',
+                    key: 'activeGyms',
+                    render: (_, plan) => {
+                      const count = gymList.filter(
+                        (g) => g.activeSubscription?.planId === plan.id && g.activeSubscription?.status === 'ACTIVE'
                       ).length;
-                      const rev = activeGyms * plan.monthlyPrice;
-
-                      return (
-                        <tr key={plan.id} className="hover:bg-gyment-bg transition-colors">
-                          <td className="px-3 py-2.5 font-bold text-gyment-text">{plan.name}</td>
-                          <td className="px-3 py-2.5">
-                            <StatusBadge status={plan.isActive ? 'Enabled' : 'Disabled'} />
-                          </td>
-                          <td className="px-3 py-2.5 text-gyment-text">{activeGyms}</td>
-                          <td className="px-3 py-2.5 font-semibold text-gyment-text">
-                            {fmtRs(rev)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      return <span className="text-gyment-text">{count}</span>;
+                    },
+                  },
+                  {
+                    title: 'MONTHLY REVENUE',
+                    key: 'monthlyRev',
+                    render: (_, plan) => {
+                      const count = gymList.filter(
+                        (g) => g.activeSubscription?.planId === plan.id && g.activeSubscription?.status === 'ACTIVE'
+                      ).length;
+                      return <span className="font-semibold text-gyment-text">{fmtRs(count * plan.monthlyPrice)}</span>;
+                    },
+                  },
+                ]}
+              />
             </div>
           </MotionFadeIn>
         )}
@@ -297,12 +337,18 @@ export default function PlansPage() {
         onClose={() => {
           setFormModalOpen(false);
           setSelectedPlanToEdit(null);
+          loadPlans();
         }}
         planToEdit={selectedPlanToEdit}
       />
 
       {/* Feature Editor Modal */}
-      <FeatureEditorModal />
+      <FeatureEditorModal 
+        open={featureModalOpen}
+        onClose={() => setFeatureModalOpen(false)}
+        editingPlanKey={editingPlanKey}
+        onSuccess={() => loadPlans()}
+      />
     </>
   );
 }

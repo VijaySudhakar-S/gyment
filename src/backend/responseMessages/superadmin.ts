@@ -86,3 +86,105 @@ export const PLAN = {
   },
 };
 
+export const USER_MANAGEMENT = {
+  SUCCESS: {
+    LISTED: "Users listed successfully.",
+    FETCHED: "User details fetched successfully.",
+    CREATED: "User account created successfully.",
+    UPDATED: "User account updated successfully.",
+    STATUS_TOGGLED: "User account status updated successfully.",
+    DELETED: "User account deleted successfully.",
+  },
+  ERROR: {
+    NOT_FOUND: "User not found.",
+    EMAIL_EXISTS: "A user with this email address already exists.",
+    PHONE_EXISTS: "A user with this phone number already exists.",
+    GYM_REQUIRED: "Gym selection is required for Gym Users.",
+    ROLE_REQUIRED: "Role selection is required for Gym Users.",
+    INVALID_TYPE: "Invalid user account category specified.",
+  },
+};
+
+export const SUBSCRIPTION = {
+  SUCCESS: {
+    LISTED: "Gym subscriptions retrieved successfully.",
+    FETCHED: "Subscription details retrieved successfully.",
+    UPDATED: "Subscription updated successfully.",
+    EXTENDED: "Subscription extended successfully.",
+    STATUS_CHANGED: "Subscription status updated successfully.",
+    PLAN_CHANGED: "Gym plan changed successfully.",
+  },
+  ERROR: {
+    NOT_FOUND: "Subscription not found.",
+    GYM_NOT_FOUND: "Gym not found.",
+    PLAN_NOT_FOUND: "Plan not found.",
+    UPDATE_FAILED: "Failed to update subscription.",
+  },
+};
+
+export const REVENUE = {
+  SUCCESS: {
+    FETCHED: "Revenue statistics retrieved successfully.",
+  },
+  ERROR: {
+    FETCH_FAILED: "Failed to retrieve revenue statistics.",
+  },
+};
+
+export const REPORTS = {
+  SUCCESS: {
+    FETCHED: "Platform reports retrieved successfully.",
+    EXPORTED: "Report export generated successfully.",
+  },
+  ERROR: {
+    FETCH_FAILED: "Failed to retrieve platform reports.",
+    EXPORT_FAILED: "Failed to generate report export.",
+  },
+};
+
+export const SETTINGS = {
+  SUCCESS: {
+    FETCHED: "Platform settings retrieved successfully.",
+    UPDATED: "Platform settings saved successfully.",
+    PROFILE_UPDATED: "SuperAdmin profile updated successfully.",
+  },
+  ERROR: {
+    FETCH_FAILED: "Failed to retrieve platform settings.",
+    UPDATE_FAILED: "Failed to update platform settings.",
+  },
+};
+
+export const SUPPORT = {
+  SUCCESS: {
+    LISTED: "Support tickets retrieved successfully.",
+    FETCHED: "Support ticket details retrieved successfully.",
+    CREATED: "Support ticket logged successfully.",
+    RESOLVED: "Support ticket marked as resolved.",
+  },
+  ERROR: {
+    NOT_FOUND: "Support ticket not found.",
+    CREATE_FAILED: "Failed to create support ticket.",
+  },
+};
+
+export const NOTIFICATIONS = {
+  SUCCESS: {
+    LISTED: "Notifications retrieved successfully.",
+    MARKED_READ: "Notification marked as read.",
+    ALL_MARKED_READ: "All notifications marked as read.",
+  },
+  ERROR: {
+    NOT_FOUND: "Notification not found.",
+    FETCH_FAILED: "Failed to fetch notifications.",
+  },
+};
+
+export const DASHBOARD = {
+  SUCCESS: {
+    FETCHED: "Dashboard overview metrics retrieved successfully.",
+  },
+  ERROR: {
+    FETCH_FAILED: "Failed to retrieve dashboard overview.",
+  },
+};
+

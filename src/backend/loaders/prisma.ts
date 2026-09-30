@@ -32,11 +32,12 @@ export type TenantPrismaClient = TenantClient;
 const resolveExistingPath = (candidates: string[], label: string) => {
   const resolvedPath = candidates.find((candidate) => existsSync(candidate));
   if (!resolvedPath) {
-    return candidates[0]; // fallback
+    return candidates[0];
   }
   return resolvedPath;
 };
 
+// get tenant database connection
 export const getDBConnection = (dbName: string): TenantClient => {
   if (!dbConnectionList.has(dbName)) {
     dbConnectionList.set(
@@ -47,6 +48,7 @@ export const getDBConnection = (dbName: string): TenantClient => {
   return dbConnectionList.get(dbName)!;
 };
 
+// check unique in admin database
 export const checkUniqueInAdminDB = async <T>(
   model: Prisma.ModelName,
   params: Partial<T>,
@@ -64,7 +66,14 @@ export const checkUniqueInAdminDB = async <T>(
   }
 };
 
-export const createAndMigrateNewSchema = (schemaName: string) => {
+// create and migrate new schema
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
+
+// create and migrate new schema asynchronously
+export const createAndMigrateNewSchemaAsync = async (schemaName: string): Promise<void> => {
   const schemaPath = "./prisma/tenant/schema.prisma";
   const schema = readFileSync(schemaPath, "utf8");
   const configPath = resolveExistingPath(
@@ -80,10 +89,9 @@ export const createAndMigrateNewSchema = (schemaName: string) => {
   writeFileSync(newSchemaPath, schema, "utf-8");
 
   try {
-    execSync(
+    await execAsync(
       `"${prismaBinary}" migrate deploy --schema "${newSchemaPath}" --config "${configPath}"`,
       {
-        stdio: "inherit",
         env: {
           ...process.env,
           DATABASE_URL_TENANT: getConnectionStringForSchema(schemaName),
@@ -97,6 +105,8 @@ export const createAndMigrateNewSchema = (schemaName: string) => {
   }
 };
 
+export const createAndMigrateNewSchema = createAndMigrateNewSchemaAsync;
+
 (async () => {
   if (config.db.auto_migrate) {
     try {
@@ -105,7 +115,7 @@ export const createAndMigrateNewSchema = (schemaName: string) => {
 
       for (const gym of gyms) {
         try {
-          createAndMigrateNewSchema(gym.schemaName);
+          await createAndMigrateNewSchemaAsync(gym.schemaName);
           console.log("Migrated tenant schema", gym.schemaName, "for", gym.name);
         } catch (error) {
           console.error("Error migrating tenant", gym.schemaName, error);

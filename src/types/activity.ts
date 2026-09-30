@@ -1,7 +1,7 @@
 export type ActivityTone = 'green' | 'blue' | 'amber' | 'red';
 
 export interface ActivityItem {
-  id: number;
+  id: number | string;
   t: string;
   d: string;
   ti: string;

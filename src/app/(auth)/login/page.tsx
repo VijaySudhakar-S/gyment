@@ -129,7 +129,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full mt-3 bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark font-semibold text-[13.5px] py-2.5 rounded-[9px] flex items-center justify-center gap-2 transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer disabled:opacity-50"
             >
-              <span>{loading ? 'Authenticating…' : 'Sign In to Super Admin'}</span>
+              <span>{loading ? 'Signing In…' : 'Sign In to Super Admin'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

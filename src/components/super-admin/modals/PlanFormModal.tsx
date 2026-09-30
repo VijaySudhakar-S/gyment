@@ -1,23 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Modal } from 'antd';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
-import { PlanData } from '@/lib/api/superadmin/plans.api';
+import { Modal, message } from 'antd';
+import { PlanData, plansApi } from '@/lib/api/superadmin/plans.api';
 
-interface PlanFormModalProps {
-  open: boolean;
-  onClose: () => void;
-  planToEdit?: PlanData | null;
-}
+import { PlanFormModalProps } from '@/types/modals';
 
 export const PlanFormModal: React.FC<PlanFormModalProps> = ({
   open,
   onClose,
+  onSuccess,
   planToEdit,
 }) => {
-  const { createPlan, updatePlan } = useSuperAdmin();
-
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [monthlyPrice, setMonthlyPrice] = useState<string>('');
@@ -48,25 +42,28 @@ export const PlanFormModal: React.FC<PlanFormModalProps> = ({
     try {
       setIsSubmitting(true);
       if (planToEdit) {
-        await updatePlan(planToEdit.id, {
+        await plansApi.update(planToEdit.id, {
           name: name.trim(),
           description: description.trim() || null,
           monthlyPrice: Number(monthlyPrice),
           yearlyPrice: Number(yearlyPrice),
           isActive,
         });
+        message.success('Plan updated successfully');
       } else {
-        await createPlan({
+        await plansApi.create({
           name: name.trim(),
           description: description.trim() || null,
           monthlyPrice: Number(monthlyPrice),
           yearlyPrice: Number(yearlyPrice),
           isActive,
         });
+        message.success('Plan created successfully');
       }
+      onSuccess?.();
       onClose();
     } catch {
-      // Error handled by notification in context
+      message.error('Failed to save plan');
     } finally {
       setIsSubmitting(false);
     }
