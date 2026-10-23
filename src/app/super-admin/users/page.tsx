@@ -7,11 +7,13 @@ import type { TableColumnsType } from 'antd';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 import { initials } from '@/lib/formatters';
 import { AddUserModal } from '@/components/super-admin/modals/AddUserModal';
 import { usersApi, UserItem } from '@/lib/api/superadmin/users.api';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 import { TableSkeleton } from '@/components/shared/skeletons';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function UsersPage() {
   const { message, modal } = App.useApp();
@@ -22,6 +24,7 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [userTypeFilter, setUserTypeFilter] = useState<string>('');
   const [roleFilter, setRoleFilter] = useState<string>('');
   const [gymFilter, setGymFilter] = useState<string>('');
@@ -61,7 +64,7 @@ export default function UsersPage() {
 
   const filteredUsers = useMemo(() => {
     return userList.filter((u) => {
-      const q = search.trim().toLowerCase();
+      const q = debouncedSearch.trim().toLowerCase();
       const matchSearch =
         !q ||
         u.name.toLowerCase().includes(q) ||
@@ -75,7 +78,7 @@ export default function UsersPage() {
 
       return matchSearch && matchUserType && matchRole && matchGym && matchStatus;
     });
-  }, [userList, search, userTypeFilter, roleFilter, gymFilter, statusFilter]);
+  }, [userList, debouncedSearch, userTypeFilter, roleFilter, gymFilter, statusFilter]);
 
   const handleCreateUser = () => {
     setUserToEdit(null);
@@ -229,82 +232,86 @@ export default function UsersPage() {
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export</span>
             </button>
-            <button
-              type="button"
+            <PrimaryButton
               onClick={handleCreateUser}
-              className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shrink-0 transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
+              icon={<Plus className="w-4 h-4" />}
             >
-              <Plus className="w-4 h-4" />
-              <span>Add User</span>
-            </button>
+              Add User
+            </PrimaryButton>
           </div>
         }
       />
 
       <main className="p-4 sm:p-5 w-full mx-auto space-y-4">
-        {/* AntD Filter Toolbar */}
-        <MotionFadeIn delay={0.04} className="flex items-center gap-2.5 flex-wrap bg-white border border-gyment-border rounded-xl p-3 shadow-2xs">
-          <Input
-            prefix={<Search className="w-4 h-4 text-gyment-muted mr-1" />}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, email or phone..."
-            className="w-56"
-            allowClear
-          />
+        {/* AntD Filter Toolbar: Search left, dropdowns right */}
+        <MotionFadeIn delay={0.04} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Search on left */}
+          <div className="w-full sm:w-60">
+            <Input
+              prefix={<Search className="w-3.5 h-3.5 text-gyment-muted mr-1.5" />}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, email, phone..."
+              className="w-full h-[36px]"
+              allowClear
+            />
+          </div>
 
-          <Select
-            allowClear
-            placeholder="User Type"
-            value={userTypeFilter || undefined}
-            onChange={(val) => setUserTypeFilter(val || '')}
-            className="w-40 text-xs"
-            options={[
-              { value: 'SUPER_ADMIN', label: 'Super Admin' },
-              { value: 'GYM_USER', label: 'Gym User' },
-            ]}
-          />
+          {/* Dropdown filters on right */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              allowClear
+              placeholder="All Status"
+              value={statusFilter || undefined}
+              onChange={(val) => setStatusFilter(val || '')}
+              className="w-full sm:w-32 h-[36px] text-xs"
+              options={[
+                { value: 'ACTIVE', label: 'Active' },
+                { value: 'INACTIVE', label: 'Inactive' },
+                { value: 'SUSPENDED', label: 'Suspended' },
+              ]}
+            />
 
-          <Select
-            allowClear
-            placeholder="All Roles"
-            value={roleFilter || undefined}
-            onChange={(val) => setRoleFilter(val || '')}
-            className="w-44 text-xs"
-            options={[
-              { value: 'SUPER_ADMIN', label: 'SUPER_ADMIN' },
-              { value: 'GYM_ADMIN', label: 'GYM_ADMIN (Owner)' },
-              { value: 'RECEPTIONIST', label: 'RECEPTIONIST' },
-              { value: 'TRAINER', label: 'TRAINER' },
-            ]}
-          />
+            <Select
+              allowClear
+              placeholder="User Type"
+              value={userTypeFilter || undefined}
+              onChange={(val) => setUserTypeFilter(val || '')}
+              className="w-full sm:w-32 h-[36px] text-xs"
+              options={[
+                { value: 'SUPER_ADMIN', label: 'Super Admin' },
+                { value: 'GYM_USER', label: 'Gym User' },
+              ]}
+            />
 
-          <Select
-            allowClear
-            showSearch
-            placeholder="All Gyms"
-            optionFilterProp="label"
-            value={gymFilter || undefined}
-            onChange={(val) => setGymFilter(val || '')}
-            className="w-48 text-xs"
-            options={gymList.map((g) => ({
-              value: g.id,
-              label: g.name,
-            }))}
-          />
+            <Select
+              allowClear
+              placeholder="All Roles"
+              value={roleFilter || undefined}
+              onChange={(val) => setRoleFilter(val || '')}
+              className="w-full sm:w-36 h-[36px] text-xs"
+              options={[
+                { value: 'SUPER_ADMIN', label: 'SUPER_ADMIN' },
+                { value: 'GYM_ADMIN', label: 'GYM_ADMIN' },
+                { value: 'RECEPTIONIST', label: 'RECEPTIONIST' },
+                { value: 'TRAINER', label: 'TRAINER' },
+              ]}
+            />
 
-          <Select
-            allowClear
-            placeholder="All Status"
-            value={statusFilter || undefined}
-            onChange={(val) => setStatusFilter(val || '')}
-            className="w-36 text-xs"
-            options={[
-              { value: 'ACTIVE', label: 'Active' },
-              { value: 'INACTIVE', label: 'Inactive' },
-              { value: 'SUSPENDED', label: 'Suspended' },
-            ]}
-          />
+            <Select
+              allowClear
+              showSearch
+              placeholder="All Gyms"
+              optionFilterProp="label"
+              value={gymFilter || undefined}
+              onChange={(val) => setGymFilter(val || '')}
+              className="w-full sm:w-40 h-[36px] text-xs"
+              options={gymList.map((g) => ({
+                value: g.id,
+                label: g.name,
+              }))}
+            />
+          </div>
         </MotionFadeIn>
 
         {/* AntD Users Table */}

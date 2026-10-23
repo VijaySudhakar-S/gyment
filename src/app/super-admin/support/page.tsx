@@ -1,19 +1,23 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { HelpCircle, Plus } from 'lucide-react';
-import { App, Modal, Input } from 'antd';
+import { HelpCircle, Plus, Search } from 'lucide-react';
+import { App, Modal, Input, Table, Select } from 'antd';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 import { supportApi, SupportTicketItem } from '@/lib/api/superadmin/support.api';
 import { SkeletonBlock } from '@/components/shared/skeletons';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function SupportPage() {
   const { message } = App.useApp();
 
   const [tickets, setTickets] = useState<SupportTicketItem[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [selectedTicket, setSelectedTicket] = useState<SupportTicketItem | null>(null);
@@ -64,6 +68,19 @@ export default function SupportPage() {
     setReplyText('');
   };
 
+  const filteredTickets = React.useMemo(() => {
+    if (!debouncedSearch.trim()) return tickets;
+    const query = debouncedSearch.toLowerCase().trim();
+    return tickets.filter(
+      t =>
+        t.subject?.toLowerCase().includes(query) ||
+        t.message?.toLowerCase().includes(query) ||
+        t.gymName?.toLowerCase().includes(query) ||
+        t.requesterName?.toLowerCase().includes(query) ||
+        t.requesterEmail?.toLowerCase().includes(query)
+    );
+  }, [tickets, debouncedSearch]);
+
   return (
     <>
       <Topbar
@@ -71,125 +88,123 @@ export default function SupportPage() {
         subtitle="Requests and tickets submitted by gym operators."
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-4">
-        {/* Filter Chips */}
-        <MotionFadeIn delay={0.04} className="flex items-center gap-2 flex-wrap">
-          {chips.map(chip => {
-            const active = statusFilter === chip;
-            return (
-              <button
-                key={chip}
-                type="button"
-                onClick={() => setStatusFilter(chip)}
-                className={`px-3.5 py-1.5 rounded-full border text-[12.5px] font-semibold transition-colors cursor-pointer ${active
-                  ? 'bg-gyment-dark text-white border-gyment-dark'
-                  : 'bg-white text-gyment-muted border-gyment-border hover:bg-gyment-bg'
-                  }`}
-              >
-                {chip.replace('_', ' ')}
-              </button>
-            );
-          })}
+        {/* Search on left, Status dropdown on right */}
+        <MotionFadeIn delay={0.04} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="w-full sm:w-72">
+            <Input
+              allowClear
+              prefix={<Search className="w-3.5 h-3.5 text-gyment-muted mr-1.5" />}
+              placeholder="Search subject, gym, or user..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-[36px] text-xs"
+            />
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <Select
+              allowClear
+              placeholder="All Statuses"
+              value={statusFilter || undefined}
+              onChange={(val) => setStatusFilter(val || 'All')}
+              className="w-full sm:w-40 h-[36px] text-xs"
+              options={chips.map((chip) => ({
+                value: chip,
+                label: chip.replace('_', ' '),
+              }))}
+            />
+          </div>
         </MotionFadeIn>
 
         {/* Support Table */}
-        <MotionFadeIn delay={0.1} className="bg-white border border-gyment-border rounded-[14px] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-[13px]">
-              <thead>
-                <tr>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Subject & Request
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Gym / Facility
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Requester
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Priority
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Status
-                  </th>
-                  <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                    Created
-                  </th>
-                  <th className="px-3 py-2.5 border-b border-gyment-border"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gyment-border">
-                {isLoading ? (
-                  [...Array(5)].map((_, i) => (
-                    <tr key={i}>
-                      <td className="px-3 py-3.5"><SkeletonBlock className="h-4 w-44 rounded" /></td>
-                      <td className="px-3 py-3.5"><SkeletonBlock className="h-4 w-28 rounded" /></td>
-                      <td className="px-3 py-3.5"><SkeletonBlock className="h-4 w-24 rounded" /></td>
-                      <td className="px-3 py-3.5"><SkeletonBlock className="h-5 w-16 rounded-full" /></td>
-                      <td className="px-3 py-3.5"><SkeletonBlock className="h-5 w-16 rounded-full" /></td>
-                      <td className="px-3 py-3.5"><SkeletonBlock className="h-3.5 w-20 rounded" /></td>
-                      <td className="px-3 py-3.5 text-right"><SkeletonBlock className="h-7 w-14 rounded inline-block" /></td>
-                    </tr>
-                  ))
-                ) : tickets.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="p-8 text-center text-gyment-muted">
-                      <div className="flex flex-col items-center">
-                        <HelpCircle className="w-9 h-9 mb-2.5 opacity-40 text-gyment-muted" />
-                        <div className="font-bold text-sm text-gyment-text mb-1">
-                          No support requests found
-                        </div>
-                        <div className="text-xs">
-                          There are currently no tickets matching this filter.
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  tickets.map(ticket => (
-                    <tr key={ticket.id} className="hover:bg-gyment-bg transition-colors">
-                      <td className="px-3 py-2.5 font-semibold text-gyment-text">
-                        <div>{ticket.subject}</div>
-                        <div className="text-[11px] text-gyment-muted font-normal line-clamp-1">{ticket.message}</div>
-                      </td>
-                      <td className="px-3 py-2.5 text-gyment-text">{ticket.gymName}</td>
-                      <td className="px-3 py-2.5 text-gyment-text">
-                        <div>{ticket.requesterName}</div>
-                        <div className="text-[11px] text-gyment-muted">{ticket.requesterEmail}</div>
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <StatusBadge status={ticket.priority} />
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <StatusBadge status={ticket.status} />
-                      </td>
-                      <td className="px-3 py-2.5 text-gyment-text">{new Date(ticket.createdAt).toLocaleDateString()}</td>
-                      <td className="px-3 py-2.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedTicket(ticket)}
-                            className="border border-gyment-border bg-white hover:bg-gyment-bg px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gyment-text transition-colors shadow-sm cursor-pointer"
-                          >
-                            View
-                          </button>
-                          {ticket.status !== 'RESOLVED' && (
-                            <button
-                              type="button"
-                              onClick={() => handleResolveTicket(ticket.id)}
-                              className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-2.5 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
-                            >
-                              Resolve
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+        <MotionFadeIn delay={0.1} className="bg-white border border-border rounded-xl overflow-hidden shadow-xs">
+          <Table
+            dataSource={filteredTickets}
+            loading={isLoading}
+            rowKey="id"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50'],
+              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} tickets`,
+            }}
+            scroll={{ x: 800 }}
+            columns={[
+              {
+                title: 'SUBJECT & REQUEST',
+                key: 'subject',
+                render: (_: any, ticket: SupportTicketItem) => (
+                  <div>
+                    <div className="font-semibold text-gyment-text">{ticket.subject}</div>
+                    <div className="text-[11px] text-muted font-normal line-clamp-1">{ticket.message}</div>
+                  </div>
+                ),
+              },
+              {
+                title: 'GYM / FACILITY',
+                dataIndex: 'gymName',
+                key: 'gymName',
+                render: (gymName: string) => (
+                  <span className="text-gyment-text font-medium text-[13px]">{gymName}</span>
+                ),
+              },
+              {
+                title: 'REQUESTER',
+                key: 'requester',
+                render: (_: any, ticket: SupportTicketItem) => (
+                  <div>
+                    <div className="text-gyment-text font-medium text-[13px]">{ticket.requesterName}</div>
+                    <div className="text-[11px] text-muted">{ticket.requesterEmail}</div>
+                  </div>
+                ),
+              },
+              {
+                title: 'PRIORITY',
+                dataIndex: 'priority',
+                key: 'priority',
+                render: (priority: string) => <StatusBadge status={priority} />,
+              },
+              {
+                title: 'STATUS',
+                dataIndex: 'status',
+                key: 'status',
+                render: (status: string) => <StatusBadge status={status} />,
+              },
+              {
+                title: 'CREATED',
+                dataIndex: 'createdAt',
+                key: 'createdAt',
+                render: (created: string) => (
+                  <span className="text-muted text-[12px]">{new Date(created).toLocaleDateString()}</span>
+                ),
+              },
+              {
+                title: 'ACTION',
+                key: 'action',
+                align: 'right' as const,
+                render: (_: any, ticket: SupportTicketItem) => (
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTicket(ticket)}
+                      className="border border-border bg-white hover:bg-stone-100 dark:hover:bg-stone-800 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gyment-text transition-colors shadow-2xs cursor-pointer"
+                    >
+                      View
+                    </button>
+                    {ticket.status !== 'RESOLVED' && (
+                      <PrimaryButton
+                        type="button"
+                        size="sm"
+                        onClick={() => handleResolveTicket(ticket.id)}
+                      >
+                        Resolve
+                      </PrimaryButton>
+                    )}
+                  </div>
+                ),
+              },
+            ]}
+          />
         </MotionFadeIn>
 
         {/* View / Reply Modal */}
@@ -243,14 +258,13 @@ export default function SupportPage() {
                     >
                       Close
                     </button>
-                    <button
-                      type="button"
+                    <PrimaryButton
+                      size="sm"
                       disabled={isResolving}
                       onClick={handleSendReply}
-                      className="bg-primary text-white hover:bg-primary-dark px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
                     >
                       {isResolving ? 'Resolving...' : 'Send & Mark Resolved'}
-                    </button>
+                    </PrimaryButton>
                   </div>
                 </div>
               )}

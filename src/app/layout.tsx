@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AntdProvider } from '../providers/AntdProvider';
 import { SuperAdminProvider } from '@/context/SuperAdminContext';
 
 export const metadata: Metadata = {
-  title: 'GYMENT — Super Admin',
-  description: 'Monitor and manage the GYMENT platform from one place.',
+  title: {
+    default: 'GYMENT',
+    template: 'GYMENT — %s',
+  },
+  description: 'GYMENT — Gym Management Platform',
 };
 
 export default function RootLayout({
@@ -27,7 +31,9 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
-        <script
+        <Script
+          id="gyment-theme-mode"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

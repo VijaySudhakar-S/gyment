@@ -1,11 +1,11 @@
-export interface MonthlyTrend {
+export interface MonthlyTrendItem {
   month: string;
   revenue: number;
   newSubscriptions: number;
   cancelledSubscriptions: number;
 }
 
-export interface PlanRevenue {
+export interface PlanRevenueItem {
   planId: string;
   planName: string;
   price: number;
@@ -13,13 +13,17 @@ export interface PlanRevenue {
   monthlyRevenue: number;
 }
 
-export interface RevenueStatsData {
+export interface RevenueMetricsDTO {
   monthlyRecurringRevenue: number;
   totalSubscriptionRevenue: number;
   averageRevenuePerGym: number;
   activePayingGyms: number;
   newPaidSubscriptions30Days: number;
   cancelledSubscriptions30Days: number;
-  monthlyTrends: MonthlyTrend[];
-  planBreakdown: PlanRevenue[];
+  monthlyTrends: MonthlyTrendItem[];
+  planBreakdown: PlanRevenueItem[];
 }
+
+export type MonthlyTrend = MonthlyTrendItem;
+export type PlanRevenue = PlanRevenueItem;
+export type RevenueStatsData = RevenueMetricsDTO;

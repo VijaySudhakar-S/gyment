@@ -1,2 +1,4 @@
 export * from './axiosClient';
-export * from './superadmin/auth.api';
+export * as superAdminApi from './superadmin';
+export * as gymAdminModule from './gymadmin';
+export { gymAdminApi } from './gymadmin';

@@ -12,9 +12,10 @@ export interface ActivityTimelineItem {
 export interface PlanDistributionItem {
   name: string;
   value: number;
+  color?: string;
 }
 
-export interface DashboardOverviewData {
+export interface DashboardOverviewDTO {
   totalGyms: number;
   activeGyms: number;
   trialGyms: number;
@@ -32,3 +33,5 @@ export interface DashboardOverviewData {
     data: number[];
   };
 }
+
+export type DashboardOverviewData = DashboardOverviewDTO;

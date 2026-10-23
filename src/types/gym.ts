@@ -61,8 +61,8 @@ export interface GymSubscriptionData {
   billingCycle: 'MONTHLY' | 'YEARLY';
   status: 'ACTIVE' | 'TRIAL' | 'PAST_DUE' | 'CANCELLED' | 'EXPIRED';
   price: number;
-  startDate: string;
-  renewalDate: string;
+  startDate: string | Date;
+  renewalDate: string | Date;
 }
 
 export interface PrimaryAdminData {
@@ -87,9 +87,16 @@ export interface GymData {
   contactPhone: string | null;
   ownerName: string | null;
   ownerPhone: string | null;
-  status: 'ACTIVE' | 'TRIAL' | 'INACTIVE' | 'SUSPENDED';
+  status: any;
   activeSubscription?: GymSubscriptionData | null;
   primaryAdmin?: PrimaryAdminData | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
+
+// Aliases for backend parity
+export type GymResponseDTO = GymData;
+export type CreateGymDTO = CreateGymRequest;
+export type UpdateGymDTO = UpdateGymRequest;
+export type GymSubscriptionDTO = GymSubscriptionData;
+export type PrimaryAdminDTO = PrimaryAdminData;

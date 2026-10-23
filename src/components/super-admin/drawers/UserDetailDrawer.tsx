@@ -71,7 +71,7 @@ export const UserDetailDrawer: React.FC<UserDetailDrawerProps> = ({ open, onClos
     <Drawer
       open={open}
       onClose={onClose}
-      width={440}
+      size={440}
       title={
         user ? (
           <div className="flex items-center gap-3">

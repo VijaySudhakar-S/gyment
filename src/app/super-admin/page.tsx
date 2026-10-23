@@ -13,6 +13,7 @@ import { RevenueChart } from '@/components/charts/RevenueChart';
 import { SubscriptionDonutChart } from '@/components/charts/SubscriptionDonutChart';
 import { initials, fmtRs } from '@/lib/formatters';
 import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/MotionContainer';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 import { dashboardApi, DashboardOverviewData } from '@/lib/api/superadmin/dashboard.api';
 import { GymData } from '@/lib/api/superadmin/gyms.api';
 import { AddGymModal } from '@/components/super-admin/modals/AddGymModal';
@@ -92,14 +93,12 @@ export default function DashboardPage() {
         title="Dashboard"
         subtitle="Monitor and manage the GYMENT platform from one place."
         actions={
-          <button
-            type="button"
+          <PrimaryButton
             onClick={() => setIsAddGymModalOpen(true)}
-            className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shrink-0 transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
+            icon={<Plus className="w-4 h-4 stroke-2" />}
           >
-            <Plus className="w-4 h-4 stroke-2" />
-            <span className="hidden sm:inline">Add Gym</span>
-          </button>
+            Add Gym
+          </PrimaryButton>
         }
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-6">

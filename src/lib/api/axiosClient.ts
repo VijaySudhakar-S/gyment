@@ -81,10 +81,10 @@ apiClient.interceptors.response.use(
 
       const refreshToken = tokenStorage.getRefreshToken();
       if (!refreshToken) {
-        tokenStorage.clearSession();
-        isRefreshing = false;
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-          window.location.href = '/login';
+        const isSuperAdminRoute = window.location.pathname.startsWith('/super-admin');
+        const loginUrl = isSuperAdminRoute ? '/super-admin/login' : '/login';
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = loginUrl;
         }
         return Promise.reject(new Error('Session expired. Please log in again.'));
       }
@@ -114,9 +114,10 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshErr) {
         processQueue(new Error('Session expired. Please log in again.'), null);
-        tokenStorage.clearSession();
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-          window.location.href = '/login';
+        const isSuperAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/super-admin');
+        const loginUrl = isSuperAdminRoute ? '/super-admin/login' : '/login';
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = loginUrl;
         }
         return Promise.reject(new Error('Session expired. Please log in again.'));
       } finally {

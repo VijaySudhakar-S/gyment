@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Sidebar } from '@/components/super-admin/sidebar/Sidebar';
 import { MobileBottomNav } from '@/components/super-admin/shared/MobileBottomNav';
 
@@ -15,10 +15,16 @@ export default function SuperAdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/super-admin/login';
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(!isLoginPage);
 
   useEffect(() => {
+    if (isLoginPage) return;
+    document.title = 'GYMENT — Super Admin';
+
     let isMounted = true;
 
     const checkAuth = async () => {
@@ -28,7 +34,7 @@ export default function SuperAdminLayout({
         if (isMounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
-          router.replace('/login');
+          router.replace('/super-admin/login');
         }
         return;
       }
@@ -47,7 +53,7 @@ export default function SuperAdminLayout({
           tokenStorage.clearSession();
           setIsAuthenticated(false);
           setIsLoading(false);
-          router.replace('/login');
+          router.replace('/super-admin/login');
         }
       }
     };
@@ -57,7 +63,11 @@ export default function SuperAdminLayout({
     return () => {
       isMounted = false;
     };
-  }, [router]);
+  }, [router, isLoginPage]);
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return <SuperAdminSkeleton />;

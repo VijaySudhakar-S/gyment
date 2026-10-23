@@ -81,3 +81,11 @@ export interface ExpireSubscriptionsResult {
   suspendedGymIds: string[];
 }
 
+// Aliases for backend parity
+export type GymSubscriptionResponseDTO = SubscriptionItem;
+export type SubscriptionKPIsDTO = SubscriptionKPIs;
+export type ChangeSubscriptionPlanDTO = ChangePlanPayload;
+export type ExtendSubscriptionDTO = ExtendSubscriptionPayload;
+export type UpdateSubscriptionStatusDTO = UpdateStatusPayload;
+export type PlanChangePreviewDTO = PlanChangePreviewData;
+export type ExpireSubscriptionsResultDTO = ExpireSubscriptionsResult;

@@ -20,11 +20,11 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ isOpen, onClose, class
   const handleLogout = () => {
     onClose();
     tokenStorage.clearSession();
-    router.replace('/login');
+    router.replace('/super-admin/login');
   };
 
   return (
-    <div className={`${className || 'absolute top-13 right-0 w-55'} bg-white border border-gyment-border rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.15)] z-[60] overflow-hidden divide-y divide-gyment-border animate-in fade-in zoom-in-95 duration-100`}>
+    <div className={`${className || 'absolute top-13 right-0 w-55'} bg-white border border-gyment-border rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.15)] z-60 overflow-hidden divide-y divide-gyment-border animate-in fade-in zoom-in-95 duration-100`}>
       <div className="p-3 bg-gyment-bg">
         <div className="text-xs font-bold text-gyment-text truncate">
           {user?.name}

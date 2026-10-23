@@ -6,14 +6,15 @@ import { FEATURES_CONFIG } from '@/data/plans';
 import { FeatureLimits } from '@/types/plan';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { SkeletonBlock } from '@/components/shared/skeletons';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 
 
 const LIMIT_KEYS = [
-  { key: 'Max Members',               label: 'Max Members',              placeholder: 'e.g. 100 or Unlimited' },
-  { key: 'Max Receptionists',         label: 'Max Receptionists',        placeholder: 'e.g. 2 or Unlimited' },
-  { key: 'Max Admins',                label: 'Max Admins',               placeholder: 'e.g. 1 or Unlimited' },
-  { key: 'Max Trainers',              label: 'Max Trainers',             placeholder: 'e.g. 5 or Unlimited' },
-  { key: 'Multiple Branch Management', label: 'Branch Limit',            placeholder: 'e.g. 1 or Unlimited' },
+  { key: 'Max Members', label: 'Max Members', placeholder: 'e.g. 100 or Unlimited' },
+  { key: 'Max Receptionists', label: 'Max Receptionists', placeholder: 'e.g. 2 or Unlimited' },
+  { key: 'Max Admins', label: 'Max Admins', placeholder: 'e.g. 1 or Unlimited' },
+  { key: 'Max Trainers', label: 'Max Trainers', placeholder: 'e.g. 5 or Unlimited' },
+  { key: 'Multiple Branch Management', label: 'Branch Limit', placeholder: 'e.g. 1 or Unlimited' },
 ];
 
 import { FeatureEditorModalProps } from '@/types/modals';
@@ -118,22 +119,20 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
         <button
           type="button"
           onClick={() => setActiveTab('features')}
-          className={`px-4 py-2 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
-            activeTab === 'features'
+          className={`px-4 py-2 text-xs font-bold border-b-2 transition-colors cursor-pointer ${activeTab === 'features'
               ? 'border-primary text-primary'
               : 'border-transparent text-gyment-muted hover:text-gyment-text'
-          }`}
+            }`}
         >
           Feature Access ({enabledCount} / {FEATURES_CONFIG.length} enabled)
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('limits')}
-          className={`px-4 py-2 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
-            activeTab === 'limits'
+          className={`px-4 py-2 text-xs font-bold border-b-2 transition-colors cursor-pointer ${activeTab === 'limits'
               ? 'border-primary text-primary'
               : 'border-transparent text-gyment-muted hover:text-gyment-text'
-          }`}
+            }`}
         >
           Capacity Limits ({LIMIT_KEYS.length} fields)
         </button>
@@ -159,11 +158,10 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
               <div
                 key={feat.key}
                 onClick={() => toggleFeature(feat.key)}
-                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                  isEnabled
+                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${isEnabled
                     ? 'border-primary/40 bg-primary/5 shadow-xs'
                     : 'border-gyment-border bg-white hover:border-gyment-muted/60'
-                }`}
+                  }`}
               >
                 <div className="flex-1 pr-3">
                   <div className="text-xs font-bold text-gyment-text flex items-center gap-1.5">
@@ -177,11 +175,10 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
                   </div>
                 </div>
                 <div
-                  className={`w-4 h-4 rounded-sm flex items-center justify-center border transition-colors ${
-                    isEnabled
+                  className={`w-4 h-4 rounded-sm flex items-center justify-center border transition-colors ${isEnabled
                       ? 'bg-primary border-primary text-white'
                       : 'border-gyment-border bg-white'
-                  }`}
+                    }`}
                 >
                   {isEnabled && (
                     <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
@@ -226,14 +223,14 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
         >
           Cancel
         </button>
-        <button
+        <PrimaryButton
           type="button"
+          size="sm"
           disabled={isSaving || isLoading}
           onClick={handleSave}
-          className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow-md cursor-pointer disabled:opacity-50"
         >
           {isSaving ? 'Saving...' : 'Save Changes'}
-        </button>
+        </PrimaryButton>
       </div>
     </Modal>
   );

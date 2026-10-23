@@ -5,6 +5,7 @@ import { App, Table } from 'antd';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/MotionContainer';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 import { FEATURES_CONFIG } from '@/data/plans';
 import { fmtRs } from '@/lib/formatters';
 import { Plus, Trash2, Edit3, Sliders, ShieldAlert, TrendingUp, AlertTriangle } from 'lucide-react';
@@ -225,14 +226,12 @@ export default function PlansPage() {
         title="GYMENT Plans"
         subtitle="Manage the SaaS subscription plans gyms can purchase."
         actions={
-          <button
-            type="button"
+          <PrimaryButton
             onClick={handleCreateNewPlan}
-            className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shrink-0 transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
+            icon={<Plus className="w-4 h-4" />}
           >
-            <Plus className="w-4 h-4" />
-            <span>Create Plan</span>
-          </button>
+            Create Plan
+          </PrimaryButton>
         }
       />
 
@@ -253,14 +252,14 @@ export default function PlansPage() {
             <p className="text-sm text-gyment-muted mt-1 max-w-sm mx-auto">
               Get started by creating your first subscription tier for gyms on GYMENT.
             </p>
-            <button
-              type="button"
-              onClick={handleCreateNewPlan}
-              className="mt-4 bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create First Plan</span>
-            </button>
+            <div className="mt-4 flex justify-center">
+              <PrimaryButton
+                onClick={handleCreateNewPlan}
+                icon={<Plus className="w-4 h-4" />}
+              >
+                Create First Plan
+              </PrimaryButton>
+            </div>
           </div>
         ) : (
           /* Plan Cards */

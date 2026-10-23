@@ -1,12 +1,28 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import SupportService from '@services/superadmin/supportService';
 import LoggerInstance from '@loaders/logger';
 import { adminDB } from '@loaders/prisma';
+import { ActivityType } from '@adminDB/index';
 import { SUPPORT } from '@responseMessages/superadmin';
 import { HttpError } from '@errors/index';
-
 import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
-const supportService = new SupportService(LoggerInstance, adminDB);
+import { SupportTicketDTO } from '@interface/support';
+
+function formatTicket(log: any): SupportTicketDTO {
+  const meta = (log.metadata as any) || {};
+  return {
+    id: log.id,
+    gymId: log.gymId || null,
+    gymName: log.gym?.name || '',
+    requesterName: meta.requesterName || log.gym?.ownerName || '',
+    requesterEmail: meta.requesterEmail || log.gym?.contactEmail || '',
+    subject: log.action || '',
+    message: log.details || '',
+    priority: meta.priority || 'MEDIUM',
+    status: meta.status || 'OPEN',
+    createdAt: new Date(log.createdAt).toISOString(),
+    updatedAt: meta.resolvedAt ? new Date(meta.resolvedAt).toISOString() : new Date(log.createdAt).toISOString(),
+  };
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
@@ -26,11 +42,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 async function handleGetAll(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { status } = req.query;
-    const data = await supportService.getAllTickets(typeof status === 'string' ? status : undefined);
+    const logs = await adminDB.auditLog.findMany({
+      where: {
+        entityType: 'SUPPORT_TICKET',
+      },
+      include: { gym: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    let formatted = logs.map(l => formatTicket(l));
+
+    if (typeof status === 'string' && status !== 'All') {
+      const upper = status.toUpperCase();
+      formatted = formatted.filter(t => t.status === upper);
+    }
+
     return res.status(200).json({
       status: true,
       message: SUPPORT.SUCCESS.LISTED,
-      data,
+      data: formatted,
     });
   } catch (error: any) {
     LoggerInstance.error('SuperAdmin get support tickets error: %o', error?.message || error);
@@ -54,14 +84,24 @@ async function handleCreate(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const data = await supportService.createTicket({
-      gymId,
-      requesterName,
-      requesterEmail,
-      subject,
-      message,
-      priority,
+    const log = await adminDB.auditLog.create({
+      data: {
+        type: ActivityType.SETTINGS,
+        action: subject,
+        details: message,
+        entityType: 'SUPPORT_TICKET',
+        gymId: gymId || null,
+        metadata: {
+          requesterName,
+          requesterEmail,
+          priority: priority || 'MEDIUM',
+          status: 'OPEN',
+        },
+      },
+      include: { gym: true },
     });
+
+    const data = formatTicket(log);
 
     return res.status(201).json({
       status: true,
@@ -78,6 +118,5 @@ async function handleCreate(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
-
 
 export default withSuperAdminAuth(handler);

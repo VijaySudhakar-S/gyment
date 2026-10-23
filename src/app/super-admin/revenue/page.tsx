@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Download } from 'lucide-react';
-import { App } from 'antd';
+import { App, Table } from 'antd';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { StatCard } from '@/components/shared/StatCard';
 import { RevenueChart } from '@/components/charts/RevenueChart';
@@ -201,56 +201,50 @@ export default function RevenuePage() {
             <h2 className="text-[15.5px] font-bold text-gyment-text m-0">Revenue by Plan</h2>
           </div>
 
-          <div className="bg-white border border-gyment-border rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-[13px]">
-                <thead>
-                  <tr>
-                    <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                      Plan
-                    </th>
-                    <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                      Active Gyms
-                    </th>
-                    <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                      Monthly Price
-                    </th>
-                    <th className="text-left text-[11px] uppercase tracking-wider text-gyment-muted font-bold px-3 py-2.5 border-b border-gyment-border whitespace-nowrap">
-                      Monthly Run-Rate
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gyment-border">
-                  {isLoading ? (
-                    Array.from({ length: 4 }).map((_, i) => (
-                      <tr key={`skel-row-${i}`} className="border-b border-gyment-border">
-                        <td className="px-3 py-3"><SkeletonBlock className="h-4 w-28" /></td>
-                        <td className="px-3 py-3"><SkeletonBlock className="h-4 w-12" /></td>
-                        <td className="px-3 py-3"><SkeletonBlock className="h-4 w-16" /></td>
-                        <td className="px-3 py-3"><SkeletonBlock className="h-4 w-20" /></td>
-                      </tr>
-                    ))
-                  ) : planBreakdown.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="p-6 text-center text-gyment-muted">
-                        No active plans recorded.
-                      </td>
-                    </tr>
-                  ) : (
-                    planBreakdown.map((plan: any) => (
-                      <tr key={plan.planId} className="hover:bg-gyment-bg transition-colors">
-                        <td className="px-3 py-2.5 font-bold text-gyment-text">{plan.planName}</td>
-                        <td className="px-3 py-2.5 text-gyment-text">{plan.activeGymsCount}</td>
-                        <td className="px-3 py-2.5 text-gyment-text">{fmtRs(plan.price)}</td>
-                        <td className="px-3 py-2.5 font-semibold text-gyment-text">
-                          {fmtRs(plan.monthlyRevenue)}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+          <div className="bg-white border border-border rounded-xl overflow-hidden shadow-xs">
+            <Table
+              dataSource={planBreakdown}
+              loading={isLoading}
+              rowKey="planId"
+              pagination={false}
+              scroll={{ x: 500 }}
+              columns={[
+                {
+                  title: 'PLAN',
+                  dataIndex: 'planName',
+                  key: 'planName',
+                  render: (name: string) => (
+                    <span className="font-bold text-gyment-text">{name}</span>
+                  ),
+                },
+                {
+                  title: 'ACTIVE GYMS',
+                  dataIndex: 'activeGymsCount',
+                  key: 'activeGymsCount',
+                  render: (count: number) => (
+                    <span className="text-gyment-text">{count}</span>
+                  ),
+                },
+                {
+                  title: 'MONTHLY PRICE',
+                  dataIndex: 'price',
+                  key: 'price',
+                  render: (price: number) => (
+                    <span className="text-gyment-text">{fmtRs(price)}</span>
+                  ),
+                },
+                {
+                  title: 'MONTHLY RUN-RATE',
+                  dataIndex: 'monthlyRevenue',
+                  key: 'monthlyRevenue',
+                  render: (rev: number) => (
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      {fmtRs(rev)}
+                    </span>
+                  ),
+                },
+              ]}
+            />
           </div>
         </MotionFadeIn>
           </>

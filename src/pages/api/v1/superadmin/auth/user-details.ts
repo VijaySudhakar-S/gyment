@@ -1,13 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import AuthService from '@services/superadmin/authService';
 import LoggerInstance from '@loaders/logger';
 import { adminDB } from '@loaders/prisma';
 import { LOGIN } from '@responseMessages/superadmin';
 import { decodeJWT } from '@helpers/index';
-import { HttpError } from '@errors/index';
-
+import { HttpError, NotFoundError } from '@errors/index';
 import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
-const authService = new AuthService(LoggerInstance, adminDB);
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -21,12 +18,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const { id } = decodeJWT(authHeader, 'token');
-    const data = await authService.readUser(id);
+    LoggerInstance.info('Fetching SuperAdmin profile: %s', id);
+
+    const admin = await adminDB.superAdmin.findUnique({
+      where: { id },
+    });
+
+    if (!admin) {
+      throw new NotFoundError(LOGIN.ERROR.USER_NOT_FOUND);
+    }
+
+    const { passwordHash, ...safeAdmin } = admin;
 
     return res.status(200).json({
       status: true,
       message: LOGIN.SUCCESS.USER_DETAILES,
-      data,
+      data: safeAdmin,
     });
   } catch (error: any) {
     LoggerInstance.error('SuperAdmin readUser error: %o', error?.message || error);
@@ -38,6 +45,5 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
-
 
 export default withSuperAdminAuth(handler);

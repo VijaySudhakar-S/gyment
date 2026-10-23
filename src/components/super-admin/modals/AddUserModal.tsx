@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Modal, Select, Radio, App } from 'antd';
-import { useSuperAdmin } from '@/context/SuperAdminContext';
 import { UserTypeCategory, GymRole, UserItem } from '@/types/user';
 import { usersApi } from '@/lib/api/superadmin/users.api';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 import { ShieldAlert, Building2 } from 'lucide-react';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 
 import { AddUserModalProps } from '@/types/modals';
 
@@ -277,13 +277,12 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, userT
           >
             Cancel
           </button>
-          <button
+          <PrimaryButton
             type="submit"
             disabled={isSubmitting}
-            className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? 'Saving...' : userToEdit ? 'Save Changes' : 'Create User Account'}
-          </button>
+          </PrimaryButton>
         </div>
       </form>
     </Modal>

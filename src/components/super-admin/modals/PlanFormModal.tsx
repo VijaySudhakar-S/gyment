@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, App } from 'antd';
 import { plansApi } from '@/lib/api/superadmin/plans.api';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 import { PlanFormModalProps } from '@/types/modals';
 
 export const PlanFormModal: React.FC<PlanFormModalProps> = ({
@@ -246,13 +247,12 @@ export const PlanFormModal: React.FC<PlanFormModalProps> = ({
           >
             Cancel
           </button>
-          <button
+          <PrimaryButton
             type="submit"
             disabled={isSubmitting}
-            className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shrink-0 transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? 'Saving...' : planToEdit ? 'Save Changes' : 'Create Plan'}
-          </button>
+          </PrimaryButton>
         </div>
       </form>
     </Modal>

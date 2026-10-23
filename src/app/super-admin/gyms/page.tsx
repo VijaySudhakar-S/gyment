@@ -16,11 +16,13 @@ import { AddGymModal } from '@/components/super-admin/modals/AddGymModal';
 import { ChangePlanModal } from '@/components/super-admin/modals/ChangePlanModal';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 import { initials } from '@/lib/formatters';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { reportsApi } from '@/lib/api/superadmin/reports.api';
 import { TableSkeleton } from '@/components/shared/skeletons';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function GymsPage() {
   const router = useRouter();
@@ -35,6 +37,7 @@ export default function GymsPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [planFilter, setPlanFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [dateFilter, setDateFilter] = useState<string>('');
@@ -73,7 +76,7 @@ export default function GymsPage() {
 
   const filteredGyms = useMemo(() => {
     return gymList.filter(g => {
-      const q = search.trim().toLowerCase();
+      const q = debouncedSearch.trim().toLowerCase();
       const matchSearch =
         !q ||
         g.name.toLowerCase().includes(q) ||
@@ -90,7 +93,7 @@ export default function GymsPage() {
 
       return matchSearch && matchPlan && matchStatus && matchDate;
     });
-  }, [gymList, search, planFilter, statusFilter, dateFilter]);
+  }, [gymList, debouncedSearch, planFilter, statusFilter, dateFilter]);
 
   const handleExport = async () => {
     try {
@@ -292,64 +295,56 @@ export default function GymsPage() {
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export</span>
             </button>
-            <button
-              type="button"
+            <PrimaryButton
               onClick={() => setIsAddGymOpen(true)}
-              className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shrink-0 transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
+              icon={<Plus className="w-4 h-4 stroke-2" />}
             >
-              <Plus className="w-4 h-4 stroke-2" />
-              <span className="hidden sm:inline">Add Gym</span>
-            </button>
+              Add Gym
+            </PrimaryButton>
           </>
         }
       />
       <main className="p-4 sm:p-5 w-full mx-auto space-y-4">
-        {/* AntD Filters Bar */}
-        <MotionFadeIn delay={0.04} className="flex items-center gap-2.5 flex-wrap">
-          <Input
-            prefix={<Search className="w-4 h-4 text-gyment-muted mr-1" />}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search gym, code, owner…"
-            className="w-56"
-            allowClear
-          />
+        {/* Unified Single Filter Bar: Search left, all dropdowns right */}
+        <MotionFadeIn delay={0.04} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Search on left */}
+          <div className="w-full sm:w-64">
+            <Input
+              prefix={<Search className="w-4 h-4 text-gyment-muted mr-1" />}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search gym, code, owner…"
+              className="w-full h-[36px]"
+              allowClear
+            />
+          </div>
 
-          <Select
-            allowClear
-            placeholder="All Plans"
-            value={planFilter || undefined}
-            onChange={val => setPlanFilter(val || '')}
-            className="w-44"
-            options={plans.map(p => ({ value: p.name, label: p.name }))}
-          />
+          {/* All dropdown filters on right */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Select
+              allowClear
+              placeholder="All Statuses"
+              value={statusFilter || undefined}
+              onChange={val => setStatusFilter(val || '')}
+              className="w-full sm:w-36 h-[36px] text-xs"
+              options={statuses.map(s => ({ value: s === 'All' ? '' : s, label: s }))}
+            />
 
-          <DatePicker
-            placeholder="Registered after"
-            className="w-44"
-            onChange={(_, dateString) => setDateFilter(Array.isArray(dateString) ? dateString[0] : dateString)}
-          />
-        </MotionFadeIn>
+            <Select
+              allowClear
+              placeholder="All Plans"
+              value={planFilter || undefined}
+              onChange={val => setPlanFilter(val || '')}
+              className="w-full sm:w-36 h-[36px] text-xs"
+              options={plans.map(p => ({ value: p.name, label: p.name }))}
+            />
 
-        {/* Status Chips */}
-        <MotionFadeIn delay={0.08} className="flex items-center gap-2 flex-wrap">
-          {statuses.map(s => {
-            const active =
-              (!statusFilter && s === 'All') || statusFilter === s;
-            return (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setStatusFilter(s === 'All' ? '' : s)}
-                className={`px-3.5 py-1.5 rounded-full border text-[12.5px] transition-colors cursor-pointer ${active
-                  ? 'bg-gyment-dark text-white font-bold border-gyment-dark dark:bg-white dark:text-[#0A0A0A] dark:border-white'
-                  : 'bg-white text-gyment-text font-bold border-gyment-border hover:border-primary hover:bg-gyment-bg'
-                  }`}
-              >
-                {s}
-              </button>
-            );
-          })}
+            <DatePicker
+              placeholder="Registered after"
+              className="w-full sm:w-40 h-[36px] text-xs"
+              onChange={(_, dateString) => setDateFilter(Array.isArray(dateString) ? dateString[0] : dateString)}
+            />
+          </div>
         </MotionFadeIn>
 
         {/* AntD Table Card */}

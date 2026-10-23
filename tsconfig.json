@@ -26,18 +26,16 @@
       "@tenantDB/index": ["./generate/tenant/index"],
       "@adminDB/*": ["./generate/admin/*"],
       "@tenantDB/*": ["./generate/tenant/*"],
-      "@backend/*": ["./src/backend/*"],
-      "@services/*": ["./src/backend/services/*"],
-      "@controller/*": ["./src/backend/controller/*"],
-      "@helpers/*": ["./src/backend/helpers/*"],
-      "@config/*": ["./src/backend/config/*"],
-      "@loaders/*": ["./src/backend/loaders/*"],
-      "@middlewares/*": ["./src/backend/middlewares/*"],
-      "@interface/*": ["./src/backend/interface/*"],
-      "@api/*": ["./src/backend/api/*"],
-      "@errors/*": ["./src/backend/api/errors/*"],
-      "@responseMessages/*": ["./src/backend/responseMessages/*"],
-      "@constants/*": ["./src/backend/constants/*"]
+      "@helpers/*": ["./src/lib/auth/*", "./src/lib/helpers/*"],
+      "@config/*": ["./src/lib/config"],
+      "@loaders/prisma": ["./src/lib/db/prisma"],
+      "@loaders/logger": ["./src/lib/logger"],
+      "@loaders/*": ["./src/lib/*"],
+      "@interface/*": ["./src/types/*"],
+      "@errors/*": ["./src/lib/errors"],
+      "@errors": ["./src/lib/errors"],
+      "@responseMessages/*": ["./src/constants/messages"],
+      "@constants/*": ["./src/constants/*"]
     }
   },
   "include": [

@@ -12,6 +12,7 @@ import { MotionFadeIn, MotionStagger, MotionItem } from '@/components/shared/Mot
 import { initials } from '@/lib/formatters';
 import { gymsApi, GymData } from '@/lib/api/superadmin/gyms.api';
 import { GymDetailSkeleton } from '@/components/shared/skeletons';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 
 export default function GymDetailPage({
   params,
@@ -149,16 +150,22 @@ export default function GymDetailPage({
             >
               View Subscription
             </button>
-            <button
-              type="button"
-              onClick={handleToggleStatus}
-              className={`px-3.5 py-2 rounded-[9px] text-[13px] font-semibold transition-colors border cursor-pointer ${gym.status === 'SUSPENDED'
-                ? 'bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark border-primary'
-                : 'bg-danger-light hover:bg-danger text-danger hover:text-white border-danger-light'
-                }`}
-            >
-              {gym.status === 'SUSPENDED' ? 'Activate Gym' : 'Suspend Gym'}
-            </button>
+            {gym.status === 'SUSPENDED' ? (
+              <PrimaryButton
+                type="button"
+                onClick={handleToggleStatus}
+              >
+                Activate Gym
+              </PrimaryButton>
+            ) : (
+              <button
+                type="button"
+                onClick={handleToggleStatus}
+                className="px-3.5 py-2 rounded-[9px] text-[13px] font-semibold transition-colors border cursor-pointer bg-danger-light hover:bg-danger text-danger hover:text-white border-danger-light"
+              >
+                Suspend Gym
+              </button>
+            )}
           </div>
         </MotionFadeIn>
 

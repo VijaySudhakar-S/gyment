@@ -17,10 +17,10 @@ export interface UserItem {
   role: string;
   gymId: string | null;
   gymName: string | null;
-  status: UserStatus;
-  lastLogin: string | null;
-  createdAt: string;
-  updatedAt: string;
+  status: any;
+  lastLogin: string | Date | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export type User = UserItem;
@@ -61,3 +61,11 @@ export interface UserFilterParams {
   gymId?: string;
   status?: UserStatus | '';
 }
+
+// Aliases for backend parity
+export type UserResponseDTO = UserItem;
+export type CreateUserDTO = CreateUserPayload;
+export type CreateSuperAdminDTO = CreateSuperAdminPayload;
+export type CreateGymUserDTO = CreateGymUserPayload;
+export type UpdateUserDTO = UpdateUserPayload;
+export type UserFilterDTO = UserFilterParams;

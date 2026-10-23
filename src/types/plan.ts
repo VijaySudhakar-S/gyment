@@ -31,6 +31,7 @@ export interface PlanData {
   features: PlanFeaturesPayload;
   isActive: boolean;
   activeGymsCount?: number;
+  sortOrder?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,3 +59,8 @@ export interface UpdatePlanFeaturesRequest {
   features: Record<string, boolean>;
   limits: FeatureLimits;
 }
+
+// Aliases for backend parity
+export type PlanResponseDTO = PlanData;
+export type CreatePlanDTO = CreatePlanRequest;
+export type UpdatePlanDTO = UpdatePlanRequest;

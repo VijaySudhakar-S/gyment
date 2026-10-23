@@ -33,3 +33,11 @@ export interface CreateSupportTicketPayload {
   message: string;
   priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 }
+
+export interface ResolveSupportTicketDTO {
+  resolutionNotes?: string;
+}
+
+// Aliases
+export type SupportTicketDTO = SupportTicketItem;
+export type CreateSupportTicketDTO = CreateSupportTicketPayload;

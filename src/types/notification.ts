@@ -21,3 +21,5 @@ export interface NotificationsResponseData {
   notifications: NotificationItem[];
   unreadCount: number;
 }
+
+export type NotificationDTO = NotificationItem;

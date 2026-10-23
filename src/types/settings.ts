@@ -5,7 +5,7 @@ export interface AdminProfile {
   mobile: string;
 }
 
-export interface PlatformSettingsData {
+export interface PlatformSettingsDTO {
   platformName: string;
   currency: string;
   defaultTimezone: string;
@@ -16,7 +16,7 @@ export interface PlatformSettingsData {
   adminProfile?: AdminProfile;
 }
 
-export interface UpdatePlatformSettingsPayload {
+export interface UpdatePlatformSettingsDTO {
   platformName?: string;
   currency?: string;
   defaultTimezone?: string;
@@ -26,9 +26,14 @@ export interface UpdatePlatformSettingsPayload {
   maintenanceMessage?: string | null;
 }
 
-export interface UpdateAdminProfilePayload {
+export interface UpdateAdminProfileDTO {
   name?: string;
   email?: string;
   mobile?: string;
   password?: string;
 }
+
+// Aliases
+export type PlatformSettingsData = PlatformSettingsDTO;
+export type UpdatePlatformSettingsPayload = UpdatePlatformSettingsDTO;
+export type UpdateAdminProfilePayload = UpdateAdminProfileDTO;

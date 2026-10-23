@@ -1,11 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import AuthService from '@services/superadmin/authService';
 import LoggerInstance from '@loaders/logger';
 import { adminDB } from '@loaders/prisma';
 import { LOGIN } from '@responseMessages/superadmin';
-import { HttpError } from '@errors/index';
-
-const authService = new AuthService(LoggerInstance, adminDB);
+import { HttpError, NotFoundError } from '@errors/index';
+import { generateLoginToken, verifyToken } from '@helpers/index';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -18,7 +16,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ status: false, message: 'Refresh token is required' });
     }
 
-    const data = await authService.refreshToken(refreshToken);
+    LoggerInstance.info('Refreshing SuperAdmin Token');
+    const { tokenDetails } = await verifyToken(refreshToken);
+
+    const admin = await adminDB.superAdmin.findUnique({
+      where: { id: tokenDetails.id, isActive: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundError(LOGIN.ERROR.USER_NOT_FOUND);
+    }
+
+    const tokens = generateLoginToken({
+      id: admin.id,
+      email: admin.email,
+      name: admin.name,
+      role: 'SUPER_ADMIN',
+    });
+
+    const data = {
+      token: tokens.token,
+      refreshtoken: tokens.refreshtoken,
+    };
 
     return res.status(200).json({
       status: true,

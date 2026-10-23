@@ -52,7 +52,7 @@ export async function requestSuperAdminPasswordReset(email: string): Promise<str
     '/api/v1/superadmin/auth/forgot-password',
     { email }
   );
-  return response.data.message;
+  return response.data.message || '';
 }
 
 /**
@@ -67,5 +67,5 @@ export async function resetSuperAdminPassword(payload: {
     '/api/v1/superadmin/auth/reset-password',
     payload
   );
-  return response.data.message;
+  return response.data.message || '';
 }

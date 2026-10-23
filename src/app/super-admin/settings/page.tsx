@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { App } from 'antd';
 import { Topbar } from '@/components/super-admin/header/Topbar';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 import { settingsApi, PlatformSettingsData } from '@/lib/api/superadmin/settings.api';
 import { FormSkeleton } from '@/components/shared/skeletons';
 
@@ -258,13 +259,12 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-3">
-                <button
+                <PrimaryButton
                   type="submit"
                   disabled={isSaving}
-                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer disabled:opacity-50"
                 >
                   {isSaving ? 'Saving...' : 'Save Changes'}
-                </button>
+                </PrimaryButton>
               </div>
             </form>
           </MotionFadeIn>
@@ -320,12 +320,11 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-3">
-                <button
+                <PrimaryButton
                   type="submit"
-                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
                 >
                   Save Changes
-                </button>
+                </PrimaryButton>
               </div>
             </form>
           </MotionFadeIn>
@@ -374,12 +373,11 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-3">
-                <button
+                <PrimaryButton
                   type="submit"
-                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer"
                 >
                   Save Changes
-                </button>
+                </PrimaryButton>
               </div>
             </form>
           </MotionFadeIn>
@@ -436,13 +434,12 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-3">
-                <button
+                <PrimaryButton
                   type="submit"
                   disabled={isSaving}
-                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-all duration-100 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer disabled:opacity-50"
                 >
                   {isSaving ? 'Updating...' : 'Update Profile'}
-                </button>
+                </PrimaryButton>
               </div>
             </form>
           </MotionFadeIn>

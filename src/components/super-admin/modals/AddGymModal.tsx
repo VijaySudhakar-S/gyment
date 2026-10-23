@@ -19,7 +19,7 @@ export const AddGymModal: React.FC<AddGymModalProps> = ({ open, onClose, onSucce
   const [status, setStatus] = useState<'ACTIVE' | 'TRIAL'>('ACTIVE');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const [planList, setPlanList] = useState<PlanData[]>([]);
   const [isLoadingPlans, setIsLoadingPlans] = useState(false);
 
@@ -80,7 +80,7 @@ export const AddGymModal: React.FC<AddGymModalProps> = ({ open, onClose, onSucce
       });
 
       message.success('Gym created and provisioned successfully');
-      
+
       // Reset form
       setName('');
       setLocation('');
@@ -91,7 +91,7 @@ export const AddGymModal: React.FC<AddGymModalProps> = ({ open, onClose, onSucce
       setBillingCycle('MONTHLY');
       setStatus('ACTIVE');
       onClose();
-      
+
       if (onSuccess) {
         await onSuccess();
       }
@@ -254,7 +254,7 @@ export const AddGymModal: React.FC<AddGymModalProps> = ({ open, onClose, onSucce
             htmlType="submit"
             loading={isSubmitting}
           >
-            {isSubmitting ? 'Provisioning Tenant Database...' : 'Create Gym & Provision Schema'}
+            {isSubmitting ? 'Creating Gym...' : 'Create Gym'}
           </Button>
         </div>
       </form>

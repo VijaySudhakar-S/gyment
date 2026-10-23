@@ -1,12 +1,27 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import SupportService from '@services/superadmin/supportService';
 import LoggerInstance from '@loaders/logger';
 import { adminDB } from '@loaders/prisma';
 import { SUPPORT } from '@responseMessages/superadmin';
-import { HttpError } from '@errors/index';
-
+import { HttpError, NotFoundError } from '@errors/index';
 import { withSuperAdminAuth } from '@helpers/withSuperAdminAuth';
-const supportService = new SupportService(LoggerInstance, adminDB);
+import { SupportTicketDTO } from '@interface/support';
+
+function formatTicket(log: any): SupportTicketDTO {
+  const meta = (log.metadata as any) || {};
+  return {
+    id: log.id,
+    gymId: log.gymId || null,
+    gymName: log.gym?.name || '',
+    requesterName: meta.requesterName || log.gym?.ownerName || '',
+    requesterEmail: meta.requesterEmail || log.gym?.contactEmail || '',
+    subject: log.action || '',
+    message: log.details || '',
+    priority: meta.priority || 'MEDIUM',
+    status: meta.status || 'OPEN',
+    createdAt: new Date(log.createdAt).toISOString(),
+    updatedAt: meta.resolvedAt ? new Date(meta.resolvedAt).toISOString() : new Date(log.createdAt).toISOString(),
+  };
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -28,7 +43,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   try {
     const { resolutionNotes } = req.body || {};
-    const data = await supportService.resolveTicket(id, { resolutionNotes });
+
+    const existing = await adminDB.auditLog.findUnique({
+      where: { id },
+      include: { gym: true },
+    });
+
+    if (!existing || existing.entityType !== 'SUPPORT_TICKET') {
+      throw new NotFoundError(SUPPORT.ERROR.NOT_FOUND);
+    }
+
+    const currentMeta = (existing.metadata as any) || {};
+    const updated = await adminDB.auditLog.update({
+      where: { id },
+      data: {
+        metadata: {
+          ...currentMeta,
+          status: 'RESOLVED',
+          resolutionNotes: resolutionNotes || '',
+          resolvedAt: new Date().toISOString(),
+        },
+      },
+      include: { gym: true },
+    });
+
+    const data = formatTicket(updated);
 
     return res.status(200).json({
       status: true,
@@ -45,6 +84,5 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
-
 
 export default withSuperAdminAuth(handler);

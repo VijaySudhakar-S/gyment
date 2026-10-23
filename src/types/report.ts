@@ -24,15 +24,19 @@ export interface UserReportMetrics {
   activeUsers: number;
 }
 
-export interface ReportMetricsData {
+export interface PlatformReportMetricsDTO {
   gyms: GymReportMetrics;
   subscriptions: SubscriptionReportMetrics;
   users: UserReportMetrics;
   generatedAt: string;
 }
 
+export type ExportType = 'gyms' | 'subscriptions' | 'revenue' | 'users';
+
 export interface ExportResponseData {
   filename: string;
   mimeType: string;
   content: string;
 }
+
+export type ReportMetricsData = PlatformReportMetricsDTO;

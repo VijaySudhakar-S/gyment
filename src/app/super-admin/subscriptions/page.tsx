@@ -22,11 +22,12 @@ import { subscriptionsApi, SubscriptionItem, SubscriptionKPIs } from '@/lib/api/
 import { plansApi, PlanData } from '@/lib/api/superadmin/plans.api';
 import { reportsApi } from '@/lib/api/superadmin/reports.api';
 import { StatCardSkeleton, TableSkeleton } from '@/components/shared/skeletons';
+import { PrimaryButton } from '@/components/shared/PrimaryButton';
 
 export default function SubscriptionsPage() {
   const router = useRouter();
   const { message, modal } = App.useApp();
-  
+
   const [selectedGymId, setSelectedGymId] = useState<string | null>(null);
   const [changePlanModalOpen, setChangePlanModalOpen] = useState(false);
 
@@ -181,7 +182,7 @@ export default function SubscriptionsPage() {
       title: 'Extend subscription?',
       content: `Extend subscription for ${sub.gymName} by 30 days?`,
       okText: 'Extend 30 Days',
-      centered : true,
+      centered: true,
       onOk: async () => {
         try {
           const res = await subscriptionsApi.extend(sub.id, { days: 30 });
@@ -205,7 +206,7 @@ export default function SubscriptionsPage() {
       content: `Are you sure you want to cancel the subscription for ${sub.gymName}? The gym will lose access.`,
       okText: 'Confirm Cancellation',
       okType: 'danger',
-      centered : true,
+      centered: true,
       onOk: async () => {
         try {
           const res = await subscriptionsApi.updateStatus(sub.id, { status: 'CANCELLED' });
@@ -229,7 +230,7 @@ export default function SubscriptionsPage() {
       content: `Are you sure you want to suspend the subscription for ${sub.gymName}?`,
       okText: 'Suspend Subscription',
       okType: 'danger',
-      centered : true,
+      centered: true,
       onOk: async () => {
         try {
           const res = await subscriptionsApi.updateStatus(sub.id, { status: 'PAST_DUE' });
@@ -310,15 +311,14 @@ export default function SubscriptionsPage() {
           <div className="flex flex-col gap-0.5">
             <span className="text-[12.5px] text-gyment-text">{renewalDate.toLocaleDateString()}</span>
             {isActive && (
-              <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full w-fit ${
-                isExpired
+              <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full w-fit ${isExpired
                   ? 'bg-red-100 text-red-700'
                   : isUrgent
                     ? 'bg-red-50 text-red-600'
                     : isWarning
                       ? 'bg-amber-50 text-amber-700'
                       : 'bg-green-50 text-green-700'
-              }`}>
+                }`}>
                 {isExpired ? 'Overdue' : `${daysLeft}d left`}
               </span>
             )}
@@ -414,41 +414,46 @@ export default function SubscriptionsPage() {
           </MotionStagger>
         )}
 
-        {/* AntD Filter Bar */}
-        <MotionFadeIn delay={0.06} className="flex items-center gap-2.5 flex-wrap">
-          <Input
-            prefix={<Search className="w-4 h-4 text-gyment-muted mr-1" />}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search gym, owner, or code…"
-            className="w-56"
-            allowClear
-          />
+        {/* AntD Filter Bar: Search left, dropdowns right */}
+        <MotionFadeIn delay={0.06} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="w-full sm:w-64">
+            <Input
+              prefix={<Search className="w-4 h-4 text-gyment-muted mr-1" />}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search gym, owner, or code…"
+              className="w-full h-[36px]"
+              allowClear
+            />
+          </div>
 
-          <Select
-            allowClear
-            placeholder="All Plans"
-            value={planFilter || undefined}
-            onChange={val => setPlanFilter(val || '')}
-            className="w-44 text-xs"
-            options={plans.map(p => ({ value: p.id, label: p.name }))}
-          />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Select
+              allowClear
+              placeholder="All Statuses"
+              value={statusFilter || undefined}
+              onChange={val => setStatusFilter(val || '')}
+              className="w-full sm:w-40 h-[36px] text-xs"
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'ACTIVE', label: 'Active' },
+                { value: 'TRIAL', label: 'Trial' },
+                { value: 'EXPIRING', label: 'Expiring Soon (30d)' },
+                { value: 'PAST_DUE', label: 'Past Due' },
+                { value: 'CANCELLED', label: 'Cancelled' },
+                { value: 'EXPIRED', label: 'Expired' },
+              ]}
+            />
 
-          <Select
-            allowClear
-            placeholder="All Statuses"
-            value={statusFilter || undefined}
-            onChange={val => setStatusFilter(val || '')}
-            className="w-44 text-xs"
-            options={[
-              { value: 'ACTIVE', label: 'Active' },
-              { value: 'TRIAL', label: 'Trial' },
-              { value: 'EXPIRING', label: 'Expiring Soon (30d)' },
-              { value: 'PAST_DUE', label: 'Past Due' },
-              { value: 'CANCELLED', label: 'Cancelled' },
-              { value: 'EXPIRED', label: 'Expired' },
-            ]}
-          />
+            <Select
+              allowClear
+              placeholder="All Plans"
+              value={planFilter || undefined}
+              onChange={val => setPlanFilter(val || '')}
+              className="w-full sm:w-40 h-[36px] text-xs"
+              options={plans.map(p => ({ value: p.id, label: p.name }))}
+            />
+          </div>
         </MotionFadeIn>
 
         {/* AntD Subscriptions Table */}
@@ -573,11 +578,10 @@ export default function SubscriptionsPage() {
                     {historyList.map((histSub) => (
                       <div
                         key={histSub.id}
-                        className={`p-2.5 rounded-lg border text-xs flex flex-col gap-1 transition-colors ${
-                          histSub.id === detailModalSub.id
+                        className={`p-2.5 rounded-lg border text-xs flex flex-col gap-1 transition-colors ${histSub.id === detailModalSub.id
                             ? 'border-gyment-primary/40 bg-gyment-primary/5'
                             : 'border-gyment-border/70 bg-gyment-bg/60'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between font-semibold">
                           <div className="flex items-center gap-2">
@@ -616,16 +620,16 @@ export default function SubscriptionsPage() {
 
               {/* Actions */}
               <div className="pt-2 border-t border-gyment-border flex gap-2 flex-wrap">
-                <button
+                <PrimaryButton
                   type="button"
+                  size="sm"
                   onClick={() => {
                     handleChangePlan(detailModalSub);
                     setDetailModalSub(null);
                   }}
-                  className="bg-linear-to-t from-primary/85 to-primary-dark text-white hover:bg-primary-dark px-3.5 py-1.5 rounded-lg text-[12.5px] font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   Change Plan
-                </button>
+                </PrimaryButton>
                 <button
                   type="button"
                   onClick={() => handleExtend(detailModalSub)}
@@ -658,7 +662,7 @@ export default function SubscriptionsPage() {
         gymId={selectedGymId}
         onSuccess={() => {
           loadSubscriptions();
-          setDetailModalSub(null); 
+          setDetailModalSub(null);
         }}
       />
     </>
