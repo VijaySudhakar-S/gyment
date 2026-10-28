@@ -40,8 +40,55 @@ export const membersApi = {
     return res.data;
   },
 
-  quickRenewMember: async (id: string | number): Promise<ApiResponse<GymMember>> => {
-    const res = await apiClient.post<ApiResponse<GymMember>>(`/api/v1/gymadmin/members/${id}/renew`);
+  quickRenewMember: async (
+    id: string | number,
+    data?: {
+      planId?: string | number;
+      startDate?: string;
+      endDate?: string;
+      amount?: number;
+      paidAmount?: number;
+      paymentStatus?: 'Paid' | 'Pending';
+      paymentMethod?: string;
+    }
+  ): Promise<ApiResponse<GymMember>> => {
+    const res = await apiClient.post<ApiResponse<GymMember>>(
+      `/api/v1/gymadmin/members/${id}/renew`,
+      data || {}
+    );
+    return res.data;
+  },
+
+  updateSubscriptionPayment: async (
+    memberId: string | number,
+    subId: string,
+    data: {
+      amount?: number;
+      paidAmount?: number;
+      totalAmount?: number;
+      planId?: string | number;
+      startDate?: string;
+      endDate?: string;
+      paymentStatus?: 'Paid' | 'Pending';
+      paymentMethod?: string;
+      notes?: string;
+    }
+  ): Promise<ApiResponse<any>> => {
+    const res = await apiClient.put<ApiResponse<any>>(
+      `/api/v1/gymadmin/members/${memberId}/subscriptions/${subId}`,
+      data
+    );
+    return res.data;
+  },
+
+  deleteSubscription: async (
+    memberId: string | number,
+    subId: string
+  ): Promise<ApiResponse<null>> => {
+    const res = await apiClient.delete<ApiResponse<null>>(
+      `/api/v1/gymadmin/members/${memberId}/subscriptions/${subId}`
+    );
     return res.data;
   },
 };
+

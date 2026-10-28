@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { gymAdminApi } from '@/lib/api/gymadmin/gymAdmin.api';
 import { GymMember, GymMembershipPlan, GymTrainer, CreateMemberDto } from '@/types/gymAdmin';
 import { MembersFilterBar } from '@/components/gym-admin/members/MembersFilterBar';
 import { MembersTable } from '@/components/gym-admin/members/MembersTable';
-import { MemberDetailDrawer } from '@/components/gym-admin/members/MemberDetailDrawer';
 import { AddMemberModal } from '@/components/gym-admin/members/AddMemberModal';
 import { EditMemberModal } from '@/components/gym-admin/members/EditMemberModal';
 import { GymAdminTopbar } from '@/components/gym-admin/layout/GymAdminTopbar';
@@ -17,6 +17,7 @@ import { App } from 'antd';
 import type { TablePaginationConfig } from 'antd';
 
 export default function GymAdminMembersPage() {
+  const router = useRouter();
   const { message } = App.useApp();
 
   const [members, setMembers] = useState<GymMember[]>([]);
@@ -38,12 +39,10 @@ export default function GymAdminMembersPage() {
     total: 0,
   });
 
-  // Modals & Drawer
+  // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<GymMember | null>(null);
-  const [selectedMember, setSelectedMember] = useState<GymMember | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Fetch filter dropdown options once
   useEffect(() => {
@@ -218,8 +217,7 @@ export default function GymAdminMembersPage() {
             }}
             onChange={handleTableChange}
             onViewMember={(m) => {
-              setSelectedMember(m);
-              setIsDrawerOpen(true);
+              router.push(`/gym-admin/members/${m.id}`);
             }}
             onEditMember={(m) => {
               setMemberToEdit(m);
@@ -250,19 +248,6 @@ export default function GymAdminMembersPage() {
           member={memberToEdit}
           membershipPlans={plans}
           trainers={trainers}
-        />
-
-        {/* Member Details Drawer */}
-        <MemberDetailDrawer
-          member={selectedMember}
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onRenew={handleRenewMember}
-          onEdit={(m) => {
-            setMemberToEdit(m);
-            setIsEditModalOpen(true);
-          }}
-          onDelete={handleDeleteMember}
         />
       </main>
     </>

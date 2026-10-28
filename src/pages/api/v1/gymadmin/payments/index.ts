@@ -1,6 +1,7 @@
 import type { NextApiResponse } from 'next';
 import { withGymAuth, GymAuthRequest } from '@helpers/withGymAuth';
 import LoggerInstance from '@loaders/logger';
+import { generateUniqueInvoiceNumber } from '@/utils/invoiceHelper';
 
 async function handler(req: GymAuthRequest, res: NextApiResponse) {
   try {
@@ -101,8 +102,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
       else if (method === 'Card') paymentMethod = 'CARD';
       else if (method === 'Bank Transfer') paymentMethod = 'BANK_TRANSFER';
 
-      const paymentCount = await db.payment.count();
-      const invoiceNumber = `INV-${String(paymentCount + 1).padStart(5, '0')}`;
+      const invoiceNumber = await generateUniqueInvoiceNumber(db);
 
       const paymentDate = date ? new Date(date) : new Date();
 

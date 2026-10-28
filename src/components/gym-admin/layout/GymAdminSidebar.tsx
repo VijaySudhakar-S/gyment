@@ -47,7 +47,7 @@ export const GymAdminSidebar: React.FC = () => {
   const navItems = [
     { label: 'Dashboard', href: '/gym-admin', icon: LayoutDashboard },
     { label: 'Members', href: '/gym-admin/members', icon: Users },
-    { label: 'Memberships', href: '/gym-admin/memberships', icon: CreditCard },
+    { label: 'Membership Plans', href: '/gym-admin/memberships', icon: CreditCard },
     { label: 'Attendance', href: '/gym-admin/attendance', icon: CheckCircle2 },
     { label: 'Payments', href: '/gym-admin/payments', icon: ReceiptIndianRupee },
     { label: 'Trainers', href: '/gym-admin/trainers', icon: Dumbbell },

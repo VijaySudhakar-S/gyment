@@ -247,15 +247,17 @@ export const RecordPaymentModal: React.FC<{
                             className="w-full"
                             options={
                                 plans.length > 0
-                                    ? plans.map((p) => ({
-                                        value: p.name,
-                                        label: p.name,
-                                    }))
+                                    ? plans
+                                          .filter((p) => p.status === 'Active')
+                                          .map((p) => ({
+                                              value: p.name,
+                                              label: p.name,
+                                          }))
                                     : [
-                                        { value: 'Monthly', label: 'Monthly' },
-                                        { value: 'Quarterly', label: 'Quarterly' },
-                                        { value: 'Yearly', label: 'Yearly' },
-                                    ]
+                                          { value: 'Monthly', label: 'Monthly' },
+                                          { value: 'Quarterly', label: 'Quarterly' },
+                                          { value: 'Yearly', label: 'Yearly' },
+                                      ]
                             }
                         />
                     </div>

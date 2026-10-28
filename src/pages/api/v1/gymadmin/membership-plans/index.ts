@@ -7,8 +7,26 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
     const db = req.db!;
 
     if (req.method === 'GET') {
+      const { status } = req.query;
+      const whereClause: any = {};
+      if (status === 'Active') {
+        whereClause.isActive = true;
+      } else if (status === 'Disabled') {
+        whereClause.isActive = false;
+      }
+
       const plans = await db.membershipPlan.findMany({
+        where: whereClause,
         orderBy: { createdAt: 'asc' },
+        include: {
+          _count: {
+            select: {
+              subscriptions: {
+                where: { status: 'ACTIVE' },
+              },
+            },
+          },
+        },
       });
 
       const formatted = plans.map((p) => {
@@ -26,6 +44,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           desc: p.description || '',
           status: p.isActive ? ('Active' as const) : ('Disabled' as const),
           features: Array.isArray(p.features) ? (p.features as string[]) : [],
+          activeMembers: p._count?.subscriptions ?? 0,
         };
       });
 
@@ -37,7 +56,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
     }
 
     if (req.method === 'POST') {
-      const { name, price, durationDays, desc, status } = req.body;
+      const { name, price, durationDays, desc, status, features } = req.body;
 
       if (!name || price === undefined) {
         return res.status(400).json({ status: false, message: 'Plan name and price are required' });
@@ -52,6 +71,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           durationMonths,
           description: desc || null,
           isActive: status !== 'Disabled',
+          features: Array.isArray(features) ? features : [],
         },
       });
 
@@ -66,6 +86,8 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           durationDays: durationMonths * 30,
           desc: newPlan.description || '',
           status: newPlan.isActive ? 'Active' : 'Disabled',
+          features: Array.isArray(newPlan.features) ? (newPlan.features as string[]) : [],
+          activeMembers: 0,
         },
       });
     }

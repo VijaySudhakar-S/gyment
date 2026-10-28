@@ -1,6 +1,7 @@
 import type { NextApiResponse } from 'next';
 import { withGymAuth, GymAuthRequest } from '@helpers/withGymAuth';
 import LoggerInstance from '@loaders/logger';
+import { generateUniqueInvoiceNumber } from '@/utils/invoiceHelper';
 
 async function handler(req: GymAuthRequest, res: NextApiResponse) {
   try {
@@ -34,7 +35,6 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         include: {
           assignedTrainer: true,
           subscriptions: {
-            take: 1,
             orderBy: { endDate: 'desc' },
             include: {
               plan: true,
@@ -88,7 +88,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           if (m.status === 'INACTIVE' || m.status === 'FROZEN') {
             displayStatus = 'Inactive';
           } else if (daysRemaining !== null) {
-            if (daysRemaining < 0 || m.status === 'EXPIRED') {
+            if (daysRemaining < 0) {
               displayStatus = 'Expired';
             } else if (daysRemaining <= 7) {
               displayStatus = 'Expiring Soon';
@@ -131,6 +131,23 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
             gender: m.gender === 'FEMALE' ? 'Female' : m.gender === 'OTHER' ? 'Other' : 'Male',
             dateOfBirth: m.dob?.toISOString().split('T')[0],
             address: m.address || '',
+            membershipHistory: m.subscriptions.map((sub, idx) => ({
+              id: sub.id,
+              planName: sub.plan?.name || 'Standard Plan',
+              startDate: sub.startDate.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              }),
+              endDate: sub.endDate.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              }),
+              price: Number(sub.paidAmount || sub.totalAmount || 0),
+              status: sub.status === 'ACTIVE' && sub.endDate >= now ? 'Active' : 'Expired',
+              isCurrent: idx === 0,
+            })),
           };
         })
         .filter((m) => {
@@ -181,6 +198,9 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         trainer,
         address,
         notes,
+        paymentStatus,
+        paymentMethod,
+        paidAmount,
       } = req.body;
 
       if (!name || !phone) {
@@ -237,7 +257,18 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
       }
 
       const parsedJoinDate = joinDate ? new Date(joinDate) : new Date();
-      const parsedStartDate = parsedJoinDate;
+      // Ensure start date cannot be before join date
+      let parsedStartDate = parsedJoinDate;
+      if (startDate) {
+        const customStart = new Date(startDate);
+        if (customStart.getTime() < parsedJoinDate.getTime()) {
+          return res.status(400).json({
+            status: false,
+            message: 'Membership start date cannot be earlier than the member join date.',
+          });
+        }
+        parsedStartDate = customStart;
+      }
 
       const durationMonths = matchedPlan.durationMonths && matchedPlan.durationMonths > 0 ? matchedPlan.durationMonths : 1;
       const parsedEndDate = new Date(parsedStartDate);
@@ -271,6 +302,12 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
 
         if (matchedPlan) {
           const price = Number(matchedPlan.price);
+          const isPending = paymentStatus === 'Pending';
+          const actualPaid = isPending
+            ? (paidAmount !== undefined && paidAmount !== null && paidAmount !== '' ? Number(paidAmount) : 0)
+            : (paidAmount !== undefined && paidAmount !== null && paidAmount !== '' ? Number(paidAmount) : price);
+          const balance = Math.max(0, price - actualPaid);
+
           const sub = await tx.subscription.create({
             data: {
               memberId: createdMember.id,
@@ -279,26 +316,36 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
               endDate: parsedEndDate,
               status: 'ACTIVE',
               totalAmount: price,
-              paidAmount: price,
-              balanceAmount: 0,
+              paidAmount: actualPaid,
+              balanceAmount: balance,
             },
           });
 
-          const paymentCount = await tx.payment.count();
-          const invoiceNumber = `INV-${String(paymentCount + 1).padStart(5, '0')}`;
+          if (actualPaid > 0) {
+            const invoiceNumber = await generateUniqueInvoiceNumber(tx);
+            const methodUpper = (paymentMethod || 'CASH').toUpperCase();
+            const normalizedMethod =
+              methodUpper === 'UPI'
+                ? 'UPI'
+                : methodUpper === 'CARD'
+                ? 'CARD'
+                : methodUpper === 'BANK_TRANSFER' || methodUpper === 'BANK TRANSFER'
+                ? 'BANK_TRANSFER'
+                : 'CASH';
 
-          await tx.payment.create({
-            data: {
-              invoiceNumber,
-              memberId: createdMember.id,
-              subscriptionId: sub.id,
-              amount: price,
-              paymentMethod: 'CASH',
-              status: 'COMPLETED',
-              paymentDate: new Date(),
-              notes: 'Initial plan enrollment payment',
-            },
-          });
+            await tx.payment.create({
+              data: {
+                invoiceNumber,
+                memberId: createdMember.id,
+                subscriptionId: sub.id,
+                amount: actualPaid,
+                paymentMethod: normalizedMethod,
+                status: 'COMPLETED',
+                paymentDate: new Date(),
+                notes: isPending ? 'Partial initial payment' : 'Initial plan enrollment payment',
+              },
+            });
+          }
         }
 
         return createdMember;

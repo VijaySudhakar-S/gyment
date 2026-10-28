@@ -2,8 +2,8 @@ import React from 'react';
 import { Drawer, Button, Popconfirm } from 'antd';
 import { GymMember } from '@/types/gymAdmin';
 import { GymStatusBadge } from '@/components/gym-admin/shared/GymStatusBadge';
-import { getInitials, formatRemainingDays } from '@/utils/gymAdminHelpers';
-import { RefreshCw, Edit2, Trash2 } from 'lucide-react';
+import { getInitials, formatRemainingDays, fmtRs } from '@/utils/gymAdminHelpers';
+import { RefreshCw, Edit2, Trash2, History, Calendar, CheckCircle2 } from 'lucide-react';
 import { PrimaryButton } from '@/components/shared/PrimaryButton';
 
 interface MemberDetailDrawerProps {
@@ -38,7 +38,7 @@ export const MemberDetailDrawer: React.FC<MemberDetailDrawerProps> = ({
     <Drawer
       open={isOpen}
       onClose={onClose}
-      width={440}
+      size={440}
       title={
         <div className="flex items-center justify-between gap-3 min-w-0 pr-2">
           <div className="flex items-center gap-3 min-w-0">
@@ -165,6 +165,81 @@ export const MemberDetailDrawer: React.FC<MemberDetailDrawerProps> = ({
               >
                 Renew Membership
               </PrimaryButton>
+            )}
+          </div>
+        </div>
+
+        {/* Membership History */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-bold uppercase tracking-wider text-xs text-gyment-muted flex items-center gap-1.5 m-0">
+              <History className="w-3.5 h-3.5 text-emerald-500" />
+              Membership History
+            </h4>
+            <span className="text-[11px] font-semibold text-gyment-muted">
+              {member.membershipHistory?.length || 1} record{member.membershipHistory && member.membershipHistory.length === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {member.membershipHistory && member.membershipHistory.length > 0 ? (
+              member.membershipHistory.map((hist, idx) => (
+                <div
+                  key={hist.id || idx}
+                  className={`p-3 rounded-xl border text-xs transition-colors ${
+                    hist.isCurrent
+                      ? 'bg-emerald-500/5 border-emerald-500/30'
+                      : 'bg-gyment-bg/60 border-gyment-border'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-gyment-text text-[13px]">
+                        {hist.planName}
+                      </span>
+                      {hist.isCurrent && (
+                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-sm bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          Current
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        hist.status === 'Active'
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
+                          : 'bg-stone-100 text-stone-500 border-stone-200 dark:bg-stone-800 dark:text-stone-400 dark:border-stone-700'
+                      }`}
+                    >
+                      {hist.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-gyment-muted pt-1">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-gyment-muted" />
+                      <span>
+                        {hist.startDate} → {hist.endDate}
+                      </span>
+                    </div>
+                    <span className="font-semibold text-gyment-text">
+                      {fmtRs(hist.price)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-3 bg-gyment-bg/60 rounded-xl border border-gyment-border text-xs">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-gyment-text text-[13px]">{member.plan}</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                    Active
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-gyment-muted">
+                  <span>{member.start} → {member.expiry}</span>
+                  <span className="font-semibold text-gyment-text">Enrolled</span>
+                </div>
+              </div>
             )}
           </div>
         </div>

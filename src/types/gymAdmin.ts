@@ -72,7 +72,28 @@ export interface GymMember {
   gender?: 'Male' | 'Female' | 'Other';
   dateOfBirth?: string;
   address?: string;
-  avatarUrl?: string;
+  paidAmount?: number;
+  balanceAmount?: number;
+  totalAmount?: number;
+  membershipHistory?: MemberSubscriptionHistory[];
+}
+
+export interface MemberSubscriptionHistory {
+  id: string;
+  planId?: string;
+  planName: string;
+  startDate: string;
+  endDate: string;
+  rawStartDate?: string;
+  rawEndDate?: string;
+  price: number;
+  totalAmount?: number;
+  paidAmount?: number;
+  balanceAmount?: number;
+  status: string;
+  paymentStatus?: 'Paid' | 'Pending' | 'Overdue';
+  paymentMethod?: string;
+  isCurrent?: boolean;
 }
 
 export interface CreateMemberDto {
@@ -88,6 +109,9 @@ export interface CreateMemberDto {
   address?: string;
   notes?: string;
   avatar?: File | null;
+  paymentStatus?: 'Paid' | 'Pending';
+  paymentMethod?: 'Cash' | 'UPI' | 'Card' | 'Bank Transfer';
+  paidAmount?: number;
 }
 
 export interface GymMembershipPlan {
@@ -99,6 +123,8 @@ export interface GymMembershipPlan {
   desc: string;
   status: 'Active' | 'Disabled';
   features?: string[];
+  activeMembers?: number;
+  admissionFee?: number;
 }
 
 export interface CreateMembershipPlanDto {
@@ -107,6 +133,7 @@ export interface CreateMembershipPlanDto {
   durationDays: number;
   desc?: string;
   status: 'Active' | 'Disabled';
+  features?: string[];
 }
 
 export interface GymAttendanceRecord {
@@ -162,9 +189,21 @@ export interface GymTrainer {
 
 export interface CreateTrainerDto {
   name: string;
-  specialization: string;
-  email: string;
+  specialization?: string;
+  email?: string;
   phone: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+export interface UpdateTrainerDto {
+  name?: string;
+  specialization?: string;
+  email?: string;
+  phone?: string;
+  status?: 'Active' | 'Inactive';
+  password?: string;
+  confirmPassword?: string;
 }
 
 export interface GymStaff {

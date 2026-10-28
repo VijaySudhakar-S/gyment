@@ -28,8 +28,8 @@ const PAGE_HEADERS: Record<string, { title: string; subtitle: string }> = {
  subtitle: 'Manage your gym members and membership information.',
  },
  '/gym-admin/memberships': {
- title: 'Memberships',
- subtitle: 'Track membership status and manage the plans you sell.',
+ title: 'Membership Plans',
+ subtitle: 'Configure packages, durations, and pricing you sell to members.',
  },
  '/gym-admin/attendance': {
  title: 'Attendance',

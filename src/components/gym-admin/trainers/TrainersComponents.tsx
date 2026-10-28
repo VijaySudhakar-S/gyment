@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
-import { GymTrainer, CreateTrainerDto } from '@/types/gymAdmin';
+import React, { useState, useEffect } from 'react';
+import { GymTrainer, CreateTrainerDto, UpdateTrainerDto } from '@/types/gymAdmin';
 import { useGymAdmin } from '@/context/GymAdminContext';
 import { LockedCard } from '@/components/gym-admin/shared/LockedCard';
 import { GymEmptyState } from '@/components/gym-admin/shared/GymEmptyState';
 import { getInitials } from '@/utils/gymAdminHelpers';
-import { Dumbbell, Plus, X } from 'lucide-react';
+import { Dumbbell, Plus, X, Lock, KeyRound, AlertCircle, Trash2, Edit2 } from 'lucide-react';
 import { PrimaryButton } from '@/components/shared/PrimaryButton';
-import { Modal, Input, Button, Table } from 'antd';
+import { Modal, Input, Button, Table, Popconfirm } from 'antd';
 import type { TableColumnsType } from 'antd';
 
 export const TrainersView: React.FC<{
   trainers: GymTrainer[];
   isLoading?: boolean;
   onAddTrainerClick: () => void;
-}> = ({ trainers, isLoading, onAddTrainerClick }) => {
+  onEditTrainerClick: (trainer: GymTrainer) => void;
+  onDeleteTrainerClick?: (trainer: GymTrainer) => void;
+}> = ({ trainers, isLoading, onAddTrainerClick, onEditTrainerClick, onDeleteTrainerClick }) => {
   const { hasFeature } = useGymAdmin();
   const canManageTrainers = hasFeature('Trainer Management');
   const canAssignTrainers = hasFeature('Trainer–Member Assignment');
@@ -32,11 +34,11 @@ export const TrainersView: React.FC<{
 
   if (isLoading) {
     return (
-      <div className="bg-white border border-border rounded-2xl p-6 animate-pulse">
-        <div className="h-6 w-32 bg-stone-200 rounded mb-4" />
+      <div className="bg-white dark:bg-neutral-900 border border-gyment-border rounded-2xl p-6 animate-pulse">
+        <div className="h-6 w-32 bg-stone-200 dark:bg-neutral-800 rounded mb-4" />
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-12 bg-stone-100 rounded" />
+            <div key={i} className="h-12 bg-stone-100 dark:bg-neutral-800 rounded" />
           ))}
         </div>
       </div>
@@ -105,15 +107,32 @@ export const TrainersView: React.FC<{
       title: 'ACTIONS',
       key: 'actions',
       align: 'right',
-      render: () => (
+      render: (_, t) => (
         <div className="flex items-center justify-end gap-1.5">
-          <Button size="small" className="text-xs font-semibold rounded-lg">
+          <Button
+            size="small"
+            className="text-xs font-semibold rounded-lg"
+            onClick={() => onEditTrainerClick(t)}
+          >
             Edit
           </Button>
-          {canAssignTrainers && (
-            <Button size="small" type="primary" ghost className="text-xs font-semibold rounded-lg">
-              Assign
-            </Button>
+          {onDeleteTrainerClick && (
+            <Popconfirm
+              title="Delete trainer"
+              description={`Are you sure you want to remove ${t.name}?`}
+              onConfirm={() => onDeleteTrainerClick(t)}
+              okText="Yes, Delete"
+              cancelText="Cancel"
+              okButtonProps={{ danger: true }}
+            >
+              <Button
+                size="small"
+                danger
+                className="text-xs font-semibold rounded-lg"
+              >
+                Delete
+              </Button>
+            </Popconfirm>
           )}
         </div>
       ),
@@ -122,7 +141,7 @@ export const TrainersView: React.FC<{
 
   return (
     <div className="space-y-4">
-      <div className="bg-white border border-gyment-border rounded-[14px] overflow-hidden shadow-2xs">
+      <div className="bg-white dark:bg-neutral-900 border border-gyment-border rounded-[14px] overflow-hidden shadow-2xs">
         <Table<GymTrainer>
           columns={columns}
           dataSource={trainers}
@@ -161,19 +180,51 @@ export const AddTrainerModal: React.FC<{
     specialization: '',
     email: '',
     phone: '',
+    password: '',
+    confirmPassword: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        name: '',
+        specialization: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+      });
+      setPasswordError('');
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPasswordError('');
+
     if (!formData.name.trim() || !formData.phone.trim()) return;
+
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password && formData.password.length < 6) {
+      setPasswordError('Password must be at least 6 characters long');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
       await onSubmit(formData);
       onClose();
+    } catch (err: any) {
+      // Error handled by parent toast
     } finally {
       setIsSubmitting(false);
     }
@@ -190,7 +241,7 @@ export const AddTrainerModal: React.FC<{
         <div className="pt-1">
           <h2 className="text-base font-bold text-gyment-text m-0">Add Trainer</h2>
           <p className="text-xs text-gyment-muted mt-0.5">
-            Create a new trainer profile for your gym
+            Create a trainer profile and credentials for your gym
           </p>
         </div>
       }
@@ -204,7 +255,7 @@ export const AddTrainerModal: React.FC<{
             required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="e.g. Deepika R."
+            placeholder="e.g. Vijay S."
           />
         </div>
 
@@ -241,6 +292,51 @@ export const AddTrainerModal: React.FC<{
           />
         </div>
 
+        {/* Security / Password Section */}
+        <div className="pt-3 border-t border-gyment-border space-y-3">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-gyment-text">
+            <Lock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Login Credentials</span>
+          </div>
+
+          <div className="p-3 bg-neutral-50 dark:bg-neutral-800/60 rounded-xl border border-gyment-border/70 text-xs text-gyment-muted flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <span>
+              If this trainer is already registered in another gym (by phone/email), their existing password will be preserved automatically.
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-gyment-text">
+                Password <span className="text-rose-500">*</span>
+              </label>
+              <Input.Password
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Enter password"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-gyment-text">
+                Confirm Password <span className="text-rose-500">*</span>
+              </label>
+              <Input.Password
+                required
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                placeholder="Re-enter password"
+              />
+            </div>
+          </div>
+
+          {passwordError && (
+            <p className="text-xs font-semibold text-rose-500 mt-1">{passwordError}</p>
+          )}
+        </div>
+
         <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-gyment-border">
           <Button onClick={onClose}>
             Cancel
@@ -250,6 +346,185 @@ export const AddTrainerModal: React.FC<{
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Saving...' : 'Add Trainer'}
+          </PrimaryButton>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+export const EditTrainerModal: React.FC<{
+  isOpen: boolean;
+  trainer: GymTrainer | null;
+  onClose: () => void;
+  onSubmit: (id: string | number, dto: UpdateTrainerDto) => Promise<void>;
+}> = ({ isOpen, trainer, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState<UpdateTrainerDto>({
+    name: '',
+    specialization: '',
+    email: '',
+    phone: '',
+    status: 'Active',
+    password: '',
+    confirmPassword: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  useEffect(() => {
+    if (trainer && isOpen) {
+      setFormData({
+        name: trainer.name || '',
+        specialization: trainer.specialization || '',
+        email: trainer.email || '',
+        phone: trainer.phone || '',
+        status: trainer.status || 'Active',
+        password: '',
+        confirmPassword: '',
+      });
+      setPasswordError('');
+    }
+  }, [trainer, isOpen]);
+
+  if (!isOpen || !trainer) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+
+    if (formData.password) {
+      if (formData.password !== formData.confirmPassword) {
+        setPasswordError('Passwords do not match');
+        return;
+      }
+      if (formData.password.length < 6) {
+        setPasswordError('New password must be at least 6 characters long');
+        return;
+      }
+    }
+
+    try {
+      setIsSubmitting(true);
+      await onSubmit(trainer.id, formData);
+      onClose();
+    } catch {
+      // Error handled by caller
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      footer={null}
+      width={480}
+      centered
+      title={
+        <div className="pt-1">
+          <h2 className="text-base font-bold text-gyment-text m-0">Edit Trainer</h2>
+          <p className="text-xs text-gyment-muted mt-0.5">
+            Update trainer details and optionally reset password
+          </p>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="pt-3 space-y-4">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold text-gyment-text">
+            Trainer Name <span className="text-rose-500">*</span>
+          </label>
+          <Input
+            required
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Trainer full name"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold text-gyment-text">
+            Specialization
+          </label>
+          <Input
+            value={formData.specialization}
+            onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+            placeholder="e.g. Strength & Conditioning"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold text-gyment-text">Email</label>
+          <Input
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="trainer@gym.com"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold text-gyment-text">
+            Phone <span className="text-rose-500">*</span>
+          </label>
+          <Input
+            required
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            placeholder="+91 98765 43210"
+          />
+        </div>
+
+        {/* Password Reset Section */}
+        <div className="pt-3 border-t border-gyment-border space-y-3">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-gyment-text">
+            <KeyRound className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Reset Password (Optional)</span>
+          </div>
+
+          <p className="text-xs text-gyment-muted">
+            For security, the existing password is encrypted and cannot be viewed. Leave blank unless you wish to set a new password.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-gyment-text">
+                New Password
+              </label>
+              <Input.Password
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Leave blank to keep"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-gyment-text">
+                Confirm Password
+              </label>
+              <Input.Password
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                placeholder="Confirm new password"
+              />
+            </div>
+          </div>
+
+          {passwordError && (
+            <p className="text-xs font-semibold text-rose-500 mt-1">{passwordError}</p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-gyment-border">
+          <Button onClick={onClose}>
+            Cancel
+          </Button>
+          <PrimaryButton
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Updating...' : 'Save Changes'}
           </PrimaryButton>
         </div>
       </form>

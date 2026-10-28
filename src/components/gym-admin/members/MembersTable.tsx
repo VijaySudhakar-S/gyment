@@ -46,9 +46,11 @@ export const MembersTable: React.FC<MembersTableProps> = ({
             <div className="font-bold text-gyment-text text-[13.5px]">
               {record.name}
             </div>
-            <div className="text-xs text-gyment-muted">
-              Joined {record.joinDate}
-            </div>
+            {record.email && (
+              <div className="text-xs text-gyment-muted truncate max-w-37">
+                {record.email}
+              </div>
+            )}
           </div>
         </div>
       ),
@@ -70,9 +72,9 @@ export const MembersTable: React.FC<MembersTableProps> = ({
       ),
     },
     {
-      title: 'START DATE',
-      dataIndex: 'start',
-      key: 'start',
+      title: 'JOIN DATE',
+      dataIndex: 'joinDate',
+      key: 'joinDate',
       render: (val) => (
         <span className="text-gyment-muted text-[13px]">{val || '—'}</span>
       ),

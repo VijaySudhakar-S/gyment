@@ -36,8 +36,8 @@
   --table-header-bg: #FFFFFF;
   --table-hover-bg: #F6F9F7;
   --white: #FFFFFF;
-  --border: #CED5D1;
-  --border-subtle: #E3E8E5;
+  --border: #E5EAE7;
+  --border-subtle: #F0F4F1;
   --danger: #C5432E;
   --danger-light: #FBEAE6;
   --warning: #B8791C;
@@ -208,7 +208,7 @@ html.dark textarea::placeholder {
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
-  border-bottom: 1px solid var(--border) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
   padding: 12px 16px !important;
   white-space: nowrap !important;
 }
@@ -495,5 +495,15 @@ html.dark textarea::placeholder {
 .ant-picker-dropdown .ant-picker-cell-selected .ant-picker-cell-inner {
   background: var(--primary) !important;
   color: #fff !important;
+}
+
+/* Clean Modal Header & Footer (Remove default lines) */
+.ant-modal .ant-modal-header {
+  border-bottom: none !important;
+  margin-bottom: 8px !important;
+}
+
+.ant-modal .ant-modal-footer {
+  border-top: none !important;
 }
 

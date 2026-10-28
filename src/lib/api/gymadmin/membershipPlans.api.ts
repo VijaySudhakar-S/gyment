@@ -3,8 +3,10 @@ import { ApiResponse } from '@/types/api';
 import { GymMembershipPlan, CreateMembershipPlanDto } from '@/types/gymAdmin';
 
 export const membershipPlansApi = {
-  getMembershipPlans: async (): Promise<ApiResponse<GymMembershipPlan[]>> => {
-    const res = await apiClient.get<ApiResponse<GymMembershipPlan[]>>('/api/v1/gymadmin/membership-plans');
+  getMembershipPlans: async (params?: { status?: 'Active' | 'Disabled' }): Promise<ApiResponse<GymMembershipPlan[]>> => {
+    const res = await apiClient.get<ApiResponse<GymMembershipPlan[]>>('/api/v1/gymadmin/membership-plans', {
+      params,
+    });
     return res.data;
   },
 

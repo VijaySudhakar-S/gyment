@@ -36,7 +36,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
     }
 
     if (req.method === 'PUT') {
-      const { name, price, durationDays, desc, status } = req.body;
+      const { name, price, durationDays, desc, status, features } = req.body;
 
       const existing = await db.membershipPlan.findUnique({
         where: { id },
@@ -58,6 +58,16 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           durationMonths,
           description: desc !== undefined ? (desc || null) : existing.description,
           isActive: status !== undefined ? status === 'Active' : existing.isActive,
+          ...(Array.isArray(features) ? { features } : {}),
+        },
+        include: {
+          _count: {
+            select: {
+              subscriptions: {
+                where: { status: 'ACTIVE' },
+              },
+            },
+          },
         },
       });
 
@@ -72,6 +82,8 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           durationDays: durationMonths * 30,
           desc: updated.description || '',
           status: updated.isActive ? 'Active' : 'Disabled',
+          features: Array.isArray(updated.features) ? (updated.features as string[]) : [],
+          activeMembers: (updated as any)._count?.subscriptions ?? 0,
         },
       });
     }
@@ -79,20 +91,19 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
     if (req.method === 'DELETE') {
       const existing = await db.membershipPlan.findUnique({
         where: { id },
-        include: {
-          _count: {
-            select: { subscriptions: true },
-          },
-        },
       });
 
       if (!existing) {
         return res.status(404).json({ status: false, message: 'Membership plan not found' });
       }
 
+      const activeSubscriptionsCount = await db.subscription.count({
+        where: { planId: id },
+      });
+
       // If active subscriptions are linked to this plan, mark as Disabled instead of hard-deleting
       // to preserve historical accounting and subscription integrity. If no subscriptions, hard-delete.
-      if (existing._count.subscriptions > 0) {
+      if (activeSubscriptionsCount > 0) {
         await db.membershipPlan.update({
           where: { id },
           data: { isActive: false },
