@@ -11,13 +11,12 @@ import { GymAdminTopbar } from '@/components/gym-admin/layout/GymAdminTopbar';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
 import { PrimaryButton } from '@/components/shared/PrimaryButton';
 import { useGymAdmin } from '@/context/GymAdminContext';
-import { GYMENT_PLANS } from '@/utils/gymAdminHelpers';
-import { Plus } from 'lucide-react';
 import { App } from 'antd';
+import { Plus } from 'lucide-react';
 
 export default function GymAdminStaffPage() {
   const { message } = App.useApp();
-  const { planTier, openCompareModal } = useGymAdmin();
+  const { staffLimitText, featureLimits, openCompareModal } = useGymAdmin();
 
   const [staff, setStaff] = useState<GymStaff[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,11 +41,14 @@ export default function GymAdminStaffPage() {
   }, [fetchStaff]);
 
   const handleAddStaffClick = () => {
-    const limit = GYMENT_PLANS[planTier].staffLimit;
-    if (limit !== Infinity && staff.length >= limit) {
-      message.warning('Staff account limit reached for current plan');
-      openCompareModal();
-      return;
+    const rawLimit = featureLimits['Max Receptionists'] || featureLimits['Max Admins'] || featureLimits['Max Trainers'];
+    if (rawLimit && String(rawLimit).toLowerCase() !== 'unlimited') {
+      const parsedLimit = parseInt(String(rawLimit), 10);
+      if (!isNaN(parsedLimit) && staff.length >= parsedLimit) {
+        message.warning(`Staff account limit of ${parsedLimit} reached for current plan`);
+        openCompareModal();
+        return;
+      }
     }
     setIsAddModalOpen(true);
   };
@@ -77,7 +79,7 @@ export default function GymAdminStaffPage() {
     <>
       <GymAdminTopbar
         title="Staff"
-        subtitle={`Manage staff accounts for your gym (${GYMENT_PLANS[planTier].staffLimitText}).`}
+        subtitle={`Manage staff accounts for your gym (${staffLimitText}).`}
         actions={
           <PrimaryButton
             onClick={handleAddStaffClick}

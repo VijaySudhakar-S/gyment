@@ -8,7 +8,7 @@ export type PaymentMethod = 'Cash' | 'UPI' | 'Card' | 'Bank Transfer';
 
 export type AttendanceCheckinMethod = 'name' | 'phone' | 'qr';
 
-export type StaffRole = 'Front Desk' | 'Manager' | 'Housekeeping' | string;
+export type StaffRole = 'Frontdesk' | 'Admin' | 'Trainer';
 
 export type GymFeatureName =
   | 'Member Management'
@@ -228,6 +228,8 @@ export interface CreateStaffDto {
   role: StaffRole;
   email: string;
   phone: string;
+  password?: string;
+  confirmPassword?: string;
 }
 
 export interface GymBranch {
@@ -286,6 +288,8 @@ export interface GymProfileSettings {
   address: string;
   ownerName: string;
   logoUrl?: string;
+  planTier?: GymentPlanTier;
+  planName?: string;
 }
 
 export interface GymMembershipSettings {

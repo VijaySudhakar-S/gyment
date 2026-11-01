@@ -127,7 +127,7 @@ export const Sidebar: React.FC = () => {
                 onClick={() => setMobileSidebarOpen(false)}
                 title={sidebarCollapsed ? item.label : undefined}
                 style={{ transition: 'all 0.2s ease-in-out' }}
-                className={`group flex items-center gap-3 mb-2 px-3 py-2.5 rounded-lg text-sm hover:translate-x-1 relative ${sidebarCollapsed ? 'justify-center p-2.5' : ''
+                className={`group flex items-center gap-3 mb-1 px-3 py-2 rounded-lg text-[13px] hover:translate-x-1 relative ${sidebarCollapsed ? 'justify-center p-2.5' : ''
                   } ${active
                     ? 'bg-linear-to-l! from-[#3dba76]! to-primary-dark! text-white! font-bold shadow-sm'
                     : 'hover:bg-white/8! font-medium'

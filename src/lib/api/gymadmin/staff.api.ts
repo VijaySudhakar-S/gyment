@@ -20,4 +20,17 @@ export const staffApi = {
     const res = await apiClient.patch<ApiResponse<GymStaff>>(`/api/v1/gymadmin/staff/${id}/status`, { status });
     return res.data;
   },
+
+  checkUserByEmail: async (email: string): Promise<ApiResponse<{
+    exists: boolean;
+    isInCurrentGym?: boolean;
+    userName?: string;
+    phone?: string;
+    registeredGyms?: string[];
+  }>> => {
+    const res = await apiClient.get('/api/v1/gymadmin/staff/check-user', {
+      params: { email },
+    });
+    return res.data;
+  },
 };

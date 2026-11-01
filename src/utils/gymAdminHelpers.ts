@@ -36,84 +36,49 @@ export const ALL_GYM_FEATURES: GymFeatureName[] = [
   'Priority Support',
 ];
 
-const STARTER_FEATURES = new Set<GymFeatureName>([
-  'Member Management',
-  'Membership Management',
-  'Custom Membership Plans',
-  'Attendance Management',
-  'Payment Records',
-  'Payment History',
-  'Basic Dashboard',
-  'Basic Reports',
-  'Membership Expiry Alerts',
-  'CSV Export',
-]);
-
-const GROWTH_FEATURES = new Set<GymFeatureName>([
-  'Member Management',
-  'Membership Management',
-  'Custom Membership Plans',
-  'Attendance Management',
-  'Multiple Attendance Methods',
-  'Payment Records',
-  'Payment History',
-  'Basic Dashboard',
-  'Advanced Dashboard & Analytics',
-  'Basic Reports',
-  'Advanced Reports',
-  'Revenue Analytics',
-  'Attendance Analytics',
-  'Membership Analytics',
-  'Membership Expiry Alerts',
-  'Trainer Management',
-  'Trainer–Member Assignment',
-  'CSV Export',
-  'Excel Export',
-  'Priority Support',
-]);
-
-const PRO_FEATURES = new Set<GymFeatureName>(ALL_GYM_FEATURES);
-
-export const GYMENT_PLANS: Record<GymentPlanTier, GymentPlanConfig> = {
-  starter: {
-    id: 'starter',
-    name: 'Starter',
-    price: 499,
-    yearlyPrice: 4999,
-    memberLimitText: 'Up to 100 members',
-    staffLimit: 1,
-    staffLimitText: '1 staff account',
-    branchesText: '1 gym / branch',
-    features: Array.from(STARTER_FEATURES),
-  },
-  growth: {
-    id: 'growth',
-    name: 'Growth',
-    price: 999,
-    yearlyPrice: 9999,
-    memberLimitText: 'Up to 500 members',
-    staffLimit: 5,
-    staffLimitText: 'Up to 5 staff accounts',
-    branchesText: '1 gym / branch',
-    features: Array.from(GROWTH_FEATURES),
-  },
-  pro: {
-    id: 'pro',
-    name: 'Pro',
-    price: 1999,
-    yearlyPrice: 19999,
-    memberLimitText: 'Unlimited members',
-    staffLimit: Infinity,
-    staffLimitText: 'Unlimited staff accounts',
-    branchesText: 'Multiple branches',
-    features: Array.from(PRO_FEATURES),
-  },
+export const FEATURE_NAME_TO_KEY: Record<GymFeatureName, string> = {
+  'Member Management': 'member_management',
+  'Membership Management': 'membership_management',
+  'Custom Membership Plans': 'custom_membership_plans',
+  'Attendance Management': 'attendance_management',
+  'Multiple Attendance Methods': 'multiple_attendance_methods',
+  'Payment Records': 'payment_records',
+  'Payment History': 'payment_history',
+  'Basic Dashboard': 'basic_dashboard',
+  'Advanced Dashboard & Analytics': 'advanced_dashboard_analytics',
+  'Basic Reports': 'basic_reports',
+  'Advanced Reports': 'advanced_reports',
+  'Revenue Analytics': 'revenue_analytics',
+  'Attendance Analytics': 'attendance_analytics',
+  'Membership Analytics': 'membership_analytics',
+  'Membership Expiry Alerts': 'membership_expiry_alerts',
+  'Trainer Management': 'trainer_management',
+  'Trainer–Member Assignment': 'trainer_member_assignment',
+  'Multiple Branch Management': 'multiple_branch_management',
+  'Branch-wise Reports': 'branch_wise_reports',
+  'Consolidated Revenue Reports': 'consolidated_revenue_reports',
+  'Custom Gym Branding': 'custom_gym_branding',
+  'Automated Notifications': 'automated_notifications',
+  'WhatsApp / SMS Integration': 'whatsapp_sms_integration',
+  'CSV Export': 'csv_export',
+  'Excel Export': 'excel_export',
+  'Advanced Data Export': 'advanced_data_export',
+  'Priority Support': 'priority_support',
 };
 
-export function hasPlanFeature(planTier: GymentPlanTier, feature: GymFeatureName): boolean {
-  if (planTier === 'pro') return PRO_FEATURES.has(feature);
-  if (planTier === 'growth') return GROWTH_FEATURES.has(feature);
-  return STARTER_FEATURES.has(feature);
+export function hasPlanFeature(
+  _planTier: GymentPlanTier,
+  feature: GymFeatureName,
+  dynamicFeatures?: Record<string, boolean> | null
+): boolean {
+  if (dynamicFeatures && typeof dynamicFeatures === 'object') {
+    const key = FEATURE_NAME_TO_KEY[feature];
+    if (key && key in dynamicFeatures) {
+      return Boolean(dynamicFeatures[key]);
+    }
+  }
+
+  return true;
 }
 
 export function fmtRs(amount?: number | null): string {

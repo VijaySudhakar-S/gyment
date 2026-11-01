@@ -47,7 +47,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
     }
 
     if (req.method === 'POST') {
-      const { name, email, phone, role } = req.body;
+      const { name, email, phone, role, password, confirmPassword } = req.body;
 
       if (!name || !email || !phone) {
         return res.status(400).json({
@@ -56,49 +56,85 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         });
       }
 
-      // Determine DB role enum
+      const cleanEmail = email.trim().toLowerCase();
+      const trimmedPhone = phone.trim();
+
+      // Role mapping: 'Frontdesk' -> 'RECEPTIONIST', 'Admin' -> 'GYM_ADMIN', 'Trainer' -> 'TRAINER'
       let gymRole: 'GYM_ADMIN' | 'RECEPTIONIST' | 'TRAINER' = 'RECEPTIONIST';
-      const normalizedRole = (role || '').toLowerCase();
-      if (normalizedRole.includes('manager') || normalizedRole.includes('admin')) {
+      let designation = 'Frontdesk';
+
+      const normalizedRole = (role || '').toLowerCase().trim();
+      if (normalizedRole === 'admin') {
         gymRole = 'GYM_ADMIN';
-      } else if (normalizedRole.includes('trainer')) {
+        designation = 'Admin';
+      } else if (normalizedRole === 'trainer') {
         gymRole = 'TRAINER';
+        designation = 'Trainer';
+      } else {
+        gymRole = 'RECEPTIONIST';
+        designation = 'Frontdesk';
       }
 
-      // Check if user already exists
+      // Check if user already exists globally
       let user = await adminDB.user.findFirst({
         where: {
-          OR: [{ email }, { phone }],
+          OR: [{ email: cleanEmail }, { phone: trimmedPhone }],
+        },
+        include: {
+          gymMemberships: {
+            include: { gym: { select: { id: true, name: true } } },
+          },
         },
       });
 
-      if (!user) {
+      if (user) {
+        // Check if user is already added to THIS gym
+        const alreadyInGym = user.gymMemberships.some((gm) => gm.gymId === gymId);
+        if (alreadyInGym) {
+          return res.status(400).json({
+            status: false,
+            message: 'This user is already registered as staff in this gym',
+          });
+        }
+      } else {
+        // User does not exist, password is required
+        if (!password || !confirmPassword) {
+          return res.status(400).json({
+            status: false,
+            message: 'Password and confirm password are required for new staff accounts',
+          });
+        }
+
+        if (password !== confirmPassword) {
+          return res.status(400).json({
+            status: false,
+            message: 'Password and confirm password do not match',
+          });
+        }
+
+        if (password.length < 6) {
+          return res.status(400).json({
+            status: false,
+            message: 'Password must be at least 6 characters long',
+          });
+        }
+
         const salt = await bcrypt.genSalt(10);
-        const defaultPasswordHash = await bcrypt.hash('Staff@123', salt);
+        const passwordHash = await bcrypt.hash(password, salt);
 
         user = await adminDB.user.create({
           data: {
-            name,
-            email,
-            phone,
-            passwordHash: defaultPasswordHash,
+            name: name.trim(),
+            email: cleanEmail,
+            phone: trimmedPhone,
+            passwordHash,
             status: 'ACTIVE',
           },
-        });
-      }
-
-      // Check if user is already added to this gym
-      const existingGymUser = await adminDB.gymUser.findFirst({
-        where: {
-          gymId,
-          userId: user.id,
-        },
-      });
-
-      if (existingGymUser) {
-        return res.status(400).json({
-          status: false,
-          message: 'This user is already registered as staff in this gym',
+          include: {
+            gymMemberships: {
+              include: { gym: { select: { id: true, name: true } } },
+            },
+          },
         });
       }
 
@@ -107,19 +143,11 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           gymId,
           userId: user.id,
           role: gymRole,
-          designation: role || 'Front Desk',
+          designation,
           status: 'ACTIVE',
         },
         include: { user: true },
       });
-
-      const roleDisplay =
-        gymUser.designation ||
-        (gymUser.role === 'RECEPTIONIST'
-          ? 'Front Desk'
-          : gymUser.role === 'TRAINER'
-          ? 'Trainer'
-          : 'Manager');
 
       return res.status(201).json({
         status: true,
@@ -129,7 +157,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           name: gymUser.user.name,
           email: gymUser.user.email,
           phone: gymUser.user.phone || '',
-          role: roleDisplay,
+          role: designation,
           status: 'Active',
           lastActive: gymUser.createdAt.toISOString(),
           avatarUrl: '',

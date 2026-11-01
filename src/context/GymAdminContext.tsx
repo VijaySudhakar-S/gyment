@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { GymAdminContextType } from '@/types/gymAdminContext';
 import { GymentPlanTier, GymFeatureName } from '@/types/gymAdmin';
 import { hasPlanFeature } from '@/utils/gymAdminHelpers';
+import { subscriptionApi } from '@/lib/api/gymadmin/settings.api';
 
 const GymAdminContext = createContext<GymAdminContextType | undefined>(undefined);
 
@@ -11,13 +12,60 @@ export const GymAdminProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
-  const [planTier, setPlanTier] = useState<GymentPlanTier>('growth');
+  const [planTier, setPlanTier] = useState<GymentPlanTier>('pro');
+  const [planName, setPlanName] = useState<string>('Pro');
+  const [price, setPrice] = useState<number>(0);
+  const [yearlyPrice, setYearlyPrice] = useState<number>(0);
+  const [billingCycle, setBillingCycle] = useState<string>('Monthly');
+  const [renewalDate, setRenewalDate] = useState<string>('');
+  const [membersText, setMembersText] = useState<string>('Unlimited members');
+  const [staffLimitText, setStaffLimitText] = useState<string>('Unlimited staff accounts');
+  const [dynamicFeatures, setDynamicFeatures] = useState<Record<string, boolean>>({});
+  const [featureLimits, setFeatureLimits] = useState<Record<string, string>>({});
+  const [availablePlans, setAvailablePlans] = useState<any[]>([]);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false);
+
+  const refreshSubscription = useCallback(async () => {
+    try {
+      const res = await subscriptionApi.getSubscriptionInfo();
+      if (res?.status && res?.data) {
+        const sub = res.data.subscription;
+        if (sub) {
+          setPlanTier(sub.planTier || 'pro');
+          setPlanName(sub.planName || 'Pro');
+          setPrice(Number(sub.price || 0));
+          setYearlyPrice(Number(sub.yearlyPrice || 0));
+          setBillingCycle(sub.billingCycle || 'Monthly');
+          setRenewalDate(sub.renewalDate || '');
+          setMembersText(sub.membersText || 'Unlimited members');
+          setStaffLimitText(sub.staffLimitText || 'Unlimited staff accounts');
+          if (sub.enabledFeatures && typeof sub.enabledFeatures === 'object') {
+            setDynamicFeatures(sub.enabledFeatures);
+          }
+          if (sub.limits && typeof sub.limits === 'object') {
+            setFeatureLimits(sub.limits);
+          }
+        }
+        if (Array.isArray(res.data.availablePlans)) {
+          setAvailablePlans(res.data.availablePlans);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load subscription info in GymAdminContext:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshSubscription();
+  }, [refreshSubscription]);
 
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
   const openCompareModal = () => setIsCompareModalOpen(true);
   const closeCompareModal = () => setIsCompareModalOpen(false);
-  const hasFeature = (feature: GymFeatureName) => hasPlanFeature(planTier, feature);
+
+  const hasFeature = (feature: GymFeatureName) => {
+    return hasPlanFeature(planTier, feature, dynamicFeatures);
+  };
 
   return (
     <GymAdminContext.Provider
@@ -33,7 +81,18 @@ export const GymAdminProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setSelectedBranch,
         planTier,
         setPlanTier,
+        planName,
+        price,
+        yearlyPrice,
+        billingCycle,
+        renewalDate,
+        membersText,
+        staffLimitText,
+        dynamicFeatures,
+        featureLimits,
+        availablePlans,
         hasFeature,
+        refreshSubscription,
         isCompareModalOpen,
         openCompareModal,
         closeCompareModal,

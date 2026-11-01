@@ -81,3 +81,57 @@
 {"level":"error","message":"SuperAdmin refreshToken error: 'jwt expired'","timestamp":"2026-11-01 11:56:39"}
 {"level":"info","message":"Gym login attempt for email: vijaysudhakar434@gmail.com, found user: true","timestamp":"2026-11-01 11:56:44"}
 {"level":"info","message":"Gym login attempt for email: vijaysudhakar760@gmail.com, found user: true","timestamp":"2026-11-01 11:56:51"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-11-01 13:46:21"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-11-01 13:46:22"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:05"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:05"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:05"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:05"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:05"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:05"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:08"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:08"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:09"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:09"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:10"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:10"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:11"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:11"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:11"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:11"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:11"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:11"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:11"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 14:02:11"}
+{"level":"info","message":"Gym login attempt for email: vijaysudhakar760@gmail.com, found user: true","timestamp":"2026-11-01 14:10:26"}
+{"level":"info","message":"Gym login attempt for email: vijaysudhakar760@gmail.com, found user: true","timestamp":"2026-11-01 14:25:47"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-11-01 19:20:14"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-11-01 19:20:15"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-11-01 19:20:30"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-11-01 19:20:30"}
+{"level":"info","message":"Gym login attempt for email: vijaysudhakar760@gmail.com, found user: true","timestamp":"2026-11-01 19:20:51"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-11-01 19:32:30"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-11-01 19:32:32"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:39"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:40"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:40"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:40"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:41"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:41"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:41"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:41"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:45"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:45"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:45"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:46"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:46"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:46"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:46"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:47"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:47"}
+{"level":"info","message":"Refreshing SuperAdmin Token","timestamp":"2026-11-01 19:34:47"}
+{"level":"info","message":"Gym login attempt for email: vijaysudhakar760@gmail.com, found user: true","timestamp":"2026-11-01 19:34:56"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-11-01 19:35:30"}
+{"level":"error","message":"SuperAdmin login error: 'Invalid email or password.'","timestamp":"2026-11-01 19:35:32"}
+{"level":"info","message":"SuperAdmin login attempt: vijaysudhakar434@gmail.com","timestamp":"2026-11-01 19:35:39"}
+{"level":"info","message":"Fetching SuperAdmin profile: 2880f8d6-5111-4eaf-b386-8e4ce36ac134","timestamp":"2026-11-01 19:35:41"}

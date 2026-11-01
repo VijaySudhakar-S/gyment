@@ -148,26 +148,7 @@ export const GymAdminTopbar: React.FC<GymAdminTopbarProps> = ({
         </div>
       )}
 
- {/* Branch Selector Pill */}
- {showBranchSelect && (
- <div className="hidden sm:flex items-center gap-1.5 bg-gyment-bg border border-gyment-border rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gyment-text">
- <MapPin className="w-3.5 h-3.5 text-gyment-muted" />
- <select
- value={selectedBranch}
- onChange={(e) => setSelectedBranch(e.target.value)}
- className="bg-transparent border-none outline-none text-xs font-semibold text-gyment-text cursor-pointer"
- >
- <option value="all" className="">
- All Branches
- </option>
- {branches.map((b) => (
- <option key={b.id} value={b.id} className="">
- {b.name}
- </option>
- ))}
- </select>
- </div>
- )}
+
 
  {/* Theme Toggle Moon / Sun Button */}
  <button

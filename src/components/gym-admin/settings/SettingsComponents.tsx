@@ -6,7 +6,7 @@ import {
   GymStaff,
 } from '@/types/gymAdmin';
 import { useGymAdmin } from '@/context/GymAdminContext';
-import { GYMENT_PLANS, fmtRs } from '@/utils/gymAdminHelpers';
+import { fmtRs } from '@/utils/gymAdminHelpers';
 import { LockedCard } from '@/components/gym-admin/shared/LockedCard';
 import { Building2, CreditCard, Users, ShieldCheck, Palette, Save } from 'lucide-react';
 import { PrimaryButton } from '@/components/shared/PrimaryButton';
@@ -29,7 +29,7 @@ export const SettingsTabsView: React.FC<{
   onSaveMembership,
   onSaveBranding,
 }) => {
-  const { planTier, openCompareModal, hasFeature } = useGymAdmin();
+  const { planName, price, billingCycle, openCompareModal, hasFeature } = useGymAdmin();
   const { message } = App.useApp();
   const [activeTab, setActiveTab] = useState<
     'profile' | 'membership' | 'users' | 'subscription' | 'branding'
@@ -62,7 +62,6 @@ export const SettingsTabsView: React.FC<{
   const [isSaving, setIsSaving] = useState(false);
 
   const canCustomBrand = hasFeature('Custom Gym Branding');
-  const planInfo = GYMENT_PLANS[planTier];
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -337,25 +336,25 @@ export const SettingsTabsView: React.FC<{
           <div className="flex justify-between py-2 border-b border-dashed border-border/80">
             <span className="text-muted">Current plan</span>
             <span className="font-bold text-gyment-text text-[14px]">
-              {planInfo.name}
+              {planName}
             </span>
           </div>
           <div className="flex justify-between py-2 border-b border-dashed border-border/80">
             <span className="text-muted">Billing cycle</span>
             <span className="font-semibold text-gyment-text">
-              Monthly
+              {billingCycle}
             </span>
           </div>
           <div className="flex justify-between py-2 border-b border-dashed border-border/80">
             <span className="text-muted">Price</span>
             <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base">
-              {fmtRs(planInfo.price)}/month
+              {fmtRs(price)}/month
             </span>
           </div>
           <div className="flex justify-between py-2 border-b border-dashed border-border/80">
-            <span className="text-muted">Next renewal date</span>
-            <span className="font-semibold text-gyment-text">
-              Active
+            <span className="text-muted">Status</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+              Active Subscription
             </span>
           </div>
           <div className="pt-4 flex justify-end">
@@ -364,7 +363,7 @@ export const SettingsTabsView: React.FC<{
               onClick={openCompareModal}
               className="bg-primary hover:bg-primary-dark text-white font-semibold text-xs px-4.5 py-2.5 rounded-lg transition-colors cursor-pointer shadow-xs"
             >
-              Upgrade Plan
+              View Available Plans
             </button>
           </div>
         </div>

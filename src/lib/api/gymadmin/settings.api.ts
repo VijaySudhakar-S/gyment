@@ -52,11 +52,26 @@ export const reportsApi = {
     const res = await apiClient.get<ApiResponse<GymBranchReport[]>>('/api/v1/gymadmin/reports/branches');
     return res.data;
   },
+
+  getReportsAnalytics: async (params?: { range?: string; startDate?: string; endDate?: string } | string): Promise<ApiResponse<any>> => {
+    const queryParams = typeof params === 'string' ? { range: params } : (params || { range: '30d' });
+    const res = await apiClient.get<ApiResponse<any>>('/api/v1/gymadmin/reports/analytics', {
+      params: queryParams,
+    });
+    return res.data;
+  },
 };
 
 export const branchesApi = {
   getBranches: async (): Promise<ApiResponse<GymBranch[]>> => {
     const res = await apiClient.get<ApiResponse<GymBranch[]>>('/api/v1/gymadmin/branches');
+    return res.data;
+  },
+};
+
+export const subscriptionApi = {
+  getSubscriptionInfo: async (): Promise<ApiResponse<any>> => {
+    const res = await apiClient.get<ApiResponse<any>>('/api/v1/gymadmin/subscription');
     return res.data;
   },
 };
@@ -67,3 +82,4 @@ export const notificationsApi = {
     return res.data;
   },
 };
+

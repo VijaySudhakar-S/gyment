@@ -1,13 +1,13 @@
 import React from 'react';
 import { useGymAdmin } from '@/context/GymAdminContext';
 import {
-  GYMENT_PLANS,
   ALL_GYM_FEATURES,
   hasPlanFeature,
   fmtRs,
+  FEATURE_NAME_TO_KEY,
 } from '@/utils/gymAdminHelpers';
-import { GymentPlanTier, GymSubscriptionInfo } from '@/types/gymAdmin';
-import { Check, Minus, ArrowRight, ShieldCheck, Calendar } from 'lucide-react';
+import { GymSubscriptionInfo } from '@/types/gymAdmin';
+import { Check, Minus, ShieldCheck, Calendar, ArrowRight } from 'lucide-react';
 import { PrimaryButton } from '@/components/shared/PrimaryButton';
 
 interface GymPlanComparisonCardProps {
@@ -17,21 +17,17 @@ interface GymPlanComparisonCardProps {
 export const GymPlanComparisonCard: React.FC<GymPlanComparisonCardProps> = ({
   subscription,
 }) => {
-  const { planTier, openCompareModal } = useGymAdmin();
+  const { planName: ctxPlanName, price: ctxPrice, yearlyPrice: ctxYearly, billingCycle: ctxCycle, renewalDate: ctxRenewal, membersText: ctxMembers, staffLimitText: ctxStaff, dynamicFeatures, openCompareModal } = useGymAdmin();
 
-  const activeTier: GymentPlanTier = subscription?.planTier || planTier;
-  const planInfo = GYMENT_PLANS[activeTier];
+  const planName = subscription?.planName || ctxPlanName || 'Active';
+  const price = subscription?.price ?? ctxPrice;
+  const yearlyPrice = subscription?.yearlyPrice ?? ctxYearly;
+  const billingCycle = subscription?.billingCycle || ctxCycle || 'Monthly';
+  const membersText = subscription?.membersText || ctxMembers || 'Unlimited members';
+  const staffLimitText = subscription?.staffLimitText || ctxStaff || 'Unlimited staff accounts';
 
-  const planName = subscription?.planName || planInfo.name;
-  const price = subscription?.price ?? planInfo.price;
-  const yearlyPrice = subscription?.yearlyPrice ?? planInfo.yearlyPrice;
-  const billingCycle = subscription?.billingCycle || 'Monthly';
-  const membersText = subscription?.membersText || planInfo.memberLimitText;
-  const staffLimitText = subscription?.staffLimitText || planInfo.staffLimitText;
-  const branchesText = subscription?.branchesText || planInfo.branchesText;
-
-  const renewalDateFormatted = subscription?.renewalDate
-    ? new Date(subscription.renewalDate).toLocaleDateString('en-US', {
+  const renewalDateFormatted = subscription?.renewalDate || ctxRenewal
+    ? new Date(subscription?.renewalDate || ctxRenewal).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -89,7 +85,7 @@ export const GymPlanComparisonCard: React.FC<GymPlanComparisonCardProps> = ({
         </div>
 
         {/* Plan Limits Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-primary/20 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-primary/20 text-xs">
           <div className="flex items-center gap-2 text-gyment-text font-bold bg-white/80 dark:bg-white/10 px-3 py-2 rounded-lg border border-primary/15">
             <span className="w-2 h-2 rounded-full bg-primary" />
             {membersText}
@@ -97,10 +93,6 @@ export const GymPlanComparisonCard: React.FC<GymPlanComparisonCardProps> = ({
           <div className="flex items-center gap-2 text-gyment-text font-bold bg-white/80 dark:bg-white/10 px-3 py-2 rounded-lg border border-primary/15">
             <span className="w-2 h-2 rounded-full bg-primary" />
             {staffLimitText}
-          </div>
-          <div className="flex items-center gap-2 text-gyment-text font-bold bg-white/80 dark:bg-white/10 px-3 py-2 rounded-lg border border-primary/15">
-            <span className="w-2 h-2 rounded-full bg-primary" />
-            {branchesText}
           </div>
         </div>
       </div>
@@ -120,8 +112,10 @@ export const GymPlanComparisonCard: React.FC<GymPlanComparisonCardProps> = ({
 
         {/* Features checklist grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3">
-          {ALL_GYM_FEATURES.map((f) => {
-            const avail = hasPlanFeature(activeTier, f);
+          {ALL_GYM_FEATURES.filter(
+            (f) => f !== 'Multiple Branch Management' && f !== 'Branch-wise Reports' && f !== 'Consolidated Revenue Reports'
+          ).map((f) => {
+            const avail = hasPlanFeature('pro', f, dynamicFeatures);
             return (
               <div
                 key={f}

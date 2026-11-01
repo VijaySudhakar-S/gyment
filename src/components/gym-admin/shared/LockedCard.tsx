@@ -3,9 +3,9 @@ import { Lock } from 'lucide-react';
 import { useGymAdmin } from '@/context/GymAdminContext';
 
 interface LockedCardProps {
- title: string;
- planRequired: 'Growth' | 'Pro';
- description: string;
+  title: string;
+  planRequired: 'Growth' | 'Pro' | string;
+  description: string;
 }
 
 export const LockedCard: React.FC<LockedCardProps> = ({
@@ -41,9 +41,9 @@ export const LockedCard: React.FC<LockedCardProps> = ({
 };
 
 export const LockedInline: React.FC<{
- title: string;
- planRequired: 'Growth' | 'Pro';
- description?: string;
+  title: string;
+  planRequired: 'Growth' | 'Pro' | string;
+  description?: string;
 }> = ({ title, planRequired, description }) => {
  const { openCompareModal } = useGymAdmin();
 

@@ -1,315 +1,455 @@
 import React from 'react';
-import {
-  GymAdminDashboardStats,
-  GymBranchReport,
-  GymRevenuePoint,
-} from '@/types/gymAdmin';
 import { fmtRs } from '@/utils/gymAdminHelpers';
-import { useGymAdmin } from '@/context/GymAdminContext';
-import { LockedCard } from '@/components/gym-admin/shared/LockedCard';
-import { GymSvgLineChart } from '@/components/gym-admin/shared/GymSvgLineChart';
-import { Download, Lock } from 'lucide-react';
-import { App, Table } from 'antd';
+import { ReactEChart } from '@/components/charts/ReactEChart';
+import { useTheme } from '@/context/ThemeContext';
+import {
+  Users,
+  TrendingUp,
+  ReceiptIndianRupee,
+  Clock,
+  Download,
+  Lock,
+  ArrowUpRight,
+  ShieldCheck,
+  CreditCard,
+  Layers,
+  CalendarCheck,
+  Percent,
+} from 'lucide-react';
+import { App, Table, Tag } from 'antd';
+import type { EChartsOption } from 'echarts';
 
-export const ReportsKpis: React.FC<{
-  stats: GymAdminDashboardStats | null;
-}> = ({ stats }) => {
-  const total = stats?.totalMembers ?? 0;
-  const active = stats?.activeMembers ?? 0;
-  const expired = stats?.expired ?? 0;
-  const new30d = stats?.newMembers30d ?? 0;
-  const todayRev = stats?.todayRevenue ?? 0;
-  const monthRev = stats?.monthlyRevenue ?? 0;
-  const expiring = stats?.expiringSoon ?? 0;
+// ----------------------------------------------------
+// 1. Executive Summary Metric Strips for Gym Owner
+// ----------------------------------------------------
+export const OwnerFinancialHealthBar: React.FC<{
+  summary: {
+    totalMembers: number;
+    activeMembers: number;
+    expiredMembers: number;
+    expiring7d: number;
+    retentionRate: number;
+    monthRevenue: number;
+    totalLifetimeRevenue: number;
+    totalPendingDues: number;
+    todayAttendance: number;
+    avgDailyAttendance: number;
+  } | null;
+}> = ({ summary }) => {
+  const monthRev = summary?.monthRevenue ?? 0;
+  const pendingDues = summary?.totalPendingDues ?? 0;
+  const activeMembers = summary?.activeMembers ?? 0;
+  const totalMembers = summary?.totalMembers ?? 0;
+  const retention = summary?.retentionRate ?? 0;
+  const dailyVisits = summary?.todayAttendance ?? 0;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {/* Member Report Card */}
-      <div className="bg-white border border-border rounded-2xl p-4 sm:p-5 shadow-2xs">
-        <h3 className="text-xs font-bold text-gyment-text uppercase tracking-wider mb-3">
-          Member Report
-        </h3>
-        <div className="space-y-2.5 text-[13px]">
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Total members</span>
-            <span className="font-bold text-gyment-text">{total}</span>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+      {/* 1. Monthly Revenue Collections */}
+      <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs hover:shadow-xs transition-shadow">
+        <div className="flex items-center justify-between text-muted text-xs font-semibold">
+          <span>This Month Revenue</span>
+          <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <ReceiptIndianRupee className="w-4.5 h-4.5" />
           </div>
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Active</span>
-            <span className="font-bold text-emerald-600 dark:text-emerald-400">
-              {active}
-            </span>
-          </div>
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Expired</span>
-            <span className="font-bold text-rose-600 dark:text-rose-400">{expired}</span>
-          </div>
-          <div className="flex justify-between py-1">
-            <span className="text-muted">New (30d)</span>
-            <span className="font-bold text-blue-600 dark:text-blue-400">{new30d}</span>
-          </div>
+        </div>
+        <div className="text-2xl sm:text-[26px] font-black text-gyment-text mt-2 leading-tight">
+          {fmtRs(monthRev)}
+        </div>
+        <div className="flex items-center justify-between text-xs text-muted mt-2 pt-2 border-t border-dashed border-border/80">
+          <span>Lifetime:</span>
+          <span className="font-bold text-stone-700 dark:text-stone-300">
+            {fmtRs(summary?.totalLifetimeRevenue ?? 0)}
+          </span>
         </div>
       </div>
 
-      {/* Attendance Report Card */}
-      <div className="bg-white border border-border rounded-2xl p-4 sm:p-5 shadow-2xs">
-        <h3 className="text-xs font-bold text-gyment-text uppercase tracking-wider mb-3">
-          Attendance Report
-        </h3>
-        <div className="space-y-2.5 text-[13px]">
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Daily average</span>
-            <span className="font-bold text-gyment-text">
-              {stats?.todayAttendance ? Math.round(stats.todayAttendance * 0.9) : 0} visits
-            </span>
+      {/* 2. Outstanding Balance & Receivables */}
+      <div className="bg-white border border-rose-200/80 dark:border-rose-900/40 rounded-2xl p-5 shadow-2xs hover:shadow-xs transition-shadow">
+        <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 text-xs font-bold">
+          <span>Pending Dues</span>
+          <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+            <CreditCard className="w-4.5 h-4.5" />
           </div>
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Monthly total</span>
-            <span className="font-bold text-gyment-text">
-              {stats?.todayAttendance ? stats.todayAttendance * 26 : 0} visits
-            </span>
-          </div>
-          <div className="flex justify-between py-1">
-            <span className="text-muted">Attendance rate</span>
-            <span className="font-bold text-emerald-600 dark:text-emerald-400">
-              {total > 0 ? Math.min(99, Math.round((active / total) * 100)) : 0}%
-            </span>
-          </div>
+        </div>
+        <div className="text-2xl sm:text-[26px] font-black text-rose-600 dark:text-rose-400 mt-2 leading-tight">
+          {fmtRs(pendingDues)}
+        </div>
+        <div className="flex items-center justify-between text-xs text-muted mt-2 pt-2 border-t border-dashed border-border/80">
+          <span>Status:</span>
+          <span className="font-bold text-rose-600 dark:text-rose-400">
+            {pendingDues > 0 ? 'Action Needed' : 'All Clear ✓'}
+          </span>
         </div>
       </div>
 
-      {/* Payment Report Card */}
-      <div className="bg-white border border-border rounded-2xl p-4 sm:p-5 shadow-2xs">
-        <h3 className="text-xs font-bold text-gyment-text uppercase tracking-wider mb-3">
-          Payment Report
-        </h3>
-        <div className="space-y-2.5 text-[13px]">
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Daily collection</span>
-            <span className="font-bold text-gyment-text">
-              {fmtRs(todayRev)}
-            </span>
+      {/* 3. Active Members & Retention Rate */}
+      <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs hover:shadow-xs transition-shadow">
+        <div className="flex items-center justify-between text-muted text-xs font-semibold">
+          <span>Active Membership</span>
+          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <Users className="w-4.5 h-4.5" />
           </div>
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Monthly revenue</span>
-            <span className="font-bold text-emerald-600 dark:text-emerald-400">
-              {fmtRs(monthRev)}
-            </span>
-          </div>
-          <div className="flex justify-between py-1">
-            <span className="text-muted">Top method</span>
-            <span className="font-bold text-gyment-text">UPI / Cash</span>
-          </div>
+        </div>
+        <div className="text-2xl sm:text-[26px] font-black text-gyment-text mt-2 leading-tight">
+          {activeMembers}
+          <span className="text-xs font-semibold text-muted ml-1.5 font-normal">
+            / {totalMembers} registered
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-xs text-muted mt-2 pt-2 border-t border-dashed border-border/80">
+          <span>Retention Health:</span>
+          <span className="font-bold text-emerald-600 dark:text-emerald-400">
+            {retention}% Active
+          </span>
         </div>
       </div>
 
-      {/* Membership Report Card */}
-      <div className="bg-white border border-border rounded-2xl p-4 sm:p-5 shadow-2xs">
-        <h3 className="text-xs font-bold text-gyment-text uppercase tracking-wider mb-3">
-          Membership Report
-        </h3>
-        <div className="space-y-2.5 text-[13px]">
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Expiring in 7d</span>
-            <span className="font-bold text-amber-600 dark:text-amber-400">{expiring}</span>
+      {/* 4. Today's Footfall & Peak Turnout */}
+      <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs hover:shadow-xs transition-shadow">
+        <div className="flex items-center justify-between text-muted text-xs font-semibold">
+          <span>Today&apos;s Attendance</span>
+          <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+            <CalendarCheck className="w-4.5 h-4.5" />
           </div>
-          <div className="flex justify-between py-1 border-b border-dashed border-border/80">
-            <span className="text-muted">Renewal rate</span>
-            <span className="font-bold text-gyment-text">88%</span>
-          </div>
-          <div className="flex justify-between py-1">
-            <span className="text-muted">Top Plan</span>
-            <span className="font-bold text-gyment-text">Monthly</span>
-          </div>
+        </div>
+        <div className="text-2xl sm:text-[26px] font-black text-gyment-text mt-2 leading-tight">
+          {dailyVisits}
+          <span className="text-xs text-muted font-normal ml-1">check-ins</span>
+        </div>
+        <div className="flex items-center justify-between text-xs text-muted mt-2 pt-2 border-t border-dashed border-border/80">
+          <span>30d Daily Avg:</span>
+          <span className="font-bold text-stone-700 dark:text-stone-300">
+            ~{summary?.avgDailyAttendance ?? 0} visits / day
+          </span>
         </div>
       </div>
     </div>
   );
 };
 
-export const RevenueTrendsCard: React.FC<{
-  revenueTrend: GymRevenuePoint[];
-}> = ({ revenueTrend }) => {
-  const values = revenueTrend.map((r) => r.amount);
-  const labels = revenueTrend.map((r) => r.label);
+// ----------------------------------------------------
+// 2. Revenue & Member Growth Dual-Axis EChart
+// ----------------------------------------------------
+export const RevenueAndGrowthChart: React.FC<{
+  monthlyTrends: Array<{
+    label: string;
+    revenue: number;
+    newMembers: number;
+    attendance: number;
+  }>;
+}> = ({ monthlyTrends }) => {
+  const { isDark } = useTheme();
+
+  const labels = monthlyTrends.map((t) => t.label);
+  const revenues = monthlyTrends.map((t) => t.revenue);
+  const signups = monthlyTrends.map((t) => t.newMembers);
+
+  const option = React.useMemo<EChartsOption>(() => {
+    return {
+      backgroundColor: 'transparent',
+      grid: {
+        top: 36,
+        right: 48,
+        bottom: 24,
+        left: 48,
+        containLabel: true,
+      },
+      legend: {
+        data: ['Revenue (₹)', 'New Signups'],
+        textStyle: {
+          color: isDark ? '#D4D4D4' : '#4B5563',
+          fontSize: 12,
+        },
+        top: 0,
+        right: 16,
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross' },
+        backgroundColor: isDark ? '#1C1C1C' : '#FFFFFF',
+        borderColor: isDark ? '#2E2E2E' : '#E3E8E5',
+        borderWidth: 1,
+        textStyle: { color: isDark ? '#FFFFFF' : '#16211B', fontSize: 12 },
+        formatter: (params: any) => {
+          if (!Array.isArray(params)) return '';
+          const month = params[0]?.name;
+          let content = `<div style="font-weight: 700; margin-bottom: 4px;">${month}</div>`;
+          params.forEach((p) => {
+            const val = p.seriesName.includes('Revenue') ? fmtRs(p.value) : `${p.value} members`;
+            content += `<div style="display:flex; justify-content:space-between; gap:16px; font-size:12px;">
+              <span style="color:${p.color}">${p.seriesName}:</span>
+              <b>${val}</b>
+            </div>`;
+          });
+          return content;
+        },
+      },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLine: { lineStyle: { color: isDark ? '#333' : '#E5E7EB' } },
+        axisLabel: { color: isDark ? '#9CA3AF' : '#6B7280', fontSize: 11 },
+      },
+      yAxis: [
+        {
+          type: 'value',
+          name: 'Revenue',
+          position: 'left',
+          axisLabel: {
+            formatter: (v: number) => `₹${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`,
+            color: isDark ? '#9CA3AF' : '#6B7280',
+          },
+          splitLine: {
+            lineStyle: {
+              color: isDark ? '#262626' : '#F3F4F6',
+              type: 'dashed',
+            },
+          },
+        },
+        {
+          type: 'value',
+          name: 'Signups',
+          position: 'right',
+          minInterval: 1,
+          axisLabel: {
+            formatter: '{value}',
+            color: isDark ? '#9CA3AF' : '#6B7280',
+          },
+          splitLine: { show: false },
+        },
+      ],
+      series: [
+        {
+          name: 'Revenue (₹)',
+          type: 'bar',
+          data: revenues,
+          yAxisIndex: 0,
+          barMaxWidth: 32,
+          itemStyle: {
+            color: '#10B981',
+            borderRadius: [4, 4, 0, 0],
+          },
+        },
+        {
+          name: 'New Signups',
+          type: 'line',
+          data: signups,
+          yAxisIndex: 1,
+          smooth: true,
+          symbolSize: 8,
+          lineStyle: { color: '#3B82F6', width: 3 },
+          itemStyle: { color: '#3B82F6' },
+        },
+      ],
+    };
+  }, [labels, revenues, signups, isDark]);
 
   return (
-    <div className="bg-white border border-border rounded-2xl p-5 mb-6 shadow-xs">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white border border-border rounded-2xl p-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <div>
-          <h3 className="text-sm font-bold text-gyment-text">
-            Monthly Revenue Collections
+          <h3 className="text-sm font-bold text-gyment-text flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Revenue Collections & Member Growth Trend</span>
           </h3>
-          <p className="text-xs text-muted">
-            Fee collections trend over the past 6 months
+          <p className="text-xs text-muted mt-0.5">
+            Compare monthly revenue collected against new member signups over the past 6 months
           </p>
         </div>
-        <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-lg">
-          Collections
-        </span>
       </div>
-
-      <GymSvgLineChart
-        data={values}
-        labels={labels}
-        color="#2FAE68"
-        height={210}
-        isCurrency
-      />
+      <ReactEChart option={option} height={280} />
     </div>
   );
 };
 
-export const BranchWiseReportsCard: React.FC<{
-  branchReports: GymBranchReport[];
-}> = ({ branchReports }) => {
-  const { hasFeature } = useGymAdmin();
-  const canViewBranches = hasFeature('Multiple Branch Management');
-
-  if (!canViewBranches) {
-    return (
-      <LockedCard
-        title="Branch-wise & Consolidated Reports"
-        planRequired="Pro"
-        description="Compare performance across multiple gym locations and view consolidated revenues once you upgrade to Pro."
-      />
-    );
-  }
-
-  const consolidatedTotal = branchReports.reduce((acc, b) => acc + b.revenue, 0);
+// ----------------------------------------------------
+// 3. Plan Performance & Revenue Contribution Table
+// ----------------------------------------------------
+export const PlanDistributionReportCard: React.FC<{
+  planDistribution: Array<{
+    id: string;
+    name: string;
+    price: number;
+    activeMembers: number;
+    totalRevenue: number;
+  }>;
+}> = ({ planDistribution }) => {
+  const totalRevenueAllPlans = planDistribution.reduce((acc, p) => acc + p.totalRevenue, 0);
 
   const columns = [
     {
-      title: 'BRANCH',
-      dataIndex: 'branchName',
-      key: 'branchName',
+      title: 'MEMBERSHIP PLAN',
+      dataIndex: 'name',
+      key: 'name',
       render: (name: string) => (
-        <span className="font-bold text-gyment-text text-[13.5px]">{name}</span>
+        <span className="font-bold text-gyment-text text-[13px]">{name}</span>
       ),
     },
     {
-      title: 'MEMBERS',
-      dataIndex: 'members',
-      key: 'members',
-      render: (members: number) => (
-        <span className="text-muted text-[13px]">{members}</span>
+      title: 'PLAN PRICE',
+      dataIndex: 'price',
+      key: 'price',
+      render: (price: number) => (
+        <span className="text-muted text-xs font-semibold">{fmtRs(price)}</span>
       ),
     },
     {
-      title: 'REVENUE',
-      dataIndex: 'revenue',
-      key: 'revenue',
+      title: 'ACTIVE MEMBERS',
+      dataIndex: 'activeMembers',
+      key: 'activeMembers',
+      render: (count: number) => (
+        <span className="font-bold text-stone-800 dark:text-stone-200 text-xs px-2 py-0.5 bg-stone-100 dark:bg-stone-800 rounded">
+          {count} members
+        </span>
+      ),
+    },
+    {
+      title: 'TOTAL REVENUE',
+      dataIndex: 'totalRevenue',
+      key: 'totalRevenue',
       render: (rev: number) => (
-        <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm">
+        <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xs">
           {fmtRs(rev)}
         </span>
       ),
     },
     {
-      title: 'ATTENDANCE',
-      dataIndex: 'attendance',
-      key: 'attendance',
-      render: (att: number) => (
-        <span className="text-muted text-[13px]">{att}</span>
-      ),
+      title: 'REVENUE SHARE',
+      key: 'share',
+      render: (_: any, p: any) => {
+        const share = totalRevenueAllPlans > 0 ? Math.round((p.totalRevenue / totalRevenueAllPlans) * 100) : 0;
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-20 h-1.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${share}%` }} />
+            </div>
+            <span className="text-[11px] font-bold text-muted">{share}%</span>
+          </div>
+        );
+      },
     },
   ];
 
   return (
-    <div className="bg-white border border-border rounded-2xl p-5 mb-6 shadow-xs">
-      <Table
-        dataSource={branchReports}
-        columns={columns}
-        rowKey="branchId"
-        pagination={false}
-        scroll={{ x: 500 }}
-      />
-
-      <div className="flex items-center justify-between border-t border-border mt-4 pt-3.5 text-[13.5px]">
-        <span className="text-muted font-semibold">
-          Consolidated Revenue
-        </span>
-        <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
-          {fmtRs(consolidatedTotal)}
-        </span>
+    <div className="bg-white border border-border rounded-2xl p-5 shadow-xs">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-sm font-bold text-gyment-text flex items-center gap-2">
+            <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Membership Plan Revenue Breakdown</span>
+          </h3>
+          <p className="text-xs text-muted mt-0.5">
+            Popularity and financial contribution by membership tier
+          </p>
+        </div>
       </div>
+      <Table
+        dataSource={planDistribution}
+        columns={columns}
+        rowKey="id"
+        pagination={false}
+        scroll={{ x: 550 }}
+        size="small"
+      />
     </div>
   );
 };
 
-export const ExportReportsCard: React.FC = () => {
-  const { hasFeature, openCompareModal } = useGymAdmin();
-  const { message } = App.useApp();
+// ----------------------------------------------------
+// 4. Hourly Peak Attendance & Payment Methods Distribution
+// ----------------------------------------------------
+export const OperationsAndMethodsCard: React.FC<{
+  paymentMethods: Array<{ method: string; amount: number; count: number }>;
+  hourlyPeak: Array<{ slot: string; visits: number }>;
+}> = ({ paymentMethods, hourlyPeak }) => {
+  const { isDark } = useTheme();
 
-  const canExportExcel = hasFeature('Excel Export');
-  const canExportAdvanced = hasFeature('Advanced Data Export');
+  const totalVisits = hourlyPeak.reduce((acc, h) => acc + h.visits, 0);
 
-  const handleExport = (type: string) => {
-    message.success(`Exporting ${type} report...`);
-  };
+  // EChart for payment methods breakdown
+  const pieOption = React.useMemo<EChartsOption>(() => {
+    return {
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'item',
+        formatter: (p: any) => `${p.name}: <b>${fmtRs(p.value)}</b> (${p.percent}%)`,
+      },
+      legend: {
+        bottom: 0,
+        textStyle: { color: isDark ? '#D4D4D4' : '#4B5563', fontSize: 11 },
+      },
+      series: [
+        {
+          name: 'Payment Methods',
+          type: 'pie',
+          radius: ['45%', '70%'],
+          avoidLabelOverlap: false,
+          label: { show: false },
+          data: paymentMethods.map((pm) => ({
+            name: pm.method,
+            value: pm.amount,
+          })),
+        },
+      ],
+    };
+  }, [paymentMethods, isDark]);
 
   return (
-    <div className="bg-white border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-sm font-bold text-gyment-text mb-1.5">
-        Export Gym Data
-      </h3>
-      <p className="text-xs text-muted mb-4">
-        Download reports in various formats for accountants or local backup.
-      </p>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Hourly Gym Peak Traffic */}
+      <div className="bg-white border border-border rounded-2xl p-5 shadow-xs">
+        <h3 className="text-sm font-bold text-gyment-text flex items-center gap-2 mb-1">
+          <Clock className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+          <span>Gym Peak Hours & Footfall Density</span>
+        </h3>
+        <p className="text-xs text-muted mb-4">
+          Time-of-day distribution of member check-ins (Past 30 days)
+        </p>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {/* CSV */}
-        <button
-          type="button"
-          onClick={() => handleExport('CSV')}
-          className="border border-border bg-white hover:bg-stone-50 text-gyment-text px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
-        >
-          <Download className="w-4 h-4 text-muted" />
-          Export CSV
-        </button>
+        <div className="space-y-3">
+          {hourlyPeak.map((slot) => {
+            const percent = totalVisits > 0 ? Math.round((slot.visits / totalVisits) * 100) : 0;
+            return (
+              <div key={slot.slot} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-gyment-text">{slot.slot}</span>
+                  <span className="text-muted">
+                    {slot.visits} visits <b>({percent}%)</b>
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-linear-to-r from-teal-500 to-emerald-500 rounded-full transition-all duration-300"
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-        {/* Excel */}
-        {canExportExcel ? (
-          <button
-            type="button"
-            onClick={() => handleExport('Excel')}
-            className="border border-border bg-white hover:bg-stone-50 text-gyment-text px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
-          >
-            <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            Export Excel
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => openCompareModal()}
-            className="border border-dashed border-border bg-stone-50 text-muted px-3.5 py-2 rounded-lg text-xs font-medium flex items-center gap-2 cursor-pointer hover:border-amber-400 transition-colors"
-          >
-            <Lock className="w-3.5 h-3.5 text-amber-500" />
-            Excel — Growth
-          </button>
-        )}
+      {/* Payment Method Distribution */}
+      <div className="bg-white border border-border rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+        <div>
+          <h3 className="text-sm font-bold text-gyment-text flex items-center gap-2 mb-1">
+            <CreditCard className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span>Collection Channels (UPI vs Cash vs Card)</span>
+          </h3>
+          <p className="text-xs text-muted mb-2">
+            Payment instrument preference across all member transactions
+          </p>
+        </div>
 
-        {/* Advanced Export */}
-        {canExportAdvanced ? (
-          <button
-            type="button"
-            onClick={() => handleExport('Advanced PDF/ZIP')}
-            className="border border-border bg-white hover:bg-stone-50 text-gyment-text px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
-          >
-            <Download className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            Advanced Data Export
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => openCompareModal()}
-            className="border border-dashed border-border bg-stone-50 text-muted px-3.5 py-2 rounded-lg text-xs font-medium flex items-center gap-2 cursor-pointer hover:border-amber-400 transition-colors"
-          >
-            <Lock className="w-3.5 h-3.5 text-amber-500" />
-            Advanced Export — Pro
-          </button>
-        )}
+        <div className="h-56">
+          <ReactEChart option={pieOption} height={220} />
+        </div>
       </div>
     </div>
   );
 };
+
+
+
+
