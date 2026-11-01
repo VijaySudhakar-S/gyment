@@ -119,6 +119,22 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         },
       });
 
+      // Update subscription paidAmount & balanceAmount
+      if (subId && targetMember.subscriptions[0]) {
+        const curSub = targetMember.subscriptions[0];
+        const newPaid = Number(curSub.paidAmount || 0) + Number(amount);
+        const total = Number(curSub.totalAmount || 0);
+        const newBalance = Math.max(0, total - newPaid);
+
+        await db.subscription.update({
+          where: { id: subId },
+          data: {
+            paidAmount: newPaid,
+            balanceAmount: newBalance,
+          },
+        });
+      }
+
       return res.status(201).json({
         status: true,
         message: 'Payment recorded successfully',

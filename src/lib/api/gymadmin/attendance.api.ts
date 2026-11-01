@@ -12,4 +12,9 @@ export const attendanceApi = {
     const res = await apiClient.post<ApiResponse<GymAttendanceRecord>>('/api/v1/gymadmin/attendance/checkin', data);
     return res.data;
   },
+
+  getAbsentees: async (days: number = 5): Promise<ApiResponse<any[]>> => {
+    const res = await apiClient.get<ApiResponse<any[]>>(`/api/v1/gymadmin/attendance/absentees?days=${days}`);
+    return res.data;
+  },
 };

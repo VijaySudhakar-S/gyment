@@ -30,6 +30,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         status: true,
         message: 'Profile settings retrieved successfully',
         data: {
+          gymId: gym?.id || gymId,
           gymName: customProfile.gymName || gym?.name || 'Gyment Partner',
           phone: customProfile.phone || gym?.contactPhone || gym?.ownerPhone || '',
           email: customProfile.email || gym?.contactEmail || '',

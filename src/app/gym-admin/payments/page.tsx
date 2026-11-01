@@ -12,6 +12,7 @@ import {
   PaymentsKpis,
   PaymentsTable,
   RecordPaymentModal,
+  PendingMembersModal,
 } from '@/components/gym-admin/payments/PaymentsComponents';
 import { GymAdminTopbar } from '@/components/gym-admin/layout/GymAdminTopbar';
 import { MotionFadeIn } from '@/components/shared/MotionContainer';
@@ -26,18 +27,22 @@ export default function GymAdminPaymentsPage() {
   const [payments, setPayments] = useState<GymPaymentRecord[]>([]);
   const [members, setMembers] = useState<GymMember[]>([]);
   const [plans, setPlans] = useState<GymMembershipPlan[]>([]);
+  const [gymProfile, setGymProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false);
+  const [isPendingModalOpen, setIsPendingModalOpen] = useState<boolean>(false);
+  const [memberForPayment, setMemberForPayment] = useState<GymMember | null>(null);
   const [search, setSearch] = useState<string>('');
   const debouncedSearch = useDebounce(search, 300);
 
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [paymentsRes, membersRes, plansRes] = await Promise.allSettled([
+      const [paymentsRes, membersRes, plansRes, profileRes] = await Promise.allSettled([
         gymAdminApi.getPayments(),
         gymAdminApi.getMembers(),
         gymAdminApi.getMembershipPlans(),
+        gymAdminApi.getProfileSettings(),
       ]);
 
       if (paymentsRes.status === 'fulfilled' && Array.isArray(paymentsRes.value?.data)) {
@@ -48,6 +53,9 @@ export default function GymAdminPaymentsPage() {
       }
       if (plansRes.status === 'fulfilled' && Array.isArray(plansRes.value?.data)) {
         setPlans(plansRes.value.data);
+      }
+      if (profileRes.status === 'fulfilled' && profileRes.value?.data) {
+        setGymProfile(profileRes.value.data);
       }
     } catch (err) {
       console.error('Failed to load payments:', err);
@@ -83,6 +91,15 @@ export default function GymAdminPaymentsPage() {
 
   const monthlyTotal = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
 
+  // Members with pending balance amount
+  const membersWithPending = React.useMemo(() => {
+    return members.filter((m) => m.balanceAmount && Number(m.balanceAmount) > 0);
+  }, [members]);
+
+  const pendingTotal = React.useMemo(() => {
+    return membersWithPending.reduce((acc, m) => acc + Number(m.balanceAmount || 0), 0);
+  }, [membersWithPending]);
+
   const [methodFilter, setMethodFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
 
@@ -103,6 +120,11 @@ export default function GymAdminPaymentsPage() {
     });
   }, [payments, debouncedSearch, methodFilter, statusFilter]);
 
+  const handleCollectPending = (m: GymMember) => {
+    setMemberForPayment(m);
+    setIsRecordModalOpen(true);
+  };
+
   return (
     <>
       <GymAdminTopbar
@@ -110,7 +132,10 @@ export default function GymAdminPaymentsPage() {
         subtitle="Track collections, invoices, and member payment history."
         actions={
           <PrimaryButton
-            onClick={() => setIsRecordModalOpen(true)}
+            onClick={() => {
+              setMemberForPayment(null);
+              setIsRecordModalOpen(true);
+            }}
             icon={<Plus className="w-3.5 h-3.5 stroke-[2.4]" />}
           >
             Record Payment
@@ -124,6 +149,9 @@ export default function GymAdminPaymentsPage() {
             todayTotal={todayTotal}
             monthlyTotal={monthlyTotal}
             paymentCount={payments.length}
+            pendingTotal={pendingTotal}
+            pendingMembersCount={membersWithPending.length}
+            onOpenPendingMembers={() => setIsPendingModalOpen(true)}
           />
         </MotionFadeIn>
 
@@ -181,13 +209,26 @@ export default function GymAdminPaymentsPage() {
           />
         </MotionFadeIn>
 
-      {/* Modal */}
+      {/* Record Payment Modal */}
       <RecordPaymentModal
         isOpen={isRecordModalOpen}
-        onClose={() => setIsRecordModalOpen(false)}
+        onClose={() => {
+          setIsRecordModalOpen(false);
+          setMemberForPayment(null);
+        }}
         onSubmit={handleRecordPayment}
         members={members}
         plans={plans}
+        initialMember={memberForPayment}
+      />
+
+      {/* Pending Members Dues List Modal */}
+      <PendingMembersModal
+        isOpen={isPendingModalOpen}
+        onClose={() => setIsPendingModalOpen(false)}
+        membersWithPending={membersWithPending}
+        onCollectPayment={handleCollectPending}
+        gymName={gymProfile?.gymName || 'Gyment'}
       />
       </main>
     </>

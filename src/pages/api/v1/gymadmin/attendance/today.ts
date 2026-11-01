@@ -45,17 +45,56 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         id: a.id,
         memberId: a.memberId,
         memberName: `${a.member.firstName} ${a.member.lastName}`.trim(),
+        phone: a.member.phone || '',
+        avatar: a.member.avatar || null,
         checkInTime,
+        checkInDate: a.checkIn.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        }),
         plan: planName,
         status: a.status === 'PRESENT' ? 'Checked In' : a.status,
         method: a.method === 'QR_CODE' ? ('qr' as const) : ('name' as const),
       };
     });
 
+    // Calculate dynamic peak check-in window from today's real attendance
+    let peakTime = 'No check-ins yet';
+    if (attendances.length > 0) {
+      const hourCounts: { [hour: number]: number } = {};
+      attendances.forEach((att) => {
+        const hour = new Date(att.checkIn).getHours();
+        hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+      });
+
+      let peakHour = 6;
+      let maxCount = -1;
+      for (const [hStr, count] of Object.entries(hourCounts)) {
+        const h = parseInt(hStr, 10);
+        if (count > maxCount) {
+          maxCount = count;
+          peakHour = h;
+        }
+      }
+
+      const formatHour = (h: number) => {
+        const period = h >= 12 ? 'PM' : 'AM';
+        const displayH = h % 12 === 0 ? 12 : h % 12;
+        return `${displayH}:00 ${period}`;
+      };
+
+      peakTime = `${formatHour(peakHour)} – ${formatHour((peakHour + 2) % 24)}`;
+    }
+
     return res.status(200).json({
       status: true,
       message: 'Today attendance retrieved',
       data: formatted,
+      meta: {
+        peakTime,
+        todayCount: formatted.length,
+      },
     });
   } catch (error: any) {
     LoggerInstance.error('Today Attendance Error: %o', error?.message || error);

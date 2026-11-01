@@ -8,7 +8,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
     const db = req.db!;
 
     if (req.method === 'GET') {
-      const { search, status, trainer, plan } = req.query;
+      const { search, status, trainer, plan, limit } = req.query;
 
       const whereClause: any = {};
 
@@ -18,6 +18,7 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           { firstName: { contains: query, mode: 'insensitive' } },
           { lastName: { contains: query, mode: 'insensitive' } },
           { phone: { contains: query } },
+          { memberCode: { contains: query, mode: 'insensitive' } },
           { email: { contains: query, mode: 'insensitive' } },
         ];
       }
@@ -29,9 +30,12 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         }
       }
 
+      const takeLimit = limit ? Math.min(100, Math.max(1, parseInt(String(limit), 10))) : undefined;
+
       const members = await db.member.findMany({
         where: whereClause,
         orderBy: { createdAt: 'desc' },
+        ...(takeLimit ? { take: takeLimit } : {}),
         include: {
           assignedTrainer: true,
           subscriptions: {
@@ -118,6 +122,12 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
             status: displayStatus,
             daysRemaining: daysRemaining ?? 0,
             payment: paymentStatus,
+            memberCode: m.memberCode,
+            paidAmount: Number(activeSub?.paidAmount || 0),
+            balanceAmount: Number(activeSub?.balanceAmount || 0),
+            totalAmount: Number(activeSub?.totalAmount || 0),
+            dueStatus: daysRemaining !== null && daysRemaining < 0 ? 'Overdue' : 'Installment',
+            daysOverdue: daysRemaining !== null && daysRemaining < 0 ? Math.abs(daysRemaining) : 0,
             trainer: m.assignedTrainer?.name || 'Not Assigned',
             trainerId: m.assignedTrainerId,
             joinDate: m.joinedDate.toLocaleDateString('en-GB', {

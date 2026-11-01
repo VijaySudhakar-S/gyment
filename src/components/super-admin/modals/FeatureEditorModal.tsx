@@ -206,7 +206,7 @@ export const FeatureEditorModal: React.FC<FeatureEditorModalProps> = ({ open, on
                   placeholder={lim.placeholder}
                   value={currentLimits[lim.key] || ''}
                   onChange={(e) => updateLimit(lim.key, e.target.value)}
-                  className="border border-gyment-border rounded-lg px-3 py-2 text-xs outline-none focus:border-primary bg-white transition-colors"
+                  className="border border-gyment-border rounded-lg px-3 py-2 text-xs outline-none bg-white transition-colors"
                 />
               </div>
             ))}

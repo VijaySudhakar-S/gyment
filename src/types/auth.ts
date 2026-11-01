@@ -48,7 +48,8 @@ export type RoleType =
   | 'MANAGER'
   | 'TRAINER'
   | 'STAFF'
-  | 'FRONT_DESK';
+  | 'FRONT_DESK'
+  | 'MEMBER';
 
 export interface tokenDTO {
   id: string;
@@ -58,3 +59,27 @@ export interface tokenDTO {
   role: RoleType;
   permissions?: any;
 }
+
+export interface MemberAuthUser {
+  id: string;
+  memberCode: string;
+  firstName: string;
+  lastName: string;
+  name: string;
+  phone: string;
+  email?: string | null;
+  avatar?: string | null;
+  status: string;
+  gymId: string;
+  gymName: string;
+  planName: string;
+  planExpiry: string;
+  daysRemaining: number;
+  balanceAmount: number;
+}
+
+export interface MemberLoginResponseData {
+  member: MemberAuthUser;
+  token: string;
+}
+

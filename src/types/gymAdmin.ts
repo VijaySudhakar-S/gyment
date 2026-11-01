@@ -72,9 +72,12 @@ export interface GymMember {
   gender?: 'Male' | 'Female' | 'Other';
   dateOfBirth?: string;
   address?: string;
+  memberCode?: string;
   paidAmount?: number;
   balanceAmount?: number;
   totalAmount?: number;
+  dueStatus?: 'Overdue' | 'Installment';
+  daysOverdue?: number;
   membershipHistory?: MemberSubscriptionHistory[];
 }
 
@@ -140,7 +143,10 @@ export interface GymAttendanceRecord {
   id: string | number;
   memberId?: string | number;
   memberName: string;
+  phone?: string;
+  avatar?: string | null;
   checkInTime: string;
+  checkInDate?: string;
   plan: string;
   status: string;
   method?: AttendanceCheckinMethod;

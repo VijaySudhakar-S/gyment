@@ -63,6 +63,13 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
       return res.status(404).json({ status: false, message: 'Member not found for check-in' });
     }
 
+    if (targetMember.status === 'INACTIVE' || targetMember.status === 'FROZEN') {
+      return res.status(400).json({
+        status: false,
+        message: `Member ${targetMember.firstName} is currently marked as ${targetMember.status.toLowerCase()}. Please reactivate profile first.`,
+      });
+    }
+
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
 
@@ -102,7 +109,10 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         id: newAttendance.id,
         memberId: targetMember.id,
         memberName: `${targetMember.firstName} ${targetMember.lastName}`.trim(),
+        phone: targetMember.phone || '',
+        avatar: targetMember.avatar || null,
         checkInTime: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+        checkInDate: now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         plan: planName,
         status: 'Checked In',
         method: method || 'name',
