@@ -1,39 +1,38 @@
-import React, { useState } from 'react';
-import {
-  GymProfileSettings,
-  GymMembershipSettings,
-  GymBrandingSettings,
-  GymStaff,
-} from '@/types/gymAdmin';
+import React, { useState, useEffect } from 'react';
+import { GymProfileSettings } from '@/types/gymAdmin';
 import { useGymAdmin } from '@/context/GymAdminContext';
 import { fmtRs } from '@/utils/gymAdminHelpers';
-import { LockedCard } from '@/components/gym-admin/shared/LockedCard';
-import { Building2, CreditCard, Users, ShieldCheck, Palette, Save } from 'lucide-react';
+import {
+  Building2,
+  Save,
+  ArrowRight,
+  Clock,
+  MapPin,
+  Mail,
+  Phone,
+  User,
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+} from 'lucide-react';
 import { PrimaryButton } from '@/components/shared/PrimaryButton';
-import { App } from 'antd';
+import { App, TimePicker } from 'antd';
+import dayjs, { Dayjs } from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
 
 export const SettingsTabsView: React.FC<{
   profile: GymProfileSettings | null;
-  membershipSettings: GymMembershipSettings | null;
-  brandingSettings: GymBrandingSettings | null;
-  staffList: GymStaff[];
   onSaveProfile: (p: Partial<GymProfileSettings>) => Promise<void>;
-  onSaveMembership: (m: Partial<GymMembershipSettings>) => Promise<void>;
-  onSaveBranding: (b: Partial<GymBrandingSettings>) => Promise<void>;
-}> = ({
-  profile,
-  membershipSettings,
-  brandingSettings,
-  staffList,
-  onSaveProfile,
-  onSaveMembership,
-  onSaveBranding,
-}) => {
-  const { planName, price, billingCycle, openCompareModal, hasFeature } = useGymAdmin();
+}> = ({ profile, onSaveProfile }) => {
+  const {
+    planName,
+    price,
+    billingCycle,
+    openCompareModal,
+  } = useGymAdmin();
   const { message } = App.useApp();
-  const [activeTab, setActiveTab] = useState<
-    'profile' | 'membership' | 'users' | 'subscription' | 'branding'
-  >('profile');
 
   // Profile Form State
   const [profileForm, setProfileForm] = useState<GymProfileSettings>({
@@ -45,416 +44,241 @@ export const SettingsTabsView: React.FC<{
     ownerName: profile?.ownerName || '',
   });
 
-  // Membership Form State
-  const [membershipForm, setMembershipForm] = useState<GymMembershipSettings>({
-    defaultDuration: membershipSettings?.defaultDuration || 'Monthly',
-    expiryReminderDays: membershipSettings?.expiryReminderDays || 7,
-    gracePeriodDays: membershipSettings?.gracePeriodDays || 3,
-  });
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
-  // Branding Form State
-  const [brandingForm, setBrandingForm] = useState<GymBrandingSettings>({
-    brandName: brandingSettings?.brandName || profileForm.gymName || '',
-    accentColor: brandingSettings?.accentColor || '#2FAE68',
-    customBrandingEnabled: brandingSettings?.customBrandingEnabled ?? true,
-  });
+  // Parse working hours string to Dayjs range (e.g. "06:00 AM – 10:00 PM" or "6:00 AM - 10:00 PM")
+  const parseWorkingHours = (hoursStr: string): [Dayjs, Dayjs] | null => {
+    if (!hoursStr) return null;
+    const parts = hoursStr.split(/[-–—]/).map((p) => p.trim());
+    if (parts.length >= 2) {
+      const start = dayjs(parts[0], ['hh:mm A', 'h:mm A', 'HH:mm'], true);
+      const end = dayjs(parts[1], ['hh:mm A', 'h:mm A', 'HH:mm'], true);
+      if (start.isValid() && end.isValid()) {
+        return [start, end];
+      }
+    }
+    return [dayjs('06:00 AM', 'hh:mm A'), dayjs('10:00 PM', 'hh:mm A')];
+  };
 
-  const [isSaving, setIsSaving] = useState(false);
+  const [timeRange, setTimeRange] = useState<[Dayjs, Dayjs] | null>(() =>
+    parseWorkingHours(profile?.workingHours || '06:00 AM – 10:00 PM')
+  );
 
-  const canCustomBrand = hasFeature('Custom Gym Branding');
+  useEffect(() => {
+    if (profile) {
+      setProfileForm((prev) => ({
+        ...prev,
+        gymName: profile.gymName || prev.gymName,
+        phone: profile.phone || prev.phone,
+        email: profile.email || prev.email,
+        workingHours: profile.workingHours || prev.workingHours,
+        address: profile.address || prev.address,
+        ownerName: profile.ownerName || prev.ownerName,
+      }));
+      if (profile.workingHours) {
+        setTimeRange(parseWorkingHours(profile.workingHours));
+      }
+    }
+  }, [profile]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setIsSaving(true);
+      setIsSavingProfile(true);
       await onSaveProfile(profileForm);
-      message.success('Gym profile saved successfully');
+      message.success('Gym profile updated successfully');
+    } catch {
+      message.error('Failed to update gym profile. Please try again.');
     } finally {
-      setIsSaving(false);
+      setIsSavingProfile(false);
     }
   };
-
-  const handleSaveMembership = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setIsSaving(true);
-      await onSaveMembership(membershipForm);
-      message.success('Membership settings updated successfully');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSaveBranding = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setIsSaving(true);
-      await onSaveBranding(brandingForm);
-      message.success('Custom branding preferences updated');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const tabs = [
-    { id: 'profile', label: 'Gym Profile', icon: Building2 },
-    { id: 'membership', label: 'Membership Settings', icon: CreditCard },
-    { id: 'users', label: 'Users & Roles', icon: Users },
-    { id: 'subscription', label: 'Gyment Subscription', icon: ShieldCheck },
-    { id: 'branding', label: 'Custom Branding', icon: Palette },
-  ];
 
   return (
-    <div className="space-y-6">
-      {/* Tabs list */}
-      <div className="flex border-b border-border gap-2 overflow-x-auto pb-px scrollbar-none">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                if (tab.id === 'branding' && !canCustomBrand) {
-                  message.info('Custom Gym Branding is available in the Pro plan');
-                }
-                setActiveTab(tab.id as typeof activeTab);
-              }}
-              className={`flex items-center gap-2 py-3 px-3.5 text-[13.5px] font-bold border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
-                isActive
-                  ? 'border-primary text-primary-dark dark:text-emerald-400'
-                  : 'border-transparent text-muted hover:text-gyment-text dark:hover:text-stone-200'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {tab.label}
-              {tab.id === 'branding' && !canCustomBrand && (
-                <span className="text-[11px] text-amber-600 dark:text-amber-400 ml-1">
-                  🔒 Pro
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Tab 1: Gym Profile */}
-      {activeTab === 'profile' && (
-        <form
-          onSubmit={handleSaveProfile}
-          className="bg-white border border-border rounded-2xl p-5 sm:p-6 shadow-xs max-w-2xl space-y-4 text-[13.5px]"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-                Gym Name
-              </label>
-              <input
-                type="text"
-                value={profileForm.gymName}
-                onChange={(e) =>
-                  setProfileForm({ ...profileForm, gymName: e.target.value })
-                }
-                className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary"
-              />
+    <div className="w-full mx-auto space-y-8">
+      {/* 1. Subscription Banner: Sleek, borderless-feel, frosted glass styling */}
+      <div className="relative overflow-hidden rounded-2xl bg-linear-to-r from-emerald-500/10 via-primary/5 to-transparent border border-emerald-500/20 p-6 sm:p-7 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11.5px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+              Active Subscription
             </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">Phone</label>
-              <input
-                type="text"
-                value={profileForm.phone}
-                onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">Email</label>
-              <input
-                type="email"
-                value={profileForm.email}
-                onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-                Working Hours
-              </label>
-              <input
-                type="text"
-                value={profileForm.workingHours}
-                onChange={(e) =>
-                  setProfileForm({ ...profileForm, workingHours: e.target.value })
-                }
-                className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary"
-              />
-            </div>
-
-            <div className="sm:col-span-2 flex flex-col gap-1.5">
-              <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-                Address
-              </label>
-              <input
-                type="text"
-                value={profileForm.address}
-                onChange={(e) =>
-                  setProfileForm({ ...profileForm, address: e.target.value })
-                }
-                className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary"
-              />
-            </div>
-          </div>
-
-          <div className="pt-3 border-t border-border flex justify-end">
-            <PrimaryButton
-              type="submit"
-              disabled={isSaving}
-              icon={<Save className="w-4 h-4" />}
-            >
-              Save Changes
-            </PrimaryButton>
-          </div>
-        </form>
-      )}
-
-      {/* Tab 2: Membership Settings */}
-      {activeTab === 'membership' && (
-        <form
-          onSubmit={handleSaveMembership}
-          className="bg-white border border-border rounded-2xl p-5 sm:p-6 shadow-xs max-w-xl space-y-4 text-[13.5px]"
-        >
-          <div className="flex flex-col gap-1.5">
-            <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-              Default Membership Duration
-            </label>
-            <select
-              value={membershipForm.defaultDuration}
-              onChange={(e) =>
-                setMembershipForm({ ...membershipForm, defaultDuration: e.target.value })
-              }
-              className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none cursor-pointer"
-            >
-              <option value="Monthly">Monthly</option>
-              <option value="Quarterly">Quarterly</option>
-              <option value="Yearly">Yearly</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-              Expiry Reminder Notice
-            </label>
-            <select
-              value={membershipForm.expiryReminderDays}
-              onChange={(e) =>
-                setMembershipForm({
-                  ...membershipForm,
-                  expiryReminderDays: Number(e.target.value),
-                })
-              }
-              className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none cursor-pointer"
-            >
-              <option value={3}>3 days before</option>
-              <option value={7}>7 days before</option>
-              <option value={15}>15 days before</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-              Grace Period
-            </label>
-            <select
-              value={membershipForm.gracePeriodDays}
-              onChange={(e) =>
-                setMembershipForm({
-                  ...membershipForm,
-                  gracePeriodDays: Number(e.target.value),
-                })
-              }
-              className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none cursor-pointer"
-            >
-              <option value={0}>0 days (Immediate)</option>
-              <option value={3}>3 days</option>
-              <option value={7}>7 days</option>
-            </select>
-          </div>
-
-          <div className="pt-3 border-t border-border flex justify-end">
-            <PrimaryButton
-              type="submit"
-              disabled={isSaving}
-              icon={<Save className="w-4 h-4" />}
-            >
-              Save Changes
-            </PrimaryButton>
-          </div>
-        </form>
-      )}
-
-      {/* Tab 3: Users */}
-      {activeTab === 'users' && (
-        <div className="bg-white border border-border rounded-2xl p-5 shadow-xs max-w-xl space-y-3 text-[13.5px]">
-          <div className="flex items-center justify-between py-2.5 border-b border-dashed border-border/80">
-            <div>
-              <div className="font-bold text-gyment-text text-[13.5px]">
-                {profile?.ownerName || 'Gym Owner'}
-              </div>
-              <div className="text-xs text-muted">Gym Owner</div>
-            </div>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
-              Active
-            </span>
-          </div>
-
-          {staffList.map((s) => (
-            <div
-              key={s.id}
-              className="flex items-center justify-between py-2.5 border-b border-dashed border-border/80"
-            >
-              <div>
-                <div className="font-bold text-gyment-text text-[13.5px]">{s.name}</div>
-                <div className="text-xs text-muted">
-                  {s.role} · {s.email}
-                </div>
-              </div>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
-                {s.status}
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-black text-gyment-text tracking-tight">
+                {planName}
+              </h2>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-600 text-white shadow-xs">
+                <CheckCircle2 className="w-3 h-3" /> Live
               </span>
             </div>
-          ))}
-        </div>
-      )}
+            <p className="text-[13px] text-muted max-w-lg leading-relaxed">
+              Your club operates with Gyment SaaS. Core member attendance, billing, and reporting modules are active.
+            </p>
+          </div>
 
-      {/* Tab 4: Subscription */}
-      {activeTab === 'subscription' && (
-        <div className="bg-white border border-border rounded-2xl p-5 sm:p-6 shadow-xs max-w-xl space-y-3.5 text-[13.5px]">
-          <div className="flex justify-between py-2 border-b border-dashed border-border/80">
-            <span className="text-muted">Current plan</span>
-            <span className="font-bold text-gyment-text text-[14px]">
-              {planName}
-            </span>
-          </div>
-          <div className="flex justify-between py-2 border-b border-dashed border-border/80">
-            <span className="text-muted">Billing cycle</span>
-            <span className="font-semibold text-gyment-text">
-              {billingCycle}
-            </span>
-          </div>
-          <div className="flex justify-between py-2 border-b border-dashed border-border/80">
-            <span className="text-muted">Price</span>
-            <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base">
-              {fmtRs(price)}/month
-            </span>
-          </div>
-          <div className="flex justify-between py-2 border-b border-dashed border-border/80">
-            <span className="text-muted">Status</span>
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-              Active Subscription
-            </span>
-          </div>
-          <div className="pt-4 flex justify-end">
+          <div className="flex items-center gap-6 sm:gap-8 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border/80 md:pl-8">
+            <div>
+              <div className="text-[11px] uppercase tracking-wider text-muted font-bold">Investment</div>
+              <div className="text-2xl font-black text-gyment-text mt-0.5 tracking-tight">
+                {fmtRs(price)}
+                <span className="text-xs font-medium text-muted ml-1">/{billingCycle.toLowerCase()}</span>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={openCompareModal}
-              className="bg-primary hover:bg-primary-dark text-white font-semibold text-xs px-4.5 py-2.5 rounded-lg transition-colors cursor-pointer shadow-xs"
+              className="bg-primary hover:bg-primary-dark text-white font-bold text-xs sm:text-sm px-4.5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow cursor-pointer inline-flex items-center gap-2 shrink-0 active:scale-98"
             >
-              View Available Plans
+              Change Plan <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Tab 5: Branding */}
-      {activeTab === 'branding' && (
-        <div className="max-w-2xl">
-          {canCustomBrand ? (
-            <form
-              onSubmit={handleSaveBranding}
-              className="bg-white border border-border rounded-2xl p-5 sm:p-6 shadow-xs space-y-4 text-[13.5px]"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-                    Brand Name
-                  </label>
-                  <input
-                    type="text"
-                    value={brandingForm.brandName}
-                    onChange={(e) =>
-                      setBrandingForm({ ...brandingForm, brandName: e.target.value })
-                    }
-                    className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary"
+      {/* 2. Business Profile: Modern Flat Form Layout with Left Column Context & Right Column Inputs */}
+      <form onSubmit={handleSaveProfile} className="space-y-6">
+        <div className="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-stone-800 shadow-sm overflow-hidden">
+
+          {/* Section Header */}
+          <div className="px-6 py-4 sm:px-8 flex items-center justify-between border-b border-gray-200 dark:border-stone-800">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-gyment-text text-base sm:text-lg">Business Identity & Contact</h3>
+              </div>
+            </div>
+          </div>
+
+          {/* Form Fields: Grid layout with floating labels & subtle icons */}
+          <div className="px-6 py-6 sm:px-8 sm:py-7">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+
+              {/* Gym Name */}
+              <div className="space-y-1.5">
+                <label className="text-[12.5px] font-bold text-gyment-text flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-primary" /> Gym Business Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Iron Forge Fitness"
+                  value={profileForm.gymName}
+                  onChange={(e) => setProfileForm({ ...profileForm, gymName: e.target.value })}
+                  className="w-full bg-background border border-border/90 rounded-xl px-3.5 py-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all shadow-2xs placeholder:text-muted/60"
+                />
+              </div>
+
+              {/* Owner Name */}
+              <div className="space-y-1.5">
+                <label className="text-[12.5px] font-bold text-gyment-text flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-primary" /> Gym Owner Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. John Doe"
+                  value={profileForm.ownerName}
+                  onChange={(e) => setProfileForm({ ...profileForm, ownerName: e.target.value })}
+                  className="w-full bg-background border border-border/90 rounded-xl px-3.5 py-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all shadow-2xs placeholder:text-muted/60"
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-1.5">
+                <label className="text-[12.5px] font-bold text-gyment-text flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-primary" /> Official Contact Number
+                </label>
+                <input
+                  type="tel"
+                  placeholder="e.g. +91 98765 43210"
+                  value={profileForm.phone}
+                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                  className="w-full bg-background border border-border/90 rounded-xl px-3.5 py-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all shadow-2xs placeholder:text-muted/60"
+                />
+              </div>
+
+              {/* Email */}
+              <div className="space-y-1.5">
+                <label className="text-[12.5px] font-bold text-gyment-text flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-primary" /> Support & Contact Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="e.g. info@ironforge.com"
+                  value={profileForm.email}
+                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                  className="w-full bg-background border border-border/90 rounded-xl px-3.5 py-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all shadow-2xs placeholder:text-muted/60"
+                />
+              </div>
+
+              {/* Operating & Working Hours */}
+              <div className="space-y-1.5">
+                <label className="text-[12.5px] font-bold text-gyment-text flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-primary" /> Operating & Working Hours
+                  </span>
+                  {profileForm.workingHours && (
+                    <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                      {profileForm.workingHours}
+                    </span>
+                  )}
+                </label>
+                <div className="relative">
+                  <TimePicker.RangePicker
+                    use12Hours
+                    format="h:mm A"
+                    minuteStep={15}
+                    placeholder={['Opening Time', 'Closing Time']}
+                    value={timeRange}
+                    onChange={(dates) => {
+                      if (dates && dates[0] && dates[1]) {
+                        setTimeRange([dates[0], dates[1]]);
+                        const formatted = `${dates[0].format('hh:mm A')} – ${dates[1].format('hh:mm A')}`;
+                        setProfileForm((prev) => ({ ...prev, workingHours: formatted }));
+                      } else {
+                        setTimeRange(null);
+                        setProfileForm((prev) => ({ ...prev, workingHours: '' }));
+                      }
+                    }}
+                    className="w-full !bg-background !border-border/90 !rounded-xl !py-2.5 text-[13.5px] shadow-2xs hover:!border-primary focus:!border-primary"
                   />
                 </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-                    Accent Color
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={brandingForm.accentColor}
-                      onChange={(e) =>
-                        setBrandingForm({ ...brandingForm, accentColor: e.target.value })
-                      }
-                      className="w-10 h-10 p-0 border border-border rounded-lg cursor-pointer bg-transparent"
-                    />
-                    <input
-                      type="text"
-                      value={brandingForm.accentColor}
-                      onChange={(e) =>
-                        setBrandingForm({ ...brandingForm, accentColor: e.target.value })
-                      }
-                      className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none flex-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="sm:col-span-2 flex flex-col gap-1.5">
-                  <label className="font-bold text-gyment-text text-xs uppercase tracking-wide">
-                    Branding Status
-                  </label>
-                  <select
-                    value={brandingForm.customBrandingEnabled ? 'Enabled' : 'Disabled'}
-                    onChange={(e) =>
-                      setBrandingForm({
-                        ...brandingForm,
-                        customBrandingEnabled: e.target.value === 'Enabled',
-                      })
-                    }
-                    className="border border-border bg-white rounded-lg p-2.5 text-[13.5px] text-gyment-text outline-none cursor-pointer"
-                  >
-                    <option value="Enabled">Enabled</option>
-                    <option value="Disabled">Disabled</option>
-                  </select>
-                </div>
               </div>
 
-              <div className="pt-3 border-t border-border flex justify-end">
-                <PrimaryButton
-                  type="submit"
-                  disabled={isSaving}
-                  icon={<Save className="w-4 h-4" />}
-                >
-                  Save Branding
-                </PrimaryButton>
+              {/* Address */}
+              <div className="space-y-1.5">
+                <label className="text-[12.5px] font-bold text-gyment-text flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-primary" /> Gym Location
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 42 West Avenue, Saravanampatti, Coimbatore - 641006"
+                  value={profileForm.address}
+                  onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
+                  className="w-full bg-background border border-border/90 rounded-xl px-3.5 py-2.5 text-[13.5px] text-gyment-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all shadow-2xs placeholder:text-muted/60"
+                />
               </div>
-            </form>
-          ) : (
-            <LockedCard
-              title="Custom Gym Branding"
-              planRequired="Pro"
-              description="Add your custom logo, brand name, and custom theme accent color across the gym owner and member dashboard."
-            />
-          )}
+
+            </div>
+          </div>
+
+          {/* Action Footer */}
+          <div className="px-6 pb-4 sm:px-8 flex items-center justify-between">
+            <div className="ml-auto">
+              <PrimaryButton
+                type="submit"
+                disabled={isSavingProfile}
+                icon={<Save className="w-4 h-4" />}
+              >
+                {isSavingProfile ? 'Saving...' : 'Save Profile Changes'}
+              </PrimaryButton>
+            </div>
+          </div>
+
         </div>
-      )}
+      </form>
     </div>
   );
 };

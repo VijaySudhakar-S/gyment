@@ -15,6 +15,8 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
         defaultDuration: 'Monthly',
         expiryReminderDays: 7,
         gracePeriodDays: 3,
+        checkinMethod: 'ANY',
+        allowDuplicateDailyCheckin: true,
       };
 
       if (settingRecord?.value) {

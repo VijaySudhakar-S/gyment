@@ -29,6 +29,7 @@ export const GymAdminSidebar: React.FC = () => {
     toggleSidebar,
     isMobileSidebarOpen,
     setMobileSidebarOpen,
+    gymName,
   } = useGymAdmin();
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -65,7 +66,7 @@ export const GymAdminSidebar: React.FC = () => {
     setUser(tokenStorage.getUser());
   }, []);
 
-  const gymName = user?.gymName || (user as any)?.gym?.name || 'Gyment Gym';
+  const displayGymName = gymName || user?.gymName || (user as any)?.gym?.name || 'Gyment Gym';
   const ownerName = user?.name || 'Gym Owner';
 
   const isItemActive = (href?: string) => {
@@ -179,7 +180,7 @@ export const GymAdminSidebar: React.FC = () => {
             {!isSidebarCollapsed && (
               <div className="min-w-0 overflow-hidden leading-tight flex-1" suppressHydrationWarning>
                 <div className="text-xs font-bold text-white truncate" suppressHydrationWarning>
-                  {mounted ? gymName : 'Gyment Gym'}
+                  {mounted ? displayGymName : 'Gyment Gym'}
                 </div>
                 <div className="text-[11px] text-[#8FA098] truncate" suppressHydrationWarning>
                   {mounted ? `${ownerName} · Admin` : 'Admin'}

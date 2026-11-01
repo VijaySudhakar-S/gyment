@@ -12,6 +12,33 @@ export const GymAdminProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
+  const [gymName, setGymNameState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const u = JSON.parse(localStorage.getItem('gyment_user') || '{}');
+        return u.gymName || u.gym?.name || 'Gyment Gym';
+      } catch {
+        return 'Gyment Gym';
+      }
+    }
+    return 'Gyment Gym';
+  });
+
+  const setGymName = (name: string) => {
+    setGymNameState(name);
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('gyment_user');
+        const userObj = raw ? JSON.parse(raw) : {};
+        userObj.gymName = name;
+        if (userObj.gym) userObj.gym.name = name;
+        localStorage.setItem('gyment_user', JSON.stringify(userObj));
+      } catch (err) {
+        console.error('Failed to sync gym name to storage:', err);
+      }
+    }
+  };
+
   const [planTier, setPlanTier] = useState<GymentPlanTier>('pro');
   const [planName, setPlanName] = useState<string>('Pro');
   const [price, setPrice] = useState<number>(0);
@@ -79,6 +106,8 @@ export const GymAdminProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isMobileSidebarOpen: mobileSidebarOpen,
         selectedBranch,
         setSelectedBranch,
+        gymName,
+        setGymName,
         planTier,
         setPlanTier,
         planName,

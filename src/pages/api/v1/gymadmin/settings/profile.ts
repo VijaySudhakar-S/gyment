@@ -38,6 +38,9 @@ async function handler(req: GymAuthRequest, res: NextApiResponse) {
           address: customProfile.address || gym?.address || '',
           ownerName: customProfile.ownerName || gym?.ownerName || '',
           logoUrl: customProfile.logoUrl || '',
+          gstNumber: customProfile.gstNumber || '',
+          invoicePrefix: customProfile.invoicePrefix || 'INV-',
+          invoiceFooter: customProfile.invoiceFooter || 'Thank you for training with us! Fees once paid are non-refundable.',
         },
       });
     }

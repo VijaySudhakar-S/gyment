@@ -18,6 +18,8 @@ export interface GymAdminContextType {
   setSelectedBranch: React.Dispatch<React.SetStateAction<string>>;
 
   // Plan tier & dynamic feature permissions
+  gymName: string;
+  setGymName: (name: string) => void;
   planTier: GymentPlanTier;
   setPlanTier: React.Dispatch<React.SetStateAction<GymentPlanTier>>;
   planName: string;

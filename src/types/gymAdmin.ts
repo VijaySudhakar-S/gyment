@@ -290,12 +290,17 @@ export interface GymProfileSettings {
   logoUrl?: string;
   planTier?: GymentPlanTier;
   planName?: string;
+  gstNumber?: string;
+  invoicePrefix?: string;
+  invoiceFooter?: string;
 }
 
 export interface GymMembershipSettings {
   defaultDuration: string;
   expiryReminderDays: number;
   gracePeriodDays: number;
+  checkinMethod?: 'ANY' | 'QR_ONLY';
+  allowDuplicateDailyCheckin?: boolean;
 }
 
 export interface GymBrandingSettings {
